@@ -11,6 +11,18 @@
 # carries every platform's binary; that is deliberate, so that a hand-run never
 # silently produces a VSIX with no core in it at all.
 
+# The marketplace screenshots. 955KB of PNGs that every installer downloads and
+# no installed extension ever reads: the README renders them from
+# raw.githubusercontent.com, because a marketplace page cannot resolve a
+# relative path. They are tracked here so the README has somewhere to point and
+# so the pictures version with the product -- not so they ship inside it.
+#
+# media/icon.png is the exception and must stay: package.json's `icon` field
+# names it and the marketplace reads it out of the VSIX.
+media/*.png
+media/*.svg
+!media/icon.png
+
 # Source. The bundles in dist/ are what runs; the TypeScript is not needed to
 # run them and `**/*.ts` alone would not catch the directories.
 host/**
