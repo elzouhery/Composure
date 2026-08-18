@@ -1,0 +1,35 @@
+# The dependency graph is deliberately small — two Go modules in the build
+# graph, zero runtime npm dependencies — which is exactly why keeping it
+# current is cheap enough to automate.
+#
+# `make licence` fails the build on anything outside MIT / Apache-2.0 / BSD /
+# ISC, so a bump that drags in a badly licensed transitive dependency is caught
+# by CI rather than by review. That check is the reason these PRs can be
+# treated as routine.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /extension
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 5
+
+  # Actions are pinned by tag. An action resolved by a moving tag is the other
+  # half of why the default token is read-only: a compromised action inherits
+  # whatever the workflow can do.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"

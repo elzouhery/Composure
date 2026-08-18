@@ -110,7 +110,7 @@ const protocolRevision = 9
 
 // serverVersion identifies the core build. It is not the protocol revision:
 // the binary can move without the wire moving.
-const serverVersion = "0.1.0"
+const serverVersion = "0.2.0"
 
 // JSON-RPC error codes. The negative 32000 block is reserved for
 // implementation-defined server errors by the spec.

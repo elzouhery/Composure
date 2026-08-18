@@ -1,0 +1,7 @@
+# Every path, one owner. Review from a code owner is required on main, which
+# with a single owner means: nothing reaches main that the maintainer has not
+# looked at.
+#
+# When a second maintainer exists, add them here rather than widening the
+# ruleset — this file is the list, and the branch rule just enforces it.
+*       @elzouhery

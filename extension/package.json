@@ -2,7 +2,7 @@
   "name": "composure",
   "displayName": "Composure",
   "description": "See the stack your compose file declares, find out which file and line set each value, and edit compose files and Dockerfiles without reformatting them — one changed value is a two-line diff.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "elzouhery",
   "license": "Apache-2.0",
   "engines": {

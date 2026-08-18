@@ -12,6 +12,14 @@ on:
 env:
   PKGS: ./cmd/... ./internal/...
 
+# Read-only by default, every job. A workflow that can write to the repository
+# is the standard way a public project gets compromised: one dependency with a
+# post-install script, one action resolved by a moving tag, and the token in
+# the runner's environment can push. Exactly one job below needs more, asks for
+# it by name, and can still only reach the branch `main` is protected against.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build, vet, test
@@ -134,7 +142,10 @@ jobs:
   fidelity:
     name: Fidelity gate
     runs-on: ubuntu-latest
-    # Needed by the "Commit metric history" step on main.
+    # Needed by "Record metric history", which pushes to the `metrics` branch.
+    # It cannot reach main: main's ruleset restricts who may update it and does
+    # not list GitHub Actions as a bypass actor. That is deliberate -- an
+    # automation exempted from a branch rule is a hole in the branch rule.
     permissions:
       contents: write
     # The corpus is ~2.1GB of shallow clones and the four benchmarks walk it
@@ -193,21 +204,47 @@ jobs:
           path: benchmarks/history.jsonl
           retention-days: 90
 
-      # The pass rate is a tracked metric with history, not a boolean, so a
-      # slow downward drift that never breaches the baseline is still visible
-      # as a trend. Only main commits a row — pull request runs would race.
-      - name: Commit metric history
+      # The pass rate is a tracked metric with history, not a boolean, so a slow
+      # downward drift that never breaches the baseline is still visible as a
+      # trend. Only main records a row — pull request runs would race.
+      #
+      # The row goes to the orphan branch `metrics`, not to main. It used to go
+      # to main, which meant CI held write access to the branch every human
+      # change has to be reviewed to reach, and "require a pull request" would
+      # have broken the build on the first merge. Metric history is output, not
+      # source: it belongs on a branch of its own, and main is left with no
+      # automated writer at all.
+      - name: Record metric history
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet -- benchmarks/history.jsonl; then
-            echo "no new history row"
-            exit 0
+          set -euo pipefail
+          [ -s benchmarks/history.jsonl ] || { echo "no history row produced"; exit 0; }
+          row=$(tail -n 1 benchmarks/history.jsonl)
+
+          work=$(mktemp -d)
+          git -C "$work" init -q
+          git -C "$work" remote add origin \
+            "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git"
+
+          # The branch may not exist yet — on the first run, or if it is ever
+          # deleted. Start it as an orphan rather than failing the gate: losing
+          # a metric row must never be the thing that reports a red build.
+          if git -C "$work" fetch -q --depth 1 origin metrics; then
+            git -C "$work" checkout -q -B metrics FETCH_HEAD
+          else
+            echo "metrics branch does not exist yet; starting it"
+            git -C "$work" checkout -q --orphan metrics
           fi
-          git config user.name  "composure-ci"
-          git config user.email "ci@composure.dev"
-          git add benchmarks/history.jsonl
-          git commit -m "ci: record fidelity metrics for ${GITHUB_SHA:0:12}"
-          git push
+
+          printf '%s\n' "$row" >> "$work/history.jsonl"
+          git -C "$work" add history.jsonl
+          git -C "$work" \
+            -c user.name=composure-ci -c user.email=ci@composure.dev \
+            commit -q -m "metrics for ${GITHUB_SHA:0:12}"
+          git -C "$work" push -q origin metrics
+          echo "recorded on metrics: $(printf '%s' "$row" | cut -c1-80)…"
 
   # CLEANROOM.md rule 6 and requirements §10: "CLA or DCO with relicensing
   # rights from every contributor, from commit one." Every project that

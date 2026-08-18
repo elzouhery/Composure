@@ -6,9 +6,34 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Phases 1 and 2 are built and this version has never been published. The entry
-below describes what a first release would contain, not something anyone has
-installed.
+Nothing yet.
+
+## [0.2.0] — unreleased
+
+The first release published from the open-source repository. No behaviour
+changes: 0.1.0 and 0.2.0 do the same things, and the version moves because the
+marketplace will not accept a re-push of a version it has already served.
+
+### Changed
+
+- The extension's `repository`, `bugs`, `homepage` and `qna` links now name the
+  project's own repository. Until it was public they pointed at
+  `composure-assets`, a repository holding the marketplace screenshots — so
+  "Repository" and "Issues" on the listing led to a folder of PNGs rather than
+  to the product. The screenshots and the two documents the listing links now
+  resolve from the project repository, where they are current; the copies in
+  the assets repository had stopped tracking them.
+
+### Removed
+
+- The marketplace screenshots no longer ship inside the package. 955KB of PNGs
+  were downloaded by every installer and read by nothing: the listing renders
+  them over HTTP, and always did. The package is 14 files, down from 23.
+
+## [0.1.0] — 2026-08-15
+
+The first published release. All seven platform targets, on both the VS Code
+Marketplace and Open VSX.
 
 ### Added
 

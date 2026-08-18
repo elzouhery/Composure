@@ -268,7 +268,7 @@ stops trusting.
 | --- | --- |
 | **Phase 1 — the read path** | Built. Resolution with provenance, topology, diagnostics, the inspector. |
 | **Phase 2 — the edit path** | Built. Scalar edit in both grammars, diff before write, the Dockerfile stage form. This was the release gate. |
-| **Published** | **Yes.** `elzouhery.composure` 0.1.0, all seven platform targets, on both the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=elzouhery.composure) and [Open VSX](https://open-vsx.org/extension/elzouhery/composure). The Open VSX namespace is not yet verified, so that listing carries a publisher warning. |
+| **Published** | **Yes.** `elzouhery.composure` 0.2.0, all seven platform targets, on both the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=elzouhery.composure) and [Open VSX](https://open-vsx.org/extension/elzouhery/composure). The Open VSX namespace is not yet verified, so that listing carries a publisher warning. |
 | **Phase 3+ — structural authoring, image discovery wired in, runtime** | Not started. The engines for discovery and Dockerfiles exist and are measured; the UI is not built. |
 | **Terraform / OpenTofu** | **Not started.** A one-week `hclwrite` spike gates the commitment, and it has not been run. |
 | **Corpus scale** | 146 compose files and 180 Dockerfiles. The quality bar wants 5,000+. |
