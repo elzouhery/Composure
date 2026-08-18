@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:1
+# Story 9.4's placement fixture. TWO stages, deliberately: a fixture with one
+# stage cannot tell "above the first FROM" from "above this FROM", and those are
+# different rules that happen to agree on a single-stage file. That agreement is
+# the trap this file exists to break.
+#
+# The comment block you are reading is attached to the FROM below it. An ARG
+# written between a comment and the instruction it documents orphans the
+# comment, so the declaration goes ABOVE this block — and below the `# syntax=`
+# directive, which is only honoured in the leading comment block and must not be
+# pushed out of it.
+FROM golang:1.24-alpine AS builder
+WORKDIR /src
+COPY . .
+RUN go build -o /app ./cmd/app
+
+# The runtime stage. Its own comment, for the same reason.
+FROM alpine:3.20
+ENV APP_PORT=8080
+COPY --from=builder /app /usr/local/bin/app
+USER nobody
+CMD ["app"]

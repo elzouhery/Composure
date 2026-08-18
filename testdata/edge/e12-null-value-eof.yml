@@ -1,0 +1,18 @@
+# e12 — a key whose value is NULL as the LAST bytes of the file.
+#
+# Same defect as e11, different symptom. With nothing after `healthcheck:`,
+# the synthesised null position is one past the end of the buffer, so the
+# range computation did not corrupt — it failed with
+#
+#     computed range 51:55 exceeds source length 51
+#
+# which is a confident wrong answer of a different kind: the operation is
+# perfectly performable and the engine said it could not find the bytes.
+#
+# This file also ends WITHOUT a trailing newline, so the null value is the
+# final byte of the document and there is no following line to hide behind.
+services:
+  web:
+    image: nginx:1.27-alpine
+    restart: always
+    healthcheck:

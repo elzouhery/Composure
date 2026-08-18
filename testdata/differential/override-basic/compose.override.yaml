@@ -1,0 +1,14 @@
+services:
+  web:
+    image: nginx:1.25
+    command: ["nginx", "-g", "daemon off;", "-q"]
+    environment:
+      LOG_LEVEL: debug
+      OVERRIDE_ONLY: "2"
+    labels:
+      com.example.owner: override
+    ports:
+      - "8443:443"
+    volumes:
+      - ./conf:/etc/nginx/conf.d:ro
+    working_dir: /srv/web

@@ -1,0 +1,37 @@
+# A committed compose file with profiles, for story 4.6's real-binary test.
+#
+# Everything here exists to make a wrong answer distinguishable from a right
+# one:
+#
+#   * `tools` is the only service in the `debug` profile, so switching the
+#     profile on changes the node set by exactly one node. A fixture where two
+#     profiles select the same services cannot tell a connected toggle from a
+#     disconnected one.
+#   * `web` names `tools` in `depends_on`, so with the profile off the core has
+#     a reference it cannot resolve — the `filtered by profile` dangling entry
+#     the canvas has to show rather than drop.
+#   * `frontnet` and `data` are declared at the top level and are NOT in any
+#     profile. DECISIONS.md 19: a profile selects which services run and never
+#     filters the resource inventory, and nothing in the Go suite asserts that
+#     in either direction.
+services:
+  web:
+    image: nginx:1.27
+    depends_on:
+      - tools
+    networks:
+      - frontnet
+    volumes:
+      - data:/var/lib/web
+  tools:
+    profiles:
+      - debug
+    image: busybox:1.36
+    networks:
+      - frontnet
+
+networks:
+  frontnet:
+
+volumes:
+  data:

@@ -1,0 +1,5159 @@
+# 500 services, for the N3 performance check: a resolved topology must
+# open in under two seconds. Named compose.yaml so the extension actually
+# activates on it — testdata/ fixtures are named for the engine harness,
+# not for Compose, so none of them trigger activation.
+# 500 services. The performance fixture for story 4.1 (resolve and first
+# paint inside two seconds) and, from here on, a permanent regression file:
+# the structural benchmarks sweep testdata/edge, so a splice that degrades on
+# a large document fails the gate rather than surprising someone later.
+#
+# Generated, block style throughout, no anchors — the size is the point, not
+# the syntax. Adversarial shapes live in testdata/adversarial/.
+
+services:
+  svc-000:
+    image: ghcr.io/composure/example-0:1.0.0
+    container_name: svc-000
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "0"
+      SERVICE_NAME: svc-000
+    ports:
+      - "20000:8080"
+    volumes:
+      - svc-000-data:/var/lib/svc-000
+    networks:
+      - net-0
+  svc-001:
+    image: ghcr.io/composure/example-1:1.1.0
+    container_name: svc-001
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "1"
+      SERVICE_NAME: svc-001
+    networks:
+      - net-1
+  svc-002:
+    image: ghcr.io/composure/example-2:1.2.0
+    container_name: svc-002
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "2"
+      SERVICE_NAME: svc-002
+    networks:
+      - net-2
+  svc-003:
+    image: ghcr.io/composure/example-3:1.3.0
+    container_name: svc-003
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "3"
+      SERVICE_NAME: svc-003
+    ports:
+      - "20003:8080"
+    networks:
+      - net-3
+  svc-004:
+    image: ghcr.io/composure/example-4:1.4.0
+    container_name: svc-004
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "4"
+      SERVICE_NAME: svc-004
+    networks:
+      - net-0
+  svc-005:
+    image: ghcr.io/composure/example-5:1.5.0
+    container_name: svc-005
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "5"
+      SERVICE_NAME: svc-005
+    volumes:
+      - svc-005-data:/var/lib/svc-005
+    networks:
+      - net-1
+  svc-006:
+    image: ghcr.io/composure/example-6:1.6.0
+    container_name: svc-006
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "6"
+      SERVICE_NAME: svc-006
+    ports:
+      - "20006:8080"
+    networks:
+      - net-2
+  svc-007:
+    image: ghcr.io/composure/example-7:1.7.0
+    container_name: svc-007
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "7"
+      SERVICE_NAME: svc-007
+    networks:
+      - net-3
+  svc-008:
+    image: ghcr.io/composure/example-8:1.8.0
+    container_name: svc-008
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "8"
+      SERVICE_NAME: svc-008
+    networks:
+      - net-0
+  svc-009:
+    image: ghcr.io/composure/example-9:1.0.0
+    container_name: svc-009
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "9"
+      SERVICE_NAME: svc-009
+    ports:
+      - "20009:8080"
+    networks:
+      - net-1
+  svc-010:
+    image: ghcr.io/composure/example-10:1.1.0
+    container_name: svc-010
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "10"
+      SERVICE_NAME: svc-010
+    volumes:
+      - svc-010-data:/var/lib/svc-010
+    networks:
+      - net-2
+  svc-011:
+    image: ghcr.io/composure/example-11:1.2.0
+    container_name: svc-011
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "11"
+      SERVICE_NAME: svc-011
+    networks:
+      - net-3
+  svc-012:
+    image: ghcr.io/composure/example-12:1.3.0
+    container_name: svc-012
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "12"
+      SERVICE_NAME: svc-012
+    ports:
+      - "20012:8080"
+    networks:
+      - net-0
+  svc-013:
+    image: ghcr.io/composure/example-13:1.4.0
+    container_name: svc-013
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "13"
+      SERVICE_NAME: svc-013
+    networks:
+      - net-1
+  svc-014:
+    image: ghcr.io/composure/example-14:1.5.0
+    container_name: svc-014
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "14"
+      SERVICE_NAME: svc-014
+    networks:
+      - net-2
+  svc-015:
+    image: ghcr.io/composure/example-15:1.6.0
+    container_name: svc-015
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "15"
+      SERVICE_NAME: svc-015
+    ports:
+      - "20015:8080"
+    volumes:
+      - svc-015-data:/var/lib/svc-015
+    networks:
+      - net-3
+  svc-016:
+    image: ghcr.io/composure/example-16:1.7.0
+    container_name: svc-016
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "16"
+      SERVICE_NAME: svc-016
+    networks:
+      - net-0
+  svc-017:
+    image: ghcr.io/composure/example-0:1.8.0
+    container_name: svc-017
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "17"
+      SERVICE_NAME: svc-017
+    networks:
+      - net-1
+  svc-018:
+    image: ghcr.io/composure/example-1:1.0.0
+    container_name: svc-018
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "18"
+      SERVICE_NAME: svc-018
+    ports:
+      - "20018:8080"
+    networks:
+      - net-2
+  svc-019:
+    image: ghcr.io/composure/example-2:1.1.0
+    container_name: svc-019
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "19"
+      SERVICE_NAME: svc-019
+    networks:
+      - net-3
+  svc-020:
+    image: ghcr.io/composure/example-3:1.2.0
+    container_name: svc-020
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "20"
+      SERVICE_NAME: svc-020
+    volumes:
+      - svc-020-data:/var/lib/svc-020
+    networks:
+      - net-0
+  svc-021:
+    image: ghcr.io/composure/example-4:1.3.0
+    container_name: svc-021
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "21"
+      SERVICE_NAME: svc-021
+    ports:
+      - "20021:8080"
+    networks:
+      - net-1
+  svc-022:
+    image: ghcr.io/composure/example-5:1.4.0
+    container_name: svc-022
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "22"
+      SERVICE_NAME: svc-022
+    networks:
+      - net-2
+  svc-023:
+    image: ghcr.io/composure/example-6:1.5.0
+    container_name: svc-023
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "23"
+      SERVICE_NAME: svc-023
+    networks:
+      - net-3
+  svc-024:
+    image: ghcr.io/composure/example-7:1.6.0
+    container_name: svc-024
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "24"
+      SERVICE_NAME: svc-024
+    ports:
+      - "20024:8080"
+    networks:
+      - net-0
+  svc-025:
+    image: ghcr.io/composure/example-8:1.7.0
+    container_name: svc-025
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "25"
+      SERVICE_NAME: svc-025
+    volumes:
+      - svc-025-data:/var/lib/svc-025
+    networks:
+      - net-1
+  svc-026:
+    image: ghcr.io/composure/example-9:1.8.0
+    container_name: svc-026
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "26"
+      SERVICE_NAME: svc-026
+    networks:
+      - net-2
+  svc-027:
+    image: ghcr.io/composure/example-10:1.0.0
+    container_name: svc-027
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "27"
+      SERVICE_NAME: svc-027
+    ports:
+      - "20027:8080"
+    networks:
+      - net-3
+  svc-028:
+    image: ghcr.io/composure/example-11:1.1.0
+    container_name: svc-028
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "28"
+      SERVICE_NAME: svc-028
+    networks:
+      - net-0
+  svc-029:
+    image: ghcr.io/composure/example-12:1.2.0
+    container_name: svc-029
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "29"
+      SERVICE_NAME: svc-029
+    networks:
+      - net-1
+  svc-030:
+    image: ghcr.io/composure/example-13:1.3.0
+    container_name: svc-030
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "30"
+      SERVICE_NAME: svc-030
+    ports:
+      - "20030:8080"
+    volumes:
+      - svc-030-data:/var/lib/svc-030
+    networks:
+      - net-2
+  svc-031:
+    image: ghcr.io/composure/example-14:1.4.0
+    container_name: svc-031
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "31"
+      SERVICE_NAME: svc-031
+    networks:
+      - net-3
+  svc-032:
+    image: ghcr.io/composure/example-15:1.5.0
+    container_name: svc-032
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "32"
+      SERVICE_NAME: svc-032
+    networks:
+      - net-0
+  svc-033:
+    image: ghcr.io/composure/example-16:1.6.0
+    container_name: svc-033
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "33"
+      SERVICE_NAME: svc-033
+    ports:
+      - "20033:8080"
+    networks:
+      - net-1
+  svc-034:
+    image: ghcr.io/composure/example-0:1.7.0
+    container_name: svc-034
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "34"
+      SERVICE_NAME: svc-034
+    networks:
+      - net-2
+  svc-035:
+    image: ghcr.io/composure/example-1:1.8.0
+    container_name: svc-035
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "35"
+      SERVICE_NAME: svc-035
+    volumes:
+      - svc-035-data:/var/lib/svc-035
+    networks:
+      - net-3
+  svc-036:
+    image: ghcr.io/composure/example-2:1.0.0
+    container_name: svc-036
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "36"
+      SERVICE_NAME: svc-036
+    ports:
+      - "20036:8080"
+    networks:
+      - net-0
+  svc-037:
+    image: ghcr.io/composure/example-3:1.1.0
+    container_name: svc-037
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "37"
+      SERVICE_NAME: svc-037
+    networks:
+      - net-1
+  svc-038:
+    image: ghcr.io/composure/example-4:1.2.0
+    container_name: svc-038
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "38"
+      SERVICE_NAME: svc-038
+    networks:
+      - net-2
+  svc-039:
+    image: ghcr.io/composure/example-5:1.3.0
+    container_name: svc-039
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "39"
+      SERVICE_NAME: svc-039
+    ports:
+      - "20039:8080"
+    networks:
+      - net-3
+  svc-040:
+    image: ghcr.io/composure/example-6:1.4.0
+    container_name: svc-040
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "40"
+      SERVICE_NAME: svc-040
+    volumes:
+      - svc-040-data:/var/lib/svc-040
+    networks:
+      - net-0
+  svc-041:
+    image: ghcr.io/composure/example-7:1.5.0
+    container_name: svc-041
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "41"
+      SERVICE_NAME: svc-041
+    networks:
+      - net-1
+  svc-042:
+    image: ghcr.io/composure/example-8:1.6.0
+    container_name: svc-042
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "42"
+      SERVICE_NAME: svc-042
+    ports:
+      - "20042:8080"
+    networks:
+      - net-2
+  svc-043:
+    image: ghcr.io/composure/example-9:1.7.0
+    container_name: svc-043
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "43"
+      SERVICE_NAME: svc-043
+    networks:
+      - net-3
+  svc-044:
+    image: ghcr.io/composure/example-10:1.8.0
+    container_name: svc-044
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "44"
+      SERVICE_NAME: svc-044
+    networks:
+      - net-0
+  svc-045:
+    image: ghcr.io/composure/example-11:1.0.0
+    container_name: svc-045
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "45"
+      SERVICE_NAME: svc-045
+    ports:
+      - "20045:8080"
+    volumes:
+      - svc-045-data:/var/lib/svc-045
+    networks:
+      - net-1
+  svc-046:
+    image: ghcr.io/composure/example-12:1.1.0
+    container_name: svc-046
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "46"
+      SERVICE_NAME: svc-046
+    networks:
+      - net-2
+  svc-047:
+    image: ghcr.io/composure/example-13:1.2.0
+    container_name: svc-047
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "47"
+      SERVICE_NAME: svc-047
+    networks:
+      - net-3
+  svc-048:
+    image: ghcr.io/composure/example-14:1.3.0
+    container_name: svc-048
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "48"
+      SERVICE_NAME: svc-048
+    ports:
+      - "20048:8080"
+    networks:
+      - net-0
+  svc-049:
+    image: ghcr.io/composure/example-15:1.4.0
+    container_name: svc-049
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "49"
+      SERVICE_NAME: svc-049
+    networks:
+      - net-1
+  svc-050:
+    image: ghcr.io/composure/example-16:1.5.0
+    container_name: svc-050
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "50"
+      SERVICE_NAME: svc-050
+    volumes:
+      - svc-050-data:/var/lib/svc-050
+    networks:
+      - net-2
+  svc-051:
+    image: ghcr.io/composure/example-0:1.6.0
+    container_name: svc-051
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "51"
+      SERVICE_NAME: svc-051
+    ports:
+      - "20051:8080"
+    networks:
+      - net-3
+  svc-052:
+    image: ghcr.io/composure/example-1:1.7.0
+    container_name: svc-052
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "52"
+      SERVICE_NAME: svc-052
+    networks:
+      - net-0
+  svc-053:
+    image: ghcr.io/composure/example-2:1.8.0
+    container_name: svc-053
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "53"
+      SERVICE_NAME: svc-053
+    networks:
+      - net-1
+  svc-054:
+    image: ghcr.io/composure/example-3:1.0.0
+    container_name: svc-054
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "54"
+      SERVICE_NAME: svc-054
+    ports:
+      - "20054:8080"
+    networks:
+      - net-2
+  svc-055:
+    image: ghcr.io/composure/example-4:1.1.0
+    container_name: svc-055
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "55"
+      SERVICE_NAME: svc-055
+    volumes:
+      - svc-055-data:/var/lib/svc-055
+    networks:
+      - net-3
+  svc-056:
+    image: ghcr.io/composure/example-5:1.2.0
+    container_name: svc-056
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "56"
+      SERVICE_NAME: svc-056
+    networks:
+      - net-0
+  svc-057:
+    image: ghcr.io/composure/example-6:1.3.0
+    container_name: svc-057
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "57"
+      SERVICE_NAME: svc-057
+    ports:
+      - "20057:8080"
+    networks:
+      - net-1
+  svc-058:
+    image: ghcr.io/composure/example-7:1.4.0
+    container_name: svc-058
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "58"
+      SERVICE_NAME: svc-058
+    networks:
+      - net-2
+  svc-059:
+    image: ghcr.io/composure/example-8:1.5.0
+    container_name: svc-059
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "59"
+      SERVICE_NAME: svc-059
+    networks:
+      - net-3
+  svc-060:
+    image: ghcr.io/composure/example-9:1.6.0
+    container_name: svc-060
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "60"
+      SERVICE_NAME: svc-060
+    ports:
+      - "20060:8080"
+    volumes:
+      - svc-060-data:/var/lib/svc-060
+    networks:
+      - net-0
+  svc-061:
+    image: ghcr.io/composure/example-10:1.7.0
+    container_name: svc-061
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "61"
+      SERVICE_NAME: svc-061
+    networks:
+      - net-1
+  svc-062:
+    image: ghcr.io/composure/example-11:1.8.0
+    container_name: svc-062
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "62"
+      SERVICE_NAME: svc-062
+    networks:
+      - net-2
+  svc-063:
+    image: ghcr.io/composure/example-12:1.0.0
+    container_name: svc-063
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "63"
+      SERVICE_NAME: svc-063
+    ports:
+      - "20063:8080"
+    networks:
+      - net-3
+  svc-064:
+    image: ghcr.io/composure/example-13:1.1.0
+    container_name: svc-064
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "64"
+      SERVICE_NAME: svc-064
+    networks:
+      - net-0
+  svc-065:
+    image: ghcr.io/composure/example-14:1.2.0
+    container_name: svc-065
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "65"
+      SERVICE_NAME: svc-065
+    volumes:
+      - svc-065-data:/var/lib/svc-065
+    networks:
+      - net-1
+  svc-066:
+    image: ghcr.io/composure/example-15:1.3.0
+    container_name: svc-066
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "66"
+      SERVICE_NAME: svc-066
+    ports:
+      - "20066:8080"
+    networks:
+      - net-2
+  svc-067:
+    image: ghcr.io/composure/example-16:1.4.0
+    container_name: svc-067
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "67"
+      SERVICE_NAME: svc-067
+    networks:
+      - net-3
+  svc-068:
+    image: ghcr.io/composure/example-0:1.5.0
+    container_name: svc-068
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "68"
+      SERVICE_NAME: svc-068
+    networks:
+      - net-0
+  svc-069:
+    image: ghcr.io/composure/example-1:1.6.0
+    container_name: svc-069
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "69"
+      SERVICE_NAME: svc-069
+    ports:
+      - "20069:8080"
+    networks:
+      - net-1
+  svc-070:
+    image: ghcr.io/composure/example-2:1.7.0
+    container_name: svc-070
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "70"
+      SERVICE_NAME: svc-070
+    volumes:
+      - svc-070-data:/var/lib/svc-070
+    networks:
+      - net-2
+  svc-071:
+    image: ghcr.io/composure/example-3:1.8.0
+    container_name: svc-071
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "71"
+      SERVICE_NAME: svc-071
+    networks:
+      - net-3
+  svc-072:
+    image: ghcr.io/composure/example-4:1.0.0
+    container_name: svc-072
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "72"
+      SERVICE_NAME: svc-072
+    ports:
+      - "20072:8080"
+    networks:
+      - net-0
+  svc-073:
+    image: ghcr.io/composure/example-5:1.1.0
+    container_name: svc-073
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "73"
+      SERVICE_NAME: svc-073
+    networks:
+      - net-1
+  svc-074:
+    image: ghcr.io/composure/example-6:1.2.0
+    container_name: svc-074
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "74"
+      SERVICE_NAME: svc-074
+    networks:
+      - net-2
+  svc-075:
+    image: ghcr.io/composure/example-7:1.3.0
+    container_name: svc-075
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "75"
+      SERVICE_NAME: svc-075
+    ports:
+      - "20075:8080"
+    volumes:
+      - svc-075-data:/var/lib/svc-075
+    networks:
+      - net-3
+  svc-076:
+    image: ghcr.io/composure/example-8:1.4.0
+    container_name: svc-076
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "76"
+      SERVICE_NAME: svc-076
+    networks:
+      - net-0
+  svc-077:
+    image: ghcr.io/composure/example-9:1.5.0
+    container_name: svc-077
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "77"
+      SERVICE_NAME: svc-077
+    networks:
+      - net-1
+  svc-078:
+    image: ghcr.io/composure/example-10:1.6.0
+    container_name: svc-078
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "78"
+      SERVICE_NAME: svc-078
+    ports:
+      - "20078:8080"
+    networks:
+      - net-2
+  svc-079:
+    image: ghcr.io/composure/example-11:1.7.0
+    container_name: svc-079
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "79"
+      SERVICE_NAME: svc-079
+    networks:
+      - net-3
+  svc-080:
+    image: ghcr.io/composure/example-12:1.8.0
+    container_name: svc-080
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "80"
+      SERVICE_NAME: svc-080
+    volumes:
+      - svc-080-data:/var/lib/svc-080
+    networks:
+      - net-0
+  svc-081:
+    image: ghcr.io/composure/example-13:1.0.0
+    container_name: svc-081
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "81"
+      SERVICE_NAME: svc-081
+    ports:
+      - "20081:8080"
+    networks:
+      - net-1
+  svc-082:
+    image: ghcr.io/composure/example-14:1.1.0
+    container_name: svc-082
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "82"
+      SERVICE_NAME: svc-082
+    networks:
+      - net-2
+  svc-083:
+    image: ghcr.io/composure/example-15:1.2.0
+    container_name: svc-083
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "83"
+      SERVICE_NAME: svc-083
+    networks:
+      - net-3
+  svc-084:
+    image: ghcr.io/composure/example-16:1.3.0
+    container_name: svc-084
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "84"
+      SERVICE_NAME: svc-084
+    ports:
+      - "20084:8080"
+    networks:
+      - net-0
+  svc-085:
+    image: ghcr.io/composure/example-0:1.4.0
+    container_name: svc-085
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "85"
+      SERVICE_NAME: svc-085
+    volumes:
+      - svc-085-data:/var/lib/svc-085
+    networks:
+      - net-1
+  svc-086:
+    image: ghcr.io/composure/example-1:1.5.0
+    container_name: svc-086
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "86"
+      SERVICE_NAME: svc-086
+    networks:
+      - net-2
+  svc-087:
+    image: ghcr.io/composure/example-2:1.6.0
+    container_name: svc-087
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "87"
+      SERVICE_NAME: svc-087
+    ports:
+      - "20087:8080"
+    networks:
+      - net-3
+  svc-088:
+    image: ghcr.io/composure/example-3:1.7.0
+    container_name: svc-088
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "88"
+      SERVICE_NAME: svc-088
+    networks:
+      - net-0
+  svc-089:
+    image: ghcr.io/composure/example-4:1.8.0
+    container_name: svc-089
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "89"
+      SERVICE_NAME: svc-089
+    networks:
+      - net-1
+  svc-090:
+    image: ghcr.io/composure/example-5:1.0.0
+    container_name: svc-090
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "90"
+      SERVICE_NAME: svc-090
+    ports:
+      - "20090:8080"
+    volumes:
+      - svc-090-data:/var/lib/svc-090
+    networks:
+      - net-2
+  svc-091:
+    image: ghcr.io/composure/example-6:1.1.0
+    container_name: svc-091
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "91"
+      SERVICE_NAME: svc-091
+    networks:
+      - net-3
+  svc-092:
+    image: ghcr.io/composure/example-7:1.2.0
+    container_name: svc-092
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "92"
+      SERVICE_NAME: svc-092
+    networks:
+      - net-0
+  svc-093:
+    image: ghcr.io/composure/example-8:1.3.0
+    container_name: svc-093
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "93"
+      SERVICE_NAME: svc-093
+    ports:
+      - "20093:8080"
+    networks:
+      - net-1
+  svc-094:
+    image: ghcr.io/composure/example-9:1.4.0
+    container_name: svc-094
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "94"
+      SERVICE_NAME: svc-094
+    networks:
+      - net-2
+  svc-095:
+    image: ghcr.io/composure/example-10:1.5.0
+    container_name: svc-095
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "95"
+      SERVICE_NAME: svc-095
+    volumes:
+      - svc-095-data:/var/lib/svc-095
+    networks:
+      - net-3
+  svc-096:
+    image: ghcr.io/composure/example-11:1.6.0
+    container_name: svc-096
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "96"
+      SERVICE_NAME: svc-096
+    ports:
+      - "20096:8080"
+    networks:
+      - net-0
+  svc-097:
+    image: ghcr.io/composure/example-12:1.7.0
+    container_name: svc-097
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "97"
+      SERVICE_NAME: svc-097
+    networks:
+      - net-1
+  svc-098:
+    image: ghcr.io/composure/example-13:1.8.0
+    container_name: svc-098
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "98"
+      SERVICE_NAME: svc-098
+    networks:
+      - net-2
+  svc-099:
+    image: ghcr.io/composure/example-14:1.0.0
+    container_name: svc-099
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "99"
+      SERVICE_NAME: svc-099
+    ports:
+      - "20099:8080"
+    networks:
+      - net-3
+  svc-100:
+    image: ghcr.io/composure/example-15:1.1.0
+    container_name: svc-100
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "100"
+      SERVICE_NAME: svc-100
+    volumes:
+      - svc-100-data:/var/lib/svc-100
+    networks:
+      - net-0
+  svc-101:
+    image: ghcr.io/composure/example-16:1.2.0
+    container_name: svc-101
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "101"
+      SERVICE_NAME: svc-101
+    networks:
+      - net-1
+  svc-102:
+    image: ghcr.io/composure/example-0:1.3.0
+    container_name: svc-102
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "102"
+      SERVICE_NAME: svc-102
+    ports:
+      - "20102:8080"
+    networks:
+      - net-2
+  svc-103:
+    image: ghcr.io/composure/example-1:1.4.0
+    container_name: svc-103
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "103"
+      SERVICE_NAME: svc-103
+    networks:
+      - net-3
+  svc-104:
+    image: ghcr.io/composure/example-2:1.5.0
+    container_name: svc-104
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "104"
+      SERVICE_NAME: svc-104
+    networks:
+      - net-0
+  svc-105:
+    image: ghcr.io/composure/example-3:1.6.0
+    container_name: svc-105
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "105"
+      SERVICE_NAME: svc-105
+    ports:
+      - "20105:8080"
+    volumes:
+      - svc-105-data:/var/lib/svc-105
+    networks:
+      - net-1
+  svc-106:
+    image: ghcr.io/composure/example-4:1.7.0
+    container_name: svc-106
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "106"
+      SERVICE_NAME: svc-106
+    networks:
+      - net-2
+  svc-107:
+    image: ghcr.io/composure/example-5:1.8.0
+    container_name: svc-107
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "107"
+      SERVICE_NAME: svc-107
+    networks:
+      - net-3
+  svc-108:
+    image: ghcr.io/composure/example-6:1.0.0
+    container_name: svc-108
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "108"
+      SERVICE_NAME: svc-108
+    ports:
+      - "20108:8080"
+    networks:
+      - net-0
+  svc-109:
+    image: ghcr.io/composure/example-7:1.1.0
+    container_name: svc-109
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "109"
+      SERVICE_NAME: svc-109
+    networks:
+      - net-1
+  svc-110:
+    image: ghcr.io/composure/example-8:1.2.0
+    container_name: svc-110
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "110"
+      SERVICE_NAME: svc-110
+    volumes:
+      - svc-110-data:/var/lib/svc-110
+    networks:
+      - net-2
+  svc-111:
+    image: ghcr.io/composure/example-9:1.3.0
+    container_name: svc-111
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "111"
+      SERVICE_NAME: svc-111
+    ports:
+      - "20111:8080"
+    networks:
+      - net-3
+  svc-112:
+    image: ghcr.io/composure/example-10:1.4.0
+    container_name: svc-112
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "112"
+      SERVICE_NAME: svc-112
+    networks:
+      - net-0
+  svc-113:
+    image: ghcr.io/composure/example-11:1.5.0
+    container_name: svc-113
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "113"
+      SERVICE_NAME: svc-113
+    networks:
+      - net-1
+  svc-114:
+    image: ghcr.io/composure/example-12:1.6.0
+    container_name: svc-114
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "114"
+      SERVICE_NAME: svc-114
+    ports:
+      - "20114:8080"
+    networks:
+      - net-2
+  svc-115:
+    image: ghcr.io/composure/example-13:1.7.0
+    container_name: svc-115
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "115"
+      SERVICE_NAME: svc-115
+    volumes:
+      - svc-115-data:/var/lib/svc-115
+    networks:
+      - net-3
+  svc-116:
+    image: ghcr.io/composure/example-14:1.8.0
+    container_name: svc-116
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "116"
+      SERVICE_NAME: svc-116
+    networks:
+      - net-0
+  svc-117:
+    image: ghcr.io/composure/example-15:1.0.0
+    container_name: svc-117
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "117"
+      SERVICE_NAME: svc-117
+    ports:
+      - "20117:8080"
+    networks:
+      - net-1
+  svc-118:
+    image: ghcr.io/composure/example-16:1.1.0
+    container_name: svc-118
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "118"
+      SERVICE_NAME: svc-118
+    networks:
+      - net-2
+  svc-119:
+    image: ghcr.io/composure/example-0:1.2.0
+    container_name: svc-119
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "119"
+      SERVICE_NAME: svc-119
+    networks:
+      - net-3
+  svc-120:
+    image: ghcr.io/composure/example-1:1.3.0
+    container_name: svc-120
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "120"
+      SERVICE_NAME: svc-120
+    ports:
+      - "20120:8080"
+    volumes:
+      - svc-120-data:/var/lib/svc-120
+    networks:
+      - net-0
+  svc-121:
+    image: ghcr.io/composure/example-2:1.4.0
+    container_name: svc-121
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "121"
+      SERVICE_NAME: svc-121
+    networks:
+      - net-1
+  svc-122:
+    image: ghcr.io/composure/example-3:1.5.0
+    container_name: svc-122
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "122"
+      SERVICE_NAME: svc-122
+    networks:
+      - net-2
+  svc-123:
+    image: ghcr.io/composure/example-4:1.6.0
+    container_name: svc-123
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "123"
+      SERVICE_NAME: svc-123
+    ports:
+      - "20123:8080"
+    networks:
+      - net-3
+  svc-124:
+    image: ghcr.io/composure/example-5:1.7.0
+    container_name: svc-124
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "124"
+      SERVICE_NAME: svc-124
+    networks:
+      - net-0
+  svc-125:
+    image: ghcr.io/composure/example-6:1.8.0
+    container_name: svc-125
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "125"
+      SERVICE_NAME: svc-125
+    volumes:
+      - svc-125-data:/var/lib/svc-125
+    networks:
+      - net-1
+  svc-126:
+    image: ghcr.io/composure/example-7:1.0.0
+    container_name: svc-126
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "126"
+      SERVICE_NAME: svc-126
+    ports:
+      - "20126:8080"
+    networks:
+      - net-2
+  svc-127:
+    image: ghcr.io/composure/example-8:1.1.0
+    container_name: svc-127
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "127"
+      SERVICE_NAME: svc-127
+    networks:
+      - net-3
+  svc-128:
+    image: ghcr.io/composure/example-9:1.2.0
+    container_name: svc-128
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "128"
+      SERVICE_NAME: svc-128
+    networks:
+      - net-0
+  svc-129:
+    image: ghcr.io/composure/example-10:1.3.0
+    container_name: svc-129
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "129"
+      SERVICE_NAME: svc-129
+    ports:
+      - "20129:8080"
+    networks:
+      - net-1
+  svc-130:
+    image: ghcr.io/composure/example-11:1.4.0
+    container_name: svc-130
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "130"
+      SERVICE_NAME: svc-130
+    volumes:
+      - svc-130-data:/var/lib/svc-130
+    networks:
+      - net-2
+  svc-131:
+    image: ghcr.io/composure/example-12:1.5.0
+    container_name: svc-131
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "131"
+      SERVICE_NAME: svc-131
+    networks:
+      - net-3
+  svc-132:
+    image: ghcr.io/composure/example-13:1.6.0
+    container_name: svc-132
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "132"
+      SERVICE_NAME: svc-132
+    ports:
+      - "20132:8080"
+    networks:
+      - net-0
+  svc-133:
+    image: ghcr.io/composure/example-14:1.7.0
+    container_name: svc-133
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "133"
+      SERVICE_NAME: svc-133
+    networks:
+      - net-1
+  svc-134:
+    image: ghcr.io/composure/example-15:1.8.0
+    container_name: svc-134
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "134"
+      SERVICE_NAME: svc-134
+    networks:
+      - net-2
+  svc-135:
+    image: ghcr.io/composure/example-16:1.0.0
+    container_name: svc-135
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "135"
+      SERVICE_NAME: svc-135
+    ports:
+      - "20135:8080"
+    volumes:
+      - svc-135-data:/var/lib/svc-135
+    networks:
+      - net-3
+  svc-136:
+    image: ghcr.io/composure/example-0:1.1.0
+    container_name: svc-136
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "136"
+      SERVICE_NAME: svc-136
+    networks:
+      - net-0
+  svc-137:
+    image: ghcr.io/composure/example-1:1.2.0
+    container_name: svc-137
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "137"
+      SERVICE_NAME: svc-137
+    networks:
+      - net-1
+  svc-138:
+    image: ghcr.io/composure/example-2:1.3.0
+    container_name: svc-138
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "138"
+      SERVICE_NAME: svc-138
+    ports:
+      - "20138:8080"
+    networks:
+      - net-2
+  svc-139:
+    image: ghcr.io/composure/example-3:1.4.0
+    container_name: svc-139
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "139"
+      SERVICE_NAME: svc-139
+    networks:
+      - net-3
+  svc-140:
+    image: ghcr.io/composure/example-4:1.5.0
+    container_name: svc-140
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "140"
+      SERVICE_NAME: svc-140
+    volumes:
+      - svc-140-data:/var/lib/svc-140
+    networks:
+      - net-0
+  svc-141:
+    image: ghcr.io/composure/example-5:1.6.0
+    container_name: svc-141
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "141"
+      SERVICE_NAME: svc-141
+    ports:
+      - "20141:8080"
+    networks:
+      - net-1
+  svc-142:
+    image: ghcr.io/composure/example-6:1.7.0
+    container_name: svc-142
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "142"
+      SERVICE_NAME: svc-142
+    networks:
+      - net-2
+  svc-143:
+    image: ghcr.io/composure/example-7:1.8.0
+    container_name: svc-143
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "143"
+      SERVICE_NAME: svc-143
+    networks:
+      - net-3
+  svc-144:
+    image: ghcr.io/composure/example-8:1.0.0
+    container_name: svc-144
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "144"
+      SERVICE_NAME: svc-144
+    ports:
+      - "20144:8080"
+    networks:
+      - net-0
+  svc-145:
+    image: ghcr.io/composure/example-9:1.1.0
+    container_name: svc-145
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "145"
+      SERVICE_NAME: svc-145
+    volumes:
+      - svc-145-data:/var/lib/svc-145
+    networks:
+      - net-1
+  svc-146:
+    image: ghcr.io/composure/example-10:1.2.0
+    container_name: svc-146
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "146"
+      SERVICE_NAME: svc-146
+    networks:
+      - net-2
+  svc-147:
+    image: ghcr.io/composure/example-11:1.3.0
+    container_name: svc-147
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "147"
+      SERVICE_NAME: svc-147
+    ports:
+      - "20147:8080"
+    networks:
+      - net-3
+  svc-148:
+    image: ghcr.io/composure/example-12:1.4.0
+    container_name: svc-148
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "148"
+      SERVICE_NAME: svc-148
+    networks:
+      - net-0
+  svc-149:
+    image: ghcr.io/composure/example-13:1.5.0
+    container_name: svc-149
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "149"
+      SERVICE_NAME: svc-149
+    networks:
+      - net-1
+  svc-150:
+    image: ghcr.io/composure/example-14:1.6.0
+    container_name: svc-150
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "150"
+      SERVICE_NAME: svc-150
+    ports:
+      - "20150:8080"
+    volumes:
+      - svc-150-data:/var/lib/svc-150
+    networks:
+      - net-2
+  svc-151:
+    image: ghcr.io/composure/example-15:1.7.0
+    container_name: svc-151
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "151"
+      SERVICE_NAME: svc-151
+    networks:
+      - net-3
+  svc-152:
+    image: ghcr.io/composure/example-16:1.8.0
+    container_name: svc-152
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "152"
+      SERVICE_NAME: svc-152
+    networks:
+      - net-0
+  svc-153:
+    image: ghcr.io/composure/example-0:1.0.0
+    container_name: svc-153
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "153"
+      SERVICE_NAME: svc-153
+    ports:
+      - "20153:8080"
+    networks:
+      - net-1
+  svc-154:
+    image: ghcr.io/composure/example-1:1.1.0
+    container_name: svc-154
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "154"
+      SERVICE_NAME: svc-154
+    networks:
+      - net-2
+  svc-155:
+    image: ghcr.io/composure/example-2:1.2.0
+    container_name: svc-155
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "155"
+      SERVICE_NAME: svc-155
+    volumes:
+      - svc-155-data:/var/lib/svc-155
+    networks:
+      - net-3
+  svc-156:
+    image: ghcr.io/composure/example-3:1.3.0
+    container_name: svc-156
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "156"
+      SERVICE_NAME: svc-156
+    ports:
+      - "20156:8080"
+    networks:
+      - net-0
+  svc-157:
+    image: ghcr.io/composure/example-4:1.4.0
+    container_name: svc-157
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "157"
+      SERVICE_NAME: svc-157
+    networks:
+      - net-1
+  svc-158:
+    image: ghcr.io/composure/example-5:1.5.0
+    container_name: svc-158
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "158"
+      SERVICE_NAME: svc-158
+    networks:
+      - net-2
+  svc-159:
+    image: ghcr.io/composure/example-6:1.6.0
+    container_name: svc-159
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "159"
+      SERVICE_NAME: svc-159
+    ports:
+      - "20159:8080"
+    networks:
+      - net-3
+  svc-160:
+    image: ghcr.io/composure/example-7:1.7.0
+    container_name: svc-160
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "160"
+      SERVICE_NAME: svc-160
+    volumes:
+      - svc-160-data:/var/lib/svc-160
+    networks:
+      - net-0
+  svc-161:
+    image: ghcr.io/composure/example-8:1.8.0
+    container_name: svc-161
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "161"
+      SERVICE_NAME: svc-161
+    networks:
+      - net-1
+  svc-162:
+    image: ghcr.io/composure/example-9:1.0.0
+    container_name: svc-162
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "162"
+      SERVICE_NAME: svc-162
+    ports:
+      - "20162:8080"
+    networks:
+      - net-2
+  svc-163:
+    image: ghcr.io/composure/example-10:1.1.0
+    container_name: svc-163
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "163"
+      SERVICE_NAME: svc-163
+    networks:
+      - net-3
+  svc-164:
+    image: ghcr.io/composure/example-11:1.2.0
+    container_name: svc-164
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "164"
+      SERVICE_NAME: svc-164
+    networks:
+      - net-0
+  svc-165:
+    image: ghcr.io/composure/example-12:1.3.0
+    container_name: svc-165
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "165"
+      SERVICE_NAME: svc-165
+    ports:
+      - "20165:8080"
+    volumes:
+      - svc-165-data:/var/lib/svc-165
+    networks:
+      - net-1
+  svc-166:
+    image: ghcr.io/composure/example-13:1.4.0
+    container_name: svc-166
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "166"
+      SERVICE_NAME: svc-166
+    networks:
+      - net-2
+  svc-167:
+    image: ghcr.io/composure/example-14:1.5.0
+    container_name: svc-167
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "167"
+      SERVICE_NAME: svc-167
+    networks:
+      - net-3
+  svc-168:
+    image: ghcr.io/composure/example-15:1.6.0
+    container_name: svc-168
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "168"
+      SERVICE_NAME: svc-168
+    ports:
+      - "20168:8080"
+    networks:
+      - net-0
+  svc-169:
+    image: ghcr.io/composure/example-16:1.7.0
+    container_name: svc-169
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "169"
+      SERVICE_NAME: svc-169
+    networks:
+      - net-1
+  svc-170:
+    image: ghcr.io/composure/example-0:1.8.0
+    container_name: svc-170
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "170"
+      SERVICE_NAME: svc-170
+    volumes:
+      - svc-170-data:/var/lib/svc-170
+    networks:
+      - net-2
+  svc-171:
+    image: ghcr.io/composure/example-1:1.0.0
+    container_name: svc-171
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "171"
+      SERVICE_NAME: svc-171
+    ports:
+      - "20171:8080"
+    networks:
+      - net-3
+  svc-172:
+    image: ghcr.io/composure/example-2:1.1.0
+    container_name: svc-172
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "172"
+      SERVICE_NAME: svc-172
+    networks:
+      - net-0
+  svc-173:
+    image: ghcr.io/composure/example-3:1.2.0
+    container_name: svc-173
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "173"
+      SERVICE_NAME: svc-173
+    networks:
+      - net-1
+  svc-174:
+    image: ghcr.io/composure/example-4:1.3.0
+    container_name: svc-174
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "174"
+      SERVICE_NAME: svc-174
+    ports:
+      - "20174:8080"
+    networks:
+      - net-2
+  svc-175:
+    image: ghcr.io/composure/example-5:1.4.0
+    container_name: svc-175
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "175"
+      SERVICE_NAME: svc-175
+    volumes:
+      - svc-175-data:/var/lib/svc-175
+    networks:
+      - net-3
+  svc-176:
+    image: ghcr.io/composure/example-6:1.5.0
+    container_name: svc-176
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "176"
+      SERVICE_NAME: svc-176
+    networks:
+      - net-0
+  svc-177:
+    image: ghcr.io/composure/example-7:1.6.0
+    container_name: svc-177
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "177"
+      SERVICE_NAME: svc-177
+    ports:
+      - "20177:8080"
+    networks:
+      - net-1
+  svc-178:
+    image: ghcr.io/composure/example-8:1.7.0
+    container_name: svc-178
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "178"
+      SERVICE_NAME: svc-178
+    networks:
+      - net-2
+  svc-179:
+    image: ghcr.io/composure/example-9:1.8.0
+    container_name: svc-179
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "179"
+      SERVICE_NAME: svc-179
+    networks:
+      - net-3
+  svc-180:
+    image: ghcr.io/composure/example-10:1.0.0
+    container_name: svc-180
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "180"
+      SERVICE_NAME: svc-180
+    ports:
+      - "20180:8080"
+    volumes:
+      - svc-180-data:/var/lib/svc-180
+    networks:
+      - net-0
+  svc-181:
+    image: ghcr.io/composure/example-11:1.1.0
+    container_name: svc-181
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "181"
+      SERVICE_NAME: svc-181
+    networks:
+      - net-1
+  svc-182:
+    image: ghcr.io/composure/example-12:1.2.0
+    container_name: svc-182
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "182"
+      SERVICE_NAME: svc-182
+    networks:
+      - net-2
+  svc-183:
+    image: ghcr.io/composure/example-13:1.3.0
+    container_name: svc-183
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "183"
+      SERVICE_NAME: svc-183
+    ports:
+      - "20183:8080"
+    networks:
+      - net-3
+  svc-184:
+    image: ghcr.io/composure/example-14:1.4.0
+    container_name: svc-184
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "184"
+      SERVICE_NAME: svc-184
+    networks:
+      - net-0
+  svc-185:
+    image: ghcr.io/composure/example-15:1.5.0
+    container_name: svc-185
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "185"
+      SERVICE_NAME: svc-185
+    volumes:
+      - svc-185-data:/var/lib/svc-185
+    networks:
+      - net-1
+  svc-186:
+    image: ghcr.io/composure/example-16:1.6.0
+    container_name: svc-186
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "186"
+      SERVICE_NAME: svc-186
+    ports:
+      - "20186:8080"
+    networks:
+      - net-2
+  svc-187:
+    image: ghcr.io/composure/example-0:1.7.0
+    container_name: svc-187
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "187"
+      SERVICE_NAME: svc-187
+    networks:
+      - net-3
+  svc-188:
+    image: ghcr.io/composure/example-1:1.8.0
+    container_name: svc-188
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "188"
+      SERVICE_NAME: svc-188
+    networks:
+      - net-0
+  svc-189:
+    image: ghcr.io/composure/example-2:1.0.0
+    container_name: svc-189
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "189"
+      SERVICE_NAME: svc-189
+    ports:
+      - "20189:8080"
+    networks:
+      - net-1
+  svc-190:
+    image: ghcr.io/composure/example-3:1.1.0
+    container_name: svc-190
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "190"
+      SERVICE_NAME: svc-190
+    volumes:
+      - svc-190-data:/var/lib/svc-190
+    networks:
+      - net-2
+  svc-191:
+    image: ghcr.io/composure/example-4:1.2.0
+    container_name: svc-191
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "191"
+      SERVICE_NAME: svc-191
+    networks:
+      - net-3
+  svc-192:
+    image: ghcr.io/composure/example-5:1.3.0
+    container_name: svc-192
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "192"
+      SERVICE_NAME: svc-192
+    ports:
+      - "20192:8080"
+    networks:
+      - net-0
+  svc-193:
+    image: ghcr.io/composure/example-6:1.4.0
+    container_name: svc-193
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "193"
+      SERVICE_NAME: svc-193
+    networks:
+      - net-1
+  svc-194:
+    image: ghcr.io/composure/example-7:1.5.0
+    container_name: svc-194
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "194"
+      SERVICE_NAME: svc-194
+    networks:
+      - net-2
+  svc-195:
+    image: ghcr.io/composure/example-8:1.6.0
+    container_name: svc-195
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "195"
+      SERVICE_NAME: svc-195
+    ports:
+      - "20195:8080"
+    volumes:
+      - svc-195-data:/var/lib/svc-195
+    networks:
+      - net-3
+  svc-196:
+    image: ghcr.io/composure/example-9:1.7.0
+    container_name: svc-196
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "196"
+      SERVICE_NAME: svc-196
+    networks:
+      - net-0
+  svc-197:
+    image: ghcr.io/composure/example-10:1.8.0
+    container_name: svc-197
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "197"
+      SERVICE_NAME: svc-197
+    networks:
+      - net-1
+  svc-198:
+    image: ghcr.io/composure/example-11:1.0.0
+    container_name: svc-198
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "198"
+      SERVICE_NAME: svc-198
+    ports:
+      - "20198:8080"
+    networks:
+      - net-2
+  svc-199:
+    image: ghcr.io/composure/example-12:1.1.0
+    container_name: svc-199
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "199"
+      SERVICE_NAME: svc-199
+    networks:
+      - net-3
+  svc-200:
+    image: ghcr.io/composure/example-13:1.2.0
+    container_name: svc-200
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "200"
+      SERVICE_NAME: svc-200
+    volumes:
+      - svc-200-data:/var/lib/svc-200
+    networks:
+      - net-0
+  svc-201:
+    image: ghcr.io/composure/example-14:1.3.0
+    container_name: svc-201
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "201"
+      SERVICE_NAME: svc-201
+    ports:
+      - "20201:8080"
+    networks:
+      - net-1
+  svc-202:
+    image: ghcr.io/composure/example-15:1.4.0
+    container_name: svc-202
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "202"
+      SERVICE_NAME: svc-202
+    networks:
+      - net-2
+  svc-203:
+    image: ghcr.io/composure/example-16:1.5.0
+    container_name: svc-203
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "203"
+      SERVICE_NAME: svc-203
+    networks:
+      - net-3
+  svc-204:
+    image: ghcr.io/composure/example-0:1.6.0
+    container_name: svc-204
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "204"
+      SERVICE_NAME: svc-204
+    ports:
+      - "20204:8080"
+    networks:
+      - net-0
+  svc-205:
+    image: ghcr.io/composure/example-1:1.7.0
+    container_name: svc-205
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "205"
+      SERVICE_NAME: svc-205
+    volumes:
+      - svc-205-data:/var/lib/svc-205
+    networks:
+      - net-1
+  svc-206:
+    image: ghcr.io/composure/example-2:1.8.0
+    container_name: svc-206
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "206"
+      SERVICE_NAME: svc-206
+    networks:
+      - net-2
+  svc-207:
+    image: ghcr.io/composure/example-3:1.0.0
+    container_name: svc-207
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "207"
+      SERVICE_NAME: svc-207
+    ports:
+      - "20207:8080"
+    networks:
+      - net-3
+  svc-208:
+    image: ghcr.io/composure/example-4:1.1.0
+    container_name: svc-208
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "208"
+      SERVICE_NAME: svc-208
+    networks:
+      - net-0
+  svc-209:
+    image: ghcr.io/composure/example-5:1.2.0
+    container_name: svc-209
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "209"
+      SERVICE_NAME: svc-209
+    networks:
+      - net-1
+  svc-210:
+    image: ghcr.io/composure/example-6:1.3.0
+    container_name: svc-210
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "210"
+      SERVICE_NAME: svc-210
+    ports:
+      - "20210:8080"
+    volumes:
+      - svc-210-data:/var/lib/svc-210
+    networks:
+      - net-2
+  svc-211:
+    image: ghcr.io/composure/example-7:1.4.0
+    container_name: svc-211
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "211"
+      SERVICE_NAME: svc-211
+    networks:
+      - net-3
+  svc-212:
+    image: ghcr.io/composure/example-8:1.5.0
+    container_name: svc-212
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "212"
+      SERVICE_NAME: svc-212
+    networks:
+      - net-0
+  svc-213:
+    image: ghcr.io/composure/example-9:1.6.0
+    container_name: svc-213
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "213"
+      SERVICE_NAME: svc-213
+    ports:
+      - "20213:8080"
+    networks:
+      - net-1
+  svc-214:
+    image: ghcr.io/composure/example-10:1.7.0
+    container_name: svc-214
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "214"
+      SERVICE_NAME: svc-214
+    networks:
+      - net-2
+  svc-215:
+    image: ghcr.io/composure/example-11:1.8.0
+    container_name: svc-215
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "215"
+      SERVICE_NAME: svc-215
+    volumes:
+      - svc-215-data:/var/lib/svc-215
+    networks:
+      - net-3
+  svc-216:
+    image: ghcr.io/composure/example-12:1.0.0
+    container_name: svc-216
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "216"
+      SERVICE_NAME: svc-216
+    ports:
+      - "20216:8080"
+    networks:
+      - net-0
+  svc-217:
+    image: ghcr.io/composure/example-13:1.1.0
+    container_name: svc-217
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "217"
+      SERVICE_NAME: svc-217
+    networks:
+      - net-1
+  svc-218:
+    image: ghcr.io/composure/example-14:1.2.0
+    container_name: svc-218
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "218"
+      SERVICE_NAME: svc-218
+    networks:
+      - net-2
+  svc-219:
+    image: ghcr.io/composure/example-15:1.3.0
+    container_name: svc-219
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "219"
+      SERVICE_NAME: svc-219
+    ports:
+      - "20219:8080"
+    networks:
+      - net-3
+  svc-220:
+    image: ghcr.io/composure/example-16:1.4.0
+    container_name: svc-220
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "220"
+      SERVICE_NAME: svc-220
+    volumes:
+      - svc-220-data:/var/lib/svc-220
+    networks:
+      - net-0
+  svc-221:
+    image: ghcr.io/composure/example-0:1.5.0
+    container_name: svc-221
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "221"
+      SERVICE_NAME: svc-221
+    networks:
+      - net-1
+  svc-222:
+    image: ghcr.io/composure/example-1:1.6.0
+    container_name: svc-222
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "222"
+      SERVICE_NAME: svc-222
+    ports:
+      - "20222:8080"
+    networks:
+      - net-2
+  svc-223:
+    image: ghcr.io/composure/example-2:1.7.0
+    container_name: svc-223
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "223"
+      SERVICE_NAME: svc-223
+    networks:
+      - net-3
+  svc-224:
+    image: ghcr.io/composure/example-3:1.8.0
+    container_name: svc-224
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "224"
+      SERVICE_NAME: svc-224
+    networks:
+      - net-0
+  svc-225:
+    image: ghcr.io/composure/example-4:1.0.0
+    container_name: svc-225
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "225"
+      SERVICE_NAME: svc-225
+    ports:
+      - "20225:8080"
+    volumes:
+      - svc-225-data:/var/lib/svc-225
+    networks:
+      - net-1
+  svc-226:
+    image: ghcr.io/composure/example-5:1.1.0
+    container_name: svc-226
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "226"
+      SERVICE_NAME: svc-226
+    networks:
+      - net-2
+  svc-227:
+    image: ghcr.io/composure/example-6:1.2.0
+    container_name: svc-227
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "227"
+      SERVICE_NAME: svc-227
+    networks:
+      - net-3
+  svc-228:
+    image: ghcr.io/composure/example-7:1.3.0
+    container_name: svc-228
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "228"
+      SERVICE_NAME: svc-228
+    ports:
+      - "20228:8080"
+    networks:
+      - net-0
+  svc-229:
+    image: ghcr.io/composure/example-8:1.4.0
+    container_name: svc-229
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "229"
+      SERVICE_NAME: svc-229
+    networks:
+      - net-1
+  svc-230:
+    image: ghcr.io/composure/example-9:1.5.0
+    container_name: svc-230
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "230"
+      SERVICE_NAME: svc-230
+    volumes:
+      - svc-230-data:/var/lib/svc-230
+    networks:
+      - net-2
+  svc-231:
+    image: ghcr.io/composure/example-10:1.6.0
+    container_name: svc-231
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "231"
+      SERVICE_NAME: svc-231
+    ports:
+      - "20231:8080"
+    networks:
+      - net-3
+  svc-232:
+    image: ghcr.io/composure/example-11:1.7.0
+    container_name: svc-232
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "232"
+      SERVICE_NAME: svc-232
+    networks:
+      - net-0
+  svc-233:
+    image: ghcr.io/composure/example-12:1.8.0
+    container_name: svc-233
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "233"
+      SERVICE_NAME: svc-233
+    networks:
+      - net-1
+  svc-234:
+    image: ghcr.io/composure/example-13:1.0.0
+    container_name: svc-234
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "234"
+      SERVICE_NAME: svc-234
+    ports:
+      - "20234:8080"
+    networks:
+      - net-2
+  svc-235:
+    image: ghcr.io/composure/example-14:1.1.0
+    container_name: svc-235
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "235"
+      SERVICE_NAME: svc-235
+    volumes:
+      - svc-235-data:/var/lib/svc-235
+    networks:
+      - net-3
+  svc-236:
+    image: ghcr.io/composure/example-15:1.2.0
+    container_name: svc-236
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "236"
+      SERVICE_NAME: svc-236
+    networks:
+      - net-0
+  svc-237:
+    image: ghcr.io/composure/example-16:1.3.0
+    container_name: svc-237
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "237"
+      SERVICE_NAME: svc-237
+    ports:
+      - "20237:8080"
+    networks:
+      - net-1
+  svc-238:
+    image: ghcr.io/composure/example-0:1.4.0
+    container_name: svc-238
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "238"
+      SERVICE_NAME: svc-238
+    networks:
+      - net-2
+  svc-239:
+    image: ghcr.io/composure/example-1:1.5.0
+    container_name: svc-239
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "239"
+      SERVICE_NAME: svc-239
+    networks:
+      - net-3
+  svc-240:
+    image: ghcr.io/composure/example-2:1.6.0
+    container_name: svc-240
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "240"
+      SERVICE_NAME: svc-240
+    ports:
+      - "20240:8080"
+    volumes:
+      - svc-240-data:/var/lib/svc-240
+    networks:
+      - net-0
+  svc-241:
+    image: ghcr.io/composure/example-3:1.7.0
+    container_name: svc-241
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "241"
+      SERVICE_NAME: svc-241
+    networks:
+      - net-1
+  svc-242:
+    image: ghcr.io/composure/example-4:1.8.0
+    container_name: svc-242
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "242"
+      SERVICE_NAME: svc-242
+    networks:
+      - net-2
+  svc-243:
+    image: ghcr.io/composure/example-5:1.0.0
+    container_name: svc-243
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "243"
+      SERVICE_NAME: svc-243
+    ports:
+      - "20243:8080"
+    networks:
+      - net-3
+  svc-244:
+    image: ghcr.io/composure/example-6:1.1.0
+    container_name: svc-244
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "244"
+      SERVICE_NAME: svc-244
+    networks:
+      - net-0
+  svc-245:
+    image: ghcr.io/composure/example-7:1.2.0
+    container_name: svc-245
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "245"
+      SERVICE_NAME: svc-245
+    volumes:
+      - svc-245-data:/var/lib/svc-245
+    networks:
+      - net-1
+  svc-246:
+    image: ghcr.io/composure/example-8:1.3.0
+    container_name: svc-246
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "246"
+      SERVICE_NAME: svc-246
+    ports:
+      - "20246:8080"
+    networks:
+      - net-2
+  svc-247:
+    image: ghcr.io/composure/example-9:1.4.0
+    container_name: svc-247
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "247"
+      SERVICE_NAME: svc-247
+    networks:
+      - net-3
+  svc-248:
+    image: ghcr.io/composure/example-10:1.5.0
+    container_name: svc-248
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "248"
+      SERVICE_NAME: svc-248
+    networks:
+      - net-0
+  svc-249:
+    image: ghcr.io/composure/example-11:1.6.0
+    container_name: svc-249
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "249"
+      SERVICE_NAME: svc-249
+    ports:
+      - "20249:8080"
+    networks:
+      - net-1
+  svc-250:
+    image: ghcr.io/composure/example-12:1.7.0
+    container_name: svc-250
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "250"
+      SERVICE_NAME: svc-250
+    volumes:
+      - svc-250-data:/var/lib/svc-250
+    networks:
+      - net-2
+  svc-251:
+    image: ghcr.io/composure/example-13:1.8.0
+    container_name: svc-251
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "251"
+      SERVICE_NAME: svc-251
+    networks:
+      - net-3
+  svc-252:
+    image: ghcr.io/composure/example-14:1.0.0
+    container_name: svc-252
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "252"
+      SERVICE_NAME: svc-252
+    ports:
+      - "20252:8080"
+    networks:
+      - net-0
+  svc-253:
+    image: ghcr.io/composure/example-15:1.1.0
+    container_name: svc-253
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "253"
+      SERVICE_NAME: svc-253
+    networks:
+      - net-1
+  svc-254:
+    image: ghcr.io/composure/example-16:1.2.0
+    container_name: svc-254
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "254"
+      SERVICE_NAME: svc-254
+    networks:
+      - net-2
+  svc-255:
+    image: ghcr.io/composure/example-0:1.3.0
+    container_name: svc-255
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "255"
+      SERVICE_NAME: svc-255
+    ports:
+      - "20255:8080"
+    volumes:
+      - svc-255-data:/var/lib/svc-255
+    networks:
+      - net-3
+  svc-256:
+    image: ghcr.io/composure/example-1:1.4.0
+    container_name: svc-256
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "256"
+      SERVICE_NAME: svc-256
+    networks:
+      - net-0
+  svc-257:
+    image: ghcr.io/composure/example-2:1.5.0
+    container_name: svc-257
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "257"
+      SERVICE_NAME: svc-257
+    networks:
+      - net-1
+  svc-258:
+    image: ghcr.io/composure/example-3:1.6.0
+    container_name: svc-258
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "258"
+      SERVICE_NAME: svc-258
+    ports:
+      - "20258:8080"
+    networks:
+      - net-2
+  svc-259:
+    image: ghcr.io/composure/example-4:1.7.0
+    container_name: svc-259
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "259"
+      SERVICE_NAME: svc-259
+    networks:
+      - net-3
+  svc-260:
+    image: ghcr.io/composure/example-5:1.8.0
+    container_name: svc-260
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "260"
+      SERVICE_NAME: svc-260
+    volumes:
+      - svc-260-data:/var/lib/svc-260
+    networks:
+      - net-0
+  svc-261:
+    image: ghcr.io/composure/example-6:1.0.0
+    container_name: svc-261
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "261"
+      SERVICE_NAME: svc-261
+    ports:
+      - "20261:8080"
+    networks:
+      - net-1
+  svc-262:
+    image: ghcr.io/composure/example-7:1.1.0
+    container_name: svc-262
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "262"
+      SERVICE_NAME: svc-262
+    networks:
+      - net-2
+  svc-263:
+    image: ghcr.io/composure/example-8:1.2.0
+    container_name: svc-263
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "263"
+      SERVICE_NAME: svc-263
+    networks:
+      - net-3
+  svc-264:
+    image: ghcr.io/composure/example-9:1.3.0
+    container_name: svc-264
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "264"
+      SERVICE_NAME: svc-264
+    ports:
+      - "20264:8080"
+    networks:
+      - net-0
+  svc-265:
+    image: ghcr.io/composure/example-10:1.4.0
+    container_name: svc-265
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "265"
+      SERVICE_NAME: svc-265
+    volumes:
+      - svc-265-data:/var/lib/svc-265
+    networks:
+      - net-1
+  svc-266:
+    image: ghcr.io/composure/example-11:1.5.0
+    container_name: svc-266
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "266"
+      SERVICE_NAME: svc-266
+    networks:
+      - net-2
+  svc-267:
+    image: ghcr.io/composure/example-12:1.6.0
+    container_name: svc-267
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "267"
+      SERVICE_NAME: svc-267
+    ports:
+      - "20267:8080"
+    networks:
+      - net-3
+  svc-268:
+    image: ghcr.io/composure/example-13:1.7.0
+    container_name: svc-268
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "268"
+      SERVICE_NAME: svc-268
+    networks:
+      - net-0
+  svc-269:
+    image: ghcr.io/composure/example-14:1.8.0
+    container_name: svc-269
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "269"
+      SERVICE_NAME: svc-269
+    networks:
+      - net-1
+  svc-270:
+    image: ghcr.io/composure/example-15:1.0.0
+    container_name: svc-270
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "270"
+      SERVICE_NAME: svc-270
+    ports:
+      - "20270:8080"
+    volumes:
+      - svc-270-data:/var/lib/svc-270
+    networks:
+      - net-2
+  svc-271:
+    image: ghcr.io/composure/example-16:1.1.0
+    container_name: svc-271
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "271"
+      SERVICE_NAME: svc-271
+    networks:
+      - net-3
+  svc-272:
+    image: ghcr.io/composure/example-0:1.2.0
+    container_name: svc-272
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "272"
+      SERVICE_NAME: svc-272
+    networks:
+      - net-0
+  svc-273:
+    image: ghcr.io/composure/example-1:1.3.0
+    container_name: svc-273
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "273"
+      SERVICE_NAME: svc-273
+    ports:
+      - "20273:8080"
+    networks:
+      - net-1
+  svc-274:
+    image: ghcr.io/composure/example-2:1.4.0
+    container_name: svc-274
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "274"
+      SERVICE_NAME: svc-274
+    networks:
+      - net-2
+  svc-275:
+    image: ghcr.io/composure/example-3:1.5.0
+    container_name: svc-275
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "275"
+      SERVICE_NAME: svc-275
+    volumes:
+      - svc-275-data:/var/lib/svc-275
+    networks:
+      - net-3
+  svc-276:
+    image: ghcr.io/composure/example-4:1.6.0
+    container_name: svc-276
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "276"
+      SERVICE_NAME: svc-276
+    ports:
+      - "20276:8080"
+    networks:
+      - net-0
+  svc-277:
+    image: ghcr.io/composure/example-5:1.7.0
+    container_name: svc-277
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "277"
+      SERVICE_NAME: svc-277
+    networks:
+      - net-1
+  svc-278:
+    image: ghcr.io/composure/example-6:1.8.0
+    container_name: svc-278
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "278"
+      SERVICE_NAME: svc-278
+    networks:
+      - net-2
+  svc-279:
+    image: ghcr.io/composure/example-7:1.0.0
+    container_name: svc-279
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "279"
+      SERVICE_NAME: svc-279
+    ports:
+      - "20279:8080"
+    networks:
+      - net-3
+  svc-280:
+    image: ghcr.io/composure/example-8:1.1.0
+    container_name: svc-280
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "280"
+      SERVICE_NAME: svc-280
+    volumes:
+      - svc-280-data:/var/lib/svc-280
+    networks:
+      - net-0
+  svc-281:
+    image: ghcr.io/composure/example-9:1.2.0
+    container_name: svc-281
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "281"
+      SERVICE_NAME: svc-281
+    networks:
+      - net-1
+  svc-282:
+    image: ghcr.io/composure/example-10:1.3.0
+    container_name: svc-282
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "282"
+      SERVICE_NAME: svc-282
+    ports:
+      - "20282:8080"
+    networks:
+      - net-2
+  svc-283:
+    image: ghcr.io/composure/example-11:1.4.0
+    container_name: svc-283
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "283"
+      SERVICE_NAME: svc-283
+    networks:
+      - net-3
+  svc-284:
+    image: ghcr.io/composure/example-12:1.5.0
+    container_name: svc-284
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "284"
+      SERVICE_NAME: svc-284
+    networks:
+      - net-0
+  svc-285:
+    image: ghcr.io/composure/example-13:1.6.0
+    container_name: svc-285
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "285"
+      SERVICE_NAME: svc-285
+    ports:
+      - "20285:8080"
+    volumes:
+      - svc-285-data:/var/lib/svc-285
+    networks:
+      - net-1
+  svc-286:
+    image: ghcr.io/composure/example-14:1.7.0
+    container_name: svc-286
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "286"
+      SERVICE_NAME: svc-286
+    networks:
+      - net-2
+  svc-287:
+    image: ghcr.io/composure/example-15:1.8.0
+    container_name: svc-287
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "287"
+      SERVICE_NAME: svc-287
+    networks:
+      - net-3
+  svc-288:
+    image: ghcr.io/composure/example-16:1.0.0
+    container_name: svc-288
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "288"
+      SERVICE_NAME: svc-288
+    ports:
+      - "20288:8080"
+    networks:
+      - net-0
+  svc-289:
+    image: ghcr.io/composure/example-0:1.1.0
+    container_name: svc-289
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "289"
+      SERVICE_NAME: svc-289
+    networks:
+      - net-1
+  svc-290:
+    image: ghcr.io/composure/example-1:1.2.0
+    container_name: svc-290
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "290"
+      SERVICE_NAME: svc-290
+    volumes:
+      - svc-290-data:/var/lib/svc-290
+    networks:
+      - net-2
+  svc-291:
+    image: ghcr.io/composure/example-2:1.3.0
+    container_name: svc-291
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "291"
+      SERVICE_NAME: svc-291
+    ports:
+      - "20291:8080"
+    networks:
+      - net-3
+  svc-292:
+    image: ghcr.io/composure/example-3:1.4.0
+    container_name: svc-292
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "292"
+      SERVICE_NAME: svc-292
+    networks:
+      - net-0
+  svc-293:
+    image: ghcr.io/composure/example-4:1.5.0
+    container_name: svc-293
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "293"
+      SERVICE_NAME: svc-293
+    networks:
+      - net-1
+  svc-294:
+    image: ghcr.io/composure/example-5:1.6.0
+    container_name: svc-294
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "294"
+      SERVICE_NAME: svc-294
+    ports:
+      - "20294:8080"
+    networks:
+      - net-2
+  svc-295:
+    image: ghcr.io/composure/example-6:1.7.0
+    container_name: svc-295
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "295"
+      SERVICE_NAME: svc-295
+    volumes:
+      - svc-295-data:/var/lib/svc-295
+    networks:
+      - net-3
+  svc-296:
+    image: ghcr.io/composure/example-7:1.8.0
+    container_name: svc-296
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "296"
+      SERVICE_NAME: svc-296
+    networks:
+      - net-0
+  svc-297:
+    image: ghcr.io/composure/example-8:1.0.0
+    container_name: svc-297
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "297"
+      SERVICE_NAME: svc-297
+    ports:
+      - "20297:8080"
+    networks:
+      - net-1
+  svc-298:
+    image: ghcr.io/composure/example-9:1.1.0
+    container_name: svc-298
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "298"
+      SERVICE_NAME: svc-298
+    networks:
+      - net-2
+  svc-299:
+    image: ghcr.io/composure/example-10:1.2.0
+    container_name: svc-299
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "299"
+      SERVICE_NAME: svc-299
+    networks:
+      - net-3
+  svc-300:
+    image: ghcr.io/composure/example-11:1.3.0
+    container_name: svc-300
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "300"
+      SERVICE_NAME: svc-300
+    ports:
+      - "20300:8080"
+    volumes:
+      - svc-300-data:/var/lib/svc-300
+    networks:
+      - net-0
+  svc-301:
+    image: ghcr.io/composure/example-12:1.4.0
+    container_name: svc-301
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "301"
+      SERVICE_NAME: svc-301
+    networks:
+      - net-1
+  svc-302:
+    image: ghcr.io/composure/example-13:1.5.0
+    container_name: svc-302
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "302"
+      SERVICE_NAME: svc-302
+    networks:
+      - net-2
+  svc-303:
+    image: ghcr.io/composure/example-14:1.6.0
+    container_name: svc-303
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "303"
+      SERVICE_NAME: svc-303
+    ports:
+      - "20303:8080"
+    networks:
+      - net-3
+  svc-304:
+    image: ghcr.io/composure/example-15:1.7.0
+    container_name: svc-304
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "304"
+      SERVICE_NAME: svc-304
+    networks:
+      - net-0
+  svc-305:
+    image: ghcr.io/composure/example-16:1.8.0
+    container_name: svc-305
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "305"
+      SERVICE_NAME: svc-305
+    volumes:
+      - svc-305-data:/var/lib/svc-305
+    networks:
+      - net-1
+  svc-306:
+    image: ghcr.io/composure/example-0:1.0.0
+    container_name: svc-306
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "306"
+      SERVICE_NAME: svc-306
+    ports:
+      - "20306:8080"
+    networks:
+      - net-2
+  svc-307:
+    image: ghcr.io/composure/example-1:1.1.0
+    container_name: svc-307
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "307"
+      SERVICE_NAME: svc-307
+    networks:
+      - net-3
+  svc-308:
+    image: ghcr.io/composure/example-2:1.2.0
+    container_name: svc-308
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "308"
+      SERVICE_NAME: svc-308
+    networks:
+      - net-0
+  svc-309:
+    image: ghcr.io/composure/example-3:1.3.0
+    container_name: svc-309
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "309"
+      SERVICE_NAME: svc-309
+    ports:
+      - "20309:8080"
+    networks:
+      - net-1
+  svc-310:
+    image: ghcr.io/composure/example-4:1.4.0
+    container_name: svc-310
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "310"
+      SERVICE_NAME: svc-310
+    volumes:
+      - svc-310-data:/var/lib/svc-310
+    networks:
+      - net-2
+  svc-311:
+    image: ghcr.io/composure/example-5:1.5.0
+    container_name: svc-311
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "311"
+      SERVICE_NAME: svc-311
+    networks:
+      - net-3
+  svc-312:
+    image: ghcr.io/composure/example-6:1.6.0
+    container_name: svc-312
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "312"
+      SERVICE_NAME: svc-312
+    ports:
+      - "20312:8080"
+    networks:
+      - net-0
+  svc-313:
+    image: ghcr.io/composure/example-7:1.7.0
+    container_name: svc-313
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "313"
+      SERVICE_NAME: svc-313
+    networks:
+      - net-1
+  svc-314:
+    image: ghcr.io/composure/example-8:1.8.0
+    container_name: svc-314
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "314"
+      SERVICE_NAME: svc-314
+    networks:
+      - net-2
+  svc-315:
+    image: ghcr.io/composure/example-9:1.0.0
+    container_name: svc-315
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "315"
+      SERVICE_NAME: svc-315
+    ports:
+      - "20315:8080"
+    volumes:
+      - svc-315-data:/var/lib/svc-315
+    networks:
+      - net-3
+  svc-316:
+    image: ghcr.io/composure/example-10:1.1.0
+    container_name: svc-316
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "316"
+      SERVICE_NAME: svc-316
+    networks:
+      - net-0
+  svc-317:
+    image: ghcr.io/composure/example-11:1.2.0
+    container_name: svc-317
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "317"
+      SERVICE_NAME: svc-317
+    networks:
+      - net-1
+  svc-318:
+    image: ghcr.io/composure/example-12:1.3.0
+    container_name: svc-318
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "318"
+      SERVICE_NAME: svc-318
+    ports:
+      - "20318:8080"
+    networks:
+      - net-2
+  svc-319:
+    image: ghcr.io/composure/example-13:1.4.0
+    container_name: svc-319
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "319"
+      SERVICE_NAME: svc-319
+    networks:
+      - net-3
+  svc-320:
+    image: ghcr.io/composure/example-14:1.5.0
+    container_name: svc-320
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "320"
+      SERVICE_NAME: svc-320
+    volumes:
+      - svc-320-data:/var/lib/svc-320
+    networks:
+      - net-0
+  svc-321:
+    image: ghcr.io/composure/example-15:1.6.0
+    container_name: svc-321
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "321"
+      SERVICE_NAME: svc-321
+    ports:
+      - "20321:8080"
+    networks:
+      - net-1
+  svc-322:
+    image: ghcr.io/composure/example-16:1.7.0
+    container_name: svc-322
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "322"
+      SERVICE_NAME: svc-322
+    networks:
+      - net-2
+  svc-323:
+    image: ghcr.io/composure/example-0:1.8.0
+    container_name: svc-323
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "323"
+      SERVICE_NAME: svc-323
+    networks:
+      - net-3
+  svc-324:
+    image: ghcr.io/composure/example-1:1.0.0
+    container_name: svc-324
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "324"
+      SERVICE_NAME: svc-324
+    ports:
+      - "20324:8080"
+    networks:
+      - net-0
+  svc-325:
+    image: ghcr.io/composure/example-2:1.1.0
+    container_name: svc-325
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "325"
+      SERVICE_NAME: svc-325
+    volumes:
+      - svc-325-data:/var/lib/svc-325
+    networks:
+      - net-1
+  svc-326:
+    image: ghcr.io/composure/example-3:1.2.0
+    container_name: svc-326
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "326"
+      SERVICE_NAME: svc-326
+    networks:
+      - net-2
+  svc-327:
+    image: ghcr.io/composure/example-4:1.3.0
+    container_name: svc-327
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "327"
+      SERVICE_NAME: svc-327
+    ports:
+      - "20327:8080"
+    networks:
+      - net-3
+  svc-328:
+    image: ghcr.io/composure/example-5:1.4.0
+    container_name: svc-328
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "328"
+      SERVICE_NAME: svc-328
+    networks:
+      - net-0
+  svc-329:
+    image: ghcr.io/composure/example-6:1.5.0
+    container_name: svc-329
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "329"
+      SERVICE_NAME: svc-329
+    networks:
+      - net-1
+  svc-330:
+    image: ghcr.io/composure/example-7:1.6.0
+    container_name: svc-330
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "330"
+      SERVICE_NAME: svc-330
+    ports:
+      - "20330:8080"
+    volumes:
+      - svc-330-data:/var/lib/svc-330
+    networks:
+      - net-2
+  svc-331:
+    image: ghcr.io/composure/example-8:1.7.0
+    container_name: svc-331
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "331"
+      SERVICE_NAME: svc-331
+    networks:
+      - net-3
+  svc-332:
+    image: ghcr.io/composure/example-9:1.8.0
+    container_name: svc-332
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "332"
+      SERVICE_NAME: svc-332
+    networks:
+      - net-0
+  svc-333:
+    image: ghcr.io/composure/example-10:1.0.0
+    container_name: svc-333
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "333"
+      SERVICE_NAME: svc-333
+    ports:
+      - "20333:8080"
+    networks:
+      - net-1
+  svc-334:
+    image: ghcr.io/composure/example-11:1.1.0
+    container_name: svc-334
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "334"
+      SERVICE_NAME: svc-334
+    networks:
+      - net-2
+  svc-335:
+    image: ghcr.io/composure/example-12:1.2.0
+    container_name: svc-335
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "335"
+      SERVICE_NAME: svc-335
+    volumes:
+      - svc-335-data:/var/lib/svc-335
+    networks:
+      - net-3
+  svc-336:
+    image: ghcr.io/composure/example-13:1.3.0
+    container_name: svc-336
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "336"
+      SERVICE_NAME: svc-336
+    ports:
+      - "20336:8080"
+    networks:
+      - net-0
+  svc-337:
+    image: ghcr.io/composure/example-14:1.4.0
+    container_name: svc-337
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "337"
+      SERVICE_NAME: svc-337
+    networks:
+      - net-1
+  svc-338:
+    image: ghcr.io/composure/example-15:1.5.0
+    container_name: svc-338
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "338"
+      SERVICE_NAME: svc-338
+    networks:
+      - net-2
+  svc-339:
+    image: ghcr.io/composure/example-16:1.6.0
+    container_name: svc-339
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "339"
+      SERVICE_NAME: svc-339
+    ports:
+      - "20339:8080"
+    networks:
+      - net-3
+  svc-340:
+    image: ghcr.io/composure/example-0:1.7.0
+    container_name: svc-340
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "340"
+      SERVICE_NAME: svc-340
+    volumes:
+      - svc-340-data:/var/lib/svc-340
+    networks:
+      - net-0
+  svc-341:
+    image: ghcr.io/composure/example-1:1.8.0
+    container_name: svc-341
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "341"
+      SERVICE_NAME: svc-341
+    networks:
+      - net-1
+  svc-342:
+    image: ghcr.io/composure/example-2:1.0.0
+    container_name: svc-342
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "342"
+      SERVICE_NAME: svc-342
+    ports:
+      - "20342:8080"
+    networks:
+      - net-2
+  svc-343:
+    image: ghcr.io/composure/example-3:1.1.0
+    container_name: svc-343
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "343"
+      SERVICE_NAME: svc-343
+    networks:
+      - net-3
+  svc-344:
+    image: ghcr.io/composure/example-4:1.2.0
+    container_name: svc-344
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "344"
+      SERVICE_NAME: svc-344
+    networks:
+      - net-0
+  svc-345:
+    image: ghcr.io/composure/example-5:1.3.0
+    container_name: svc-345
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "345"
+      SERVICE_NAME: svc-345
+    ports:
+      - "20345:8080"
+    volumes:
+      - svc-345-data:/var/lib/svc-345
+    networks:
+      - net-1
+  svc-346:
+    image: ghcr.io/composure/example-6:1.4.0
+    container_name: svc-346
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "346"
+      SERVICE_NAME: svc-346
+    networks:
+      - net-2
+  svc-347:
+    image: ghcr.io/composure/example-7:1.5.0
+    container_name: svc-347
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "347"
+      SERVICE_NAME: svc-347
+    networks:
+      - net-3
+  svc-348:
+    image: ghcr.io/composure/example-8:1.6.0
+    container_name: svc-348
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "348"
+      SERVICE_NAME: svc-348
+    ports:
+      - "20348:8080"
+    networks:
+      - net-0
+  svc-349:
+    image: ghcr.io/composure/example-9:1.7.0
+    container_name: svc-349
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "349"
+      SERVICE_NAME: svc-349
+    networks:
+      - net-1
+  svc-350:
+    image: ghcr.io/composure/example-10:1.8.0
+    container_name: svc-350
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "350"
+      SERVICE_NAME: svc-350
+    volumes:
+      - svc-350-data:/var/lib/svc-350
+    networks:
+      - net-2
+  svc-351:
+    image: ghcr.io/composure/example-11:1.0.0
+    container_name: svc-351
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "351"
+      SERVICE_NAME: svc-351
+    ports:
+      - "20351:8080"
+    networks:
+      - net-3
+  svc-352:
+    image: ghcr.io/composure/example-12:1.1.0
+    container_name: svc-352
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "352"
+      SERVICE_NAME: svc-352
+    networks:
+      - net-0
+  svc-353:
+    image: ghcr.io/composure/example-13:1.2.0
+    container_name: svc-353
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "353"
+      SERVICE_NAME: svc-353
+    networks:
+      - net-1
+  svc-354:
+    image: ghcr.io/composure/example-14:1.3.0
+    container_name: svc-354
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "354"
+      SERVICE_NAME: svc-354
+    ports:
+      - "20354:8080"
+    networks:
+      - net-2
+  svc-355:
+    image: ghcr.io/composure/example-15:1.4.0
+    container_name: svc-355
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "355"
+      SERVICE_NAME: svc-355
+    volumes:
+      - svc-355-data:/var/lib/svc-355
+    networks:
+      - net-3
+  svc-356:
+    image: ghcr.io/composure/example-16:1.5.0
+    container_name: svc-356
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "356"
+      SERVICE_NAME: svc-356
+    networks:
+      - net-0
+  svc-357:
+    image: ghcr.io/composure/example-0:1.6.0
+    container_name: svc-357
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "357"
+      SERVICE_NAME: svc-357
+    ports:
+      - "20357:8080"
+    networks:
+      - net-1
+  svc-358:
+    image: ghcr.io/composure/example-1:1.7.0
+    container_name: svc-358
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "358"
+      SERVICE_NAME: svc-358
+    networks:
+      - net-2
+  svc-359:
+    image: ghcr.io/composure/example-2:1.8.0
+    container_name: svc-359
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "359"
+      SERVICE_NAME: svc-359
+    networks:
+      - net-3
+  svc-360:
+    image: ghcr.io/composure/example-3:1.0.0
+    container_name: svc-360
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "360"
+      SERVICE_NAME: svc-360
+    ports:
+      - "20360:8080"
+    volumes:
+      - svc-360-data:/var/lib/svc-360
+    networks:
+      - net-0
+  svc-361:
+    image: ghcr.io/composure/example-4:1.1.0
+    container_name: svc-361
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "361"
+      SERVICE_NAME: svc-361
+    networks:
+      - net-1
+  svc-362:
+    image: ghcr.io/composure/example-5:1.2.0
+    container_name: svc-362
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "362"
+      SERVICE_NAME: svc-362
+    networks:
+      - net-2
+  svc-363:
+    image: ghcr.io/composure/example-6:1.3.0
+    container_name: svc-363
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "363"
+      SERVICE_NAME: svc-363
+    ports:
+      - "20363:8080"
+    networks:
+      - net-3
+  svc-364:
+    image: ghcr.io/composure/example-7:1.4.0
+    container_name: svc-364
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "364"
+      SERVICE_NAME: svc-364
+    networks:
+      - net-0
+  svc-365:
+    image: ghcr.io/composure/example-8:1.5.0
+    container_name: svc-365
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "365"
+      SERVICE_NAME: svc-365
+    volumes:
+      - svc-365-data:/var/lib/svc-365
+    networks:
+      - net-1
+  svc-366:
+    image: ghcr.io/composure/example-9:1.6.0
+    container_name: svc-366
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "366"
+      SERVICE_NAME: svc-366
+    ports:
+      - "20366:8080"
+    networks:
+      - net-2
+  svc-367:
+    image: ghcr.io/composure/example-10:1.7.0
+    container_name: svc-367
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "367"
+      SERVICE_NAME: svc-367
+    networks:
+      - net-3
+  svc-368:
+    image: ghcr.io/composure/example-11:1.8.0
+    container_name: svc-368
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "368"
+      SERVICE_NAME: svc-368
+    networks:
+      - net-0
+  svc-369:
+    image: ghcr.io/composure/example-12:1.0.0
+    container_name: svc-369
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "369"
+      SERVICE_NAME: svc-369
+    ports:
+      - "20369:8080"
+    networks:
+      - net-1
+  svc-370:
+    image: ghcr.io/composure/example-13:1.1.0
+    container_name: svc-370
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "370"
+      SERVICE_NAME: svc-370
+    volumes:
+      - svc-370-data:/var/lib/svc-370
+    networks:
+      - net-2
+  svc-371:
+    image: ghcr.io/composure/example-14:1.2.0
+    container_name: svc-371
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "371"
+      SERVICE_NAME: svc-371
+    networks:
+      - net-3
+  svc-372:
+    image: ghcr.io/composure/example-15:1.3.0
+    container_name: svc-372
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "372"
+      SERVICE_NAME: svc-372
+    ports:
+      - "20372:8080"
+    networks:
+      - net-0
+  svc-373:
+    image: ghcr.io/composure/example-16:1.4.0
+    container_name: svc-373
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "373"
+      SERVICE_NAME: svc-373
+    networks:
+      - net-1
+  svc-374:
+    image: ghcr.io/composure/example-0:1.5.0
+    container_name: svc-374
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "374"
+      SERVICE_NAME: svc-374
+    networks:
+      - net-2
+  svc-375:
+    image: ghcr.io/composure/example-1:1.6.0
+    container_name: svc-375
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "375"
+      SERVICE_NAME: svc-375
+    ports:
+      - "20375:8080"
+    volumes:
+      - svc-375-data:/var/lib/svc-375
+    networks:
+      - net-3
+  svc-376:
+    image: ghcr.io/composure/example-2:1.7.0
+    container_name: svc-376
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "376"
+      SERVICE_NAME: svc-376
+    networks:
+      - net-0
+  svc-377:
+    image: ghcr.io/composure/example-3:1.8.0
+    container_name: svc-377
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "377"
+      SERVICE_NAME: svc-377
+    networks:
+      - net-1
+  svc-378:
+    image: ghcr.io/composure/example-4:1.0.0
+    container_name: svc-378
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "378"
+      SERVICE_NAME: svc-378
+    ports:
+      - "20378:8080"
+    networks:
+      - net-2
+  svc-379:
+    image: ghcr.io/composure/example-5:1.1.0
+    container_name: svc-379
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "379"
+      SERVICE_NAME: svc-379
+    networks:
+      - net-3
+  svc-380:
+    image: ghcr.io/composure/example-6:1.2.0
+    container_name: svc-380
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "380"
+      SERVICE_NAME: svc-380
+    volumes:
+      - svc-380-data:/var/lib/svc-380
+    networks:
+      - net-0
+  svc-381:
+    image: ghcr.io/composure/example-7:1.3.0
+    container_name: svc-381
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "381"
+      SERVICE_NAME: svc-381
+    ports:
+      - "20381:8080"
+    networks:
+      - net-1
+  svc-382:
+    image: ghcr.io/composure/example-8:1.4.0
+    container_name: svc-382
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "382"
+      SERVICE_NAME: svc-382
+    networks:
+      - net-2
+  svc-383:
+    image: ghcr.io/composure/example-9:1.5.0
+    container_name: svc-383
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "383"
+      SERVICE_NAME: svc-383
+    networks:
+      - net-3
+  svc-384:
+    image: ghcr.io/composure/example-10:1.6.0
+    container_name: svc-384
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "384"
+      SERVICE_NAME: svc-384
+    ports:
+      - "20384:8080"
+    networks:
+      - net-0
+  svc-385:
+    image: ghcr.io/composure/example-11:1.7.0
+    container_name: svc-385
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "385"
+      SERVICE_NAME: svc-385
+    volumes:
+      - svc-385-data:/var/lib/svc-385
+    networks:
+      - net-1
+  svc-386:
+    image: ghcr.io/composure/example-12:1.8.0
+    container_name: svc-386
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "386"
+      SERVICE_NAME: svc-386
+    networks:
+      - net-2
+  svc-387:
+    image: ghcr.io/composure/example-13:1.0.0
+    container_name: svc-387
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "387"
+      SERVICE_NAME: svc-387
+    ports:
+      - "20387:8080"
+    networks:
+      - net-3
+  svc-388:
+    image: ghcr.io/composure/example-14:1.1.0
+    container_name: svc-388
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "388"
+      SERVICE_NAME: svc-388
+    networks:
+      - net-0
+  svc-389:
+    image: ghcr.io/composure/example-15:1.2.0
+    container_name: svc-389
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "389"
+      SERVICE_NAME: svc-389
+    networks:
+      - net-1
+  svc-390:
+    image: ghcr.io/composure/example-16:1.3.0
+    container_name: svc-390
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "390"
+      SERVICE_NAME: svc-390
+    ports:
+      - "20390:8080"
+    volumes:
+      - svc-390-data:/var/lib/svc-390
+    networks:
+      - net-2
+  svc-391:
+    image: ghcr.io/composure/example-0:1.4.0
+    container_name: svc-391
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "391"
+      SERVICE_NAME: svc-391
+    networks:
+      - net-3
+  svc-392:
+    image: ghcr.io/composure/example-1:1.5.0
+    container_name: svc-392
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "392"
+      SERVICE_NAME: svc-392
+    networks:
+      - net-0
+  svc-393:
+    image: ghcr.io/composure/example-2:1.6.0
+    container_name: svc-393
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "393"
+      SERVICE_NAME: svc-393
+    ports:
+      - "20393:8080"
+    networks:
+      - net-1
+  svc-394:
+    image: ghcr.io/composure/example-3:1.7.0
+    container_name: svc-394
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "394"
+      SERVICE_NAME: svc-394
+    networks:
+      - net-2
+  svc-395:
+    image: ghcr.io/composure/example-4:1.8.0
+    container_name: svc-395
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "395"
+      SERVICE_NAME: svc-395
+    volumes:
+      - svc-395-data:/var/lib/svc-395
+    networks:
+      - net-3
+  svc-396:
+    image: ghcr.io/composure/example-5:1.0.0
+    container_name: svc-396
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "396"
+      SERVICE_NAME: svc-396
+    ports:
+      - "20396:8080"
+    networks:
+      - net-0
+  svc-397:
+    image: ghcr.io/composure/example-6:1.1.0
+    container_name: svc-397
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "397"
+      SERVICE_NAME: svc-397
+    networks:
+      - net-1
+  svc-398:
+    image: ghcr.io/composure/example-7:1.2.0
+    container_name: svc-398
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "398"
+      SERVICE_NAME: svc-398
+    networks:
+      - net-2
+  svc-399:
+    image: ghcr.io/composure/example-8:1.3.0
+    container_name: svc-399
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "399"
+      SERVICE_NAME: svc-399
+    ports:
+      - "20399:8080"
+    networks:
+      - net-3
+  svc-400:
+    image: ghcr.io/composure/example-9:1.4.0
+    container_name: svc-400
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "400"
+      SERVICE_NAME: svc-400
+    volumes:
+      - svc-400-data:/var/lib/svc-400
+    networks:
+      - net-0
+  svc-401:
+    image: ghcr.io/composure/example-10:1.5.0
+    container_name: svc-401
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "401"
+      SERVICE_NAME: svc-401
+    networks:
+      - net-1
+  svc-402:
+    image: ghcr.io/composure/example-11:1.6.0
+    container_name: svc-402
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "402"
+      SERVICE_NAME: svc-402
+    ports:
+      - "20402:8080"
+    networks:
+      - net-2
+  svc-403:
+    image: ghcr.io/composure/example-12:1.7.0
+    container_name: svc-403
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "403"
+      SERVICE_NAME: svc-403
+    networks:
+      - net-3
+  svc-404:
+    image: ghcr.io/composure/example-13:1.8.0
+    container_name: svc-404
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "404"
+      SERVICE_NAME: svc-404
+    networks:
+      - net-0
+  svc-405:
+    image: ghcr.io/composure/example-14:1.0.0
+    container_name: svc-405
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "405"
+      SERVICE_NAME: svc-405
+    ports:
+      - "20405:8080"
+    volumes:
+      - svc-405-data:/var/lib/svc-405
+    networks:
+      - net-1
+  svc-406:
+    image: ghcr.io/composure/example-15:1.1.0
+    container_name: svc-406
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "406"
+      SERVICE_NAME: svc-406
+    networks:
+      - net-2
+  svc-407:
+    image: ghcr.io/composure/example-16:1.2.0
+    container_name: svc-407
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "407"
+      SERVICE_NAME: svc-407
+    networks:
+      - net-3
+  svc-408:
+    image: ghcr.io/composure/example-0:1.3.0
+    container_name: svc-408
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "408"
+      SERVICE_NAME: svc-408
+    ports:
+      - "20408:8080"
+    networks:
+      - net-0
+  svc-409:
+    image: ghcr.io/composure/example-1:1.4.0
+    container_name: svc-409
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "409"
+      SERVICE_NAME: svc-409
+    networks:
+      - net-1
+  svc-410:
+    image: ghcr.io/composure/example-2:1.5.0
+    container_name: svc-410
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "410"
+      SERVICE_NAME: svc-410
+    volumes:
+      - svc-410-data:/var/lib/svc-410
+    networks:
+      - net-2
+  svc-411:
+    image: ghcr.io/composure/example-3:1.6.0
+    container_name: svc-411
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "411"
+      SERVICE_NAME: svc-411
+    ports:
+      - "20411:8080"
+    networks:
+      - net-3
+  svc-412:
+    image: ghcr.io/composure/example-4:1.7.0
+    container_name: svc-412
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "412"
+      SERVICE_NAME: svc-412
+    networks:
+      - net-0
+  svc-413:
+    image: ghcr.io/composure/example-5:1.8.0
+    container_name: svc-413
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "413"
+      SERVICE_NAME: svc-413
+    networks:
+      - net-1
+  svc-414:
+    image: ghcr.io/composure/example-6:1.0.0
+    container_name: svc-414
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "414"
+      SERVICE_NAME: svc-414
+    ports:
+      - "20414:8080"
+    networks:
+      - net-2
+  svc-415:
+    image: ghcr.io/composure/example-7:1.1.0
+    container_name: svc-415
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "415"
+      SERVICE_NAME: svc-415
+    volumes:
+      - svc-415-data:/var/lib/svc-415
+    networks:
+      - net-3
+  svc-416:
+    image: ghcr.io/composure/example-8:1.2.0
+    container_name: svc-416
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "416"
+      SERVICE_NAME: svc-416
+    networks:
+      - net-0
+  svc-417:
+    image: ghcr.io/composure/example-9:1.3.0
+    container_name: svc-417
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "417"
+      SERVICE_NAME: svc-417
+    ports:
+      - "20417:8080"
+    networks:
+      - net-1
+  svc-418:
+    image: ghcr.io/composure/example-10:1.4.0
+    container_name: svc-418
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "418"
+      SERVICE_NAME: svc-418
+    networks:
+      - net-2
+  svc-419:
+    image: ghcr.io/composure/example-11:1.5.0
+    container_name: svc-419
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "419"
+      SERVICE_NAME: svc-419
+    networks:
+      - net-3
+  svc-420:
+    image: ghcr.io/composure/example-12:1.6.0
+    container_name: svc-420
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "420"
+      SERVICE_NAME: svc-420
+    ports:
+      - "20420:8080"
+    volumes:
+      - svc-420-data:/var/lib/svc-420
+    networks:
+      - net-0
+  svc-421:
+    image: ghcr.io/composure/example-13:1.7.0
+    container_name: svc-421
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "421"
+      SERVICE_NAME: svc-421
+    networks:
+      - net-1
+  svc-422:
+    image: ghcr.io/composure/example-14:1.8.0
+    container_name: svc-422
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "422"
+      SERVICE_NAME: svc-422
+    networks:
+      - net-2
+  svc-423:
+    image: ghcr.io/composure/example-15:1.0.0
+    container_name: svc-423
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "423"
+      SERVICE_NAME: svc-423
+    ports:
+      - "20423:8080"
+    networks:
+      - net-3
+  svc-424:
+    image: ghcr.io/composure/example-16:1.1.0
+    container_name: svc-424
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "424"
+      SERVICE_NAME: svc-424
+    networks:
+      - net-0
+  svc-425:
+    image: ghcr.io/composure/example-0:1.2.0
+    container_name: svc-425
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "425"
+      SERVICE_NAME: svc-425
+    volumes:
+      - svc-425-data:/var/lib/svc-425
+    networks:
+      - net-1
+  svc-426:
+    image: ghcr.io/composure/example-1:1.3.0
+    container_name: svc-426
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "426"
+      SERVICE_NAME: svc-426
+    ports:
+      - "20426:8080"
+    networks:
+      - net-2
+  svc-427:
+    image: ghcr.io/composure/example-2:1.4.0
+    container_name: svc-427
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "427"
+      SERVICE_NAME: svc-427
+    networks:
+      - net-3
+  svc-428:
+    image: ghcr.io/composure/example-3:1.5.0
+    container_name: svc-428
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "428"
+      SERVICE_NAME: svc-428
+    networks:
+      - net-0
+  svc-429:
+    image: ghcr.io/composure/example-4:1.6.0
+    container_name: svc-429
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "429"
+      SERVICE_NAME: svc-429
+    ports:
+      - "20429:8080"
+    networks:
+      - net-1
+  svc-430:
+    image: ghcr.io/composure/example-5:1.7.0
+    container_name: svc-430
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "430"
+      SERVICE_NAME: svc-430
+    volumes:
+      - svc-430-data:/var/lib/svc-430
+    networks:
+      - net-2
+  svc-431:
+    image: ghcr.io/composure/example-6:1.8.0
+    container_name: svc-431
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "431"
+      SERVICE_NAME: svc-431
+    networks:
+      - net-3
+  svc-432:
+    image: ghcr.io/composure/example-7:1.0.0
+    container_name: svc-432
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "432"
+      SERVICE_NAME: svc-432
+    ports:
+      - "20432:8080"
+    networks:
+      - net-0
+  svc-433:
+    image: ghcr.io/composure/example-8:1.1.0
+    container_name: svc-433
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "433"
+      SERVICE_NAME: svc-433
+    networks:
+      - net-1
+  svc-434:
+    image: ghcr.io/composure/example-9:1.2.0
+    container_name: svc-434
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "434"
+      SERVICE_NAME: svc-434
+    networks:
+      - net-2
+  svc-435:
+    image: ghcr.io/composure/example-10:1.3.0
+    container_name: svc-435
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "435"
+      SERVICE_NAME: svc-435
+    ports:
+      - "20435:8080"
+    volumes:
+      - svc-435-data:/var/lib/svc-435
+    networks:
+      - net-3
+  svc-436:
+    image: ghcr.io/composure/example-11:1.4.0
+    container_name: svc-436
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "436"
+      SERVICE_NAME: svc-436
+    networks:
+      - net-0
+  svc-437:
+    image: ghcr.io/composure/example-12:1.5.0
+    container_name: svc-437
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "437"
+      SERVICE_NAME: svc-437
+    networks:
+      - net-1
+  svc-438:
+    image: ghcr.io/composure/example-13:1.6.0
+    container_name: svc-438
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "438"
+      SERVICE_NAME: svc-438
+    ports:
+      - "20438:8080"
+    networks:
+      - net-2
+  svc-439:
+    image: ghcr.io/composure/example-14:1.7.0
+    container_name: svc-439
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "439"
+      SERVICE_NAME: svc-439
+    networks:
+      - net-3
+  svc-440:
+    image: ghcr.io/composure/example-15:1.8.0
+    container_name: svc-440
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "440"
+      SERVICE_NAME: svc-440
+    volumes:
+      - svc-440-data:/var/lib/svc-440
+    networks:
+      - net-0
+  svc-441:
+    image: ghcr.io/composure/example-16:1.0.0
+    container_name: svc-441
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "441"
+      SERVICE_NAME: svc-441
+    ports:
+      - "20441:8080"
+    networks:
+      - net-1
+  svc-442:
+    image: ghcr.io/composure/example-0:1.1.0
+    container_name: svc-442
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "442"
+      SERVICE_NAME: svc-442
+    networks:
+      - net-2
+  svc-443:
+    image: ghcr.io/composure/example-1:1.2.0
+    container_name: svc-443
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "443"
+      SERVICE_NAME: svc-443
+    networks:
+      - net-3
+  svc-444:
+    image: ghcr.io/composure/example-2:1.3.0
+    container_name: svc-444
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "444"
+      SERVICE_NAME: svc-444
+    ports:
+      - "20444:8080"
+    networks:
+      - net-0
+  svc-445:
+    image: ghcr.io/composure/example-3:1.4.0
+    container_name: svc-445
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "445"
+      SERVICE_NAME: svc-445
+    volumes:
+      - svc-445-data:/var/lib/svc-445
+    networks:
+      - net-1
+  svc-446:
+    image: ghcr.io/composure/example-4:1.5.0
+    container_name: svc-446
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "446"
+      SERVICE_NAME: svc-446
+    networks:
+      - net-2
+  svc-447:
+    image: ghcr.io/composure/example-5:1.6.0
+    container_name: svc-447
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "447"
+      SERVICE_NAME: svc-447
+    ports:
+      - "20447:8080"
+    networks:
+      - net-3
+  svc-448:
+    image: ghcr.io/composure/example-6:1.7.0
+    container_name: svc-448
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "448"
+      SERVICE_NAME: svc-448
+    networks:
+      - net-0
+  svc-449:
+    image: ghcr.io/composure/example-7:1.8.0
+    container_name: svc-449
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "449"
+      SERVICE_NAME: svc-449
+    networks:
+      - net-1
+  svc-450:
+    image: ghcr.io/composure/example-8:1.0.0
+    container_name: svc-450
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "450"
+      SERVICE_NAME: svc-450
+    ports:
+      - "20450:8080"
+    volumes:
+      - svc-450-data:/var/lib/svc-450
+    networks:
+      - net-2
+  svc-451:
+    image: ghcr.io/composure/example-9:1.1.0
+    container_name: svc-451
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "451"
+      SERVICE_NAME: svc-451
+    networks:
+      - net-3
+  svc-452:
+    image: ghcr.io/composure/example-10:1.2.0
+    container_name: svc-452
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "452"
+      SERVICE_NAME: svc-452
+    networks:
+      - net-0
+  svc-453:
+    image: ghcr.io/composure/example-11:1.3.0
+    container_name: svc-453
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "453"
+      SERVICE_NAME: svc-453
+    ports:
+      - "20453:8080"
+    networks:
+      - net-1
+  svc-454:
+    image: ghcr.io/composure/example-12:1.4.0
+    container_name: svc-454
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "454"
+      SERVICE_NAME: svc-454
+    networks:
+      - net-2
+  svc-455:
+    image: ghcr.io/composure/example-13:1.5.0
+    container_name: svc-455
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "455"
+      SERVICE_NAME: svc-455
+    volumes:
+      - svc-455-data:/var/lib/svc-455
+    networks:
+      - net-3
+  svc-456:
+    image: ghcr.io/composure/example-14:1.6.0
+    container_name: svc-456
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "456"
+      SERVICE_NAME: svc-456
+    ports:
+      - "20456:8080"
+    networks:
+      - net-0
+  svc-457:
+    image: ghcr.io/composure/example-15:1.7.0
+    container_name: svc-457
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "457"
+      SERVICE_NAME: svc-457
+    networks:
+      - net-1
+  svc-458:
+    image: ghcr.io/composure/example-16:1.8.0
+    container_name: svc-458
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "458"
+      SERVICE_NAME: svc-458
+    networks:
+      - net-2
+  svc-459:
+    image: ghcr.io/composure/example-0:1.0.0
+    container_name: svc-459
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "459"
+      SERVICE_NAME: svc-459
+    ports:
+      - "20459:8080"
+    networks:
+      - net-3
+  svc-460:
+    image: ghcr.io/composure/example-1:1.1.0
+    container_name: svc-460
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "460"
+      SERVICE_NAME: svc-460
+    volumes:
+      - svc-460-data:/var/lib/svc-460
+    networks:
+      - net-0
+  svc-461:
+    image: ghcr.io/composure/example-2:1.2.0
+    container_name: svc-461
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "461"
+      SERVICE_NAME: svc-461
+    networks:
+      - net-1
+  svc-462:
+    image: ghcr.io/composure/example-3:1.3.0
+    container_name: svc-462
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "462"
+      SERVICE_NAME: svc-462
+    ports:
+      - "20462:8080"
+    networks:
+      - net-2
+  svc-463:
+    image: ghcr.io/composure/example-4:1.4.0
+    container_name: svc-463
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "463"
+      SERVICE_NAME: svc-463
+    networks:
+      - net-3
+  svc-464:
+    image: ghcr.io/composure/example-5:1.5.0
+    container_name: svc-464
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "464"
+      SERVICE_NAME: svc-464
+    networks:
+      - net-0
+  svc-465:
+    image: ghcr.io/composure/example-6:1.6.0
+    container_name: svc-465
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "465"
+      SERVICE_NAME: svc-465
+    ports:
+      - "20465:8080"
+    volumes:
+      - svc-465-data:/var/lib/svc-465
+    networks:
+      - net-1
+  svc-466:
+    image: ghcr.io/composure/example-7:1.7.0
+    container_name: svc-466
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "466"
+      SERVICE_NAME: svc-466
+    networks:
+      - net-2
+  svc-467:
+    image: ghcr.io/composure/example-8:1.8.0
+    container_name: svc-467
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "467"
+      SERVICE_NAME: svc-467
+    networks:
+      - net-3
+  svc-468:
+    image: ghcr.io/composure/example-9:1.0.0
+    container_name: svc-468
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "468"
+      SERVICE_NAME: svc-468
+    ports:
+      - "20468:8080"
+    networks:
+      - net-0
+  svc-469:
+    image: ghcr.io/composure/example-10:1.1.0
+    container_name: svc-469
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "469"
+      SERVICE_NAME: svc-469
+    networks:
+      - net-1
+  svc-470:
+    image: ghcr.io/composure/example-11:1.2.0
+    container_name: svc-470
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "470"
+      SERVICE_NAME: svc-470
+    volumes:
+      - svc-470-data:/var/lib/svc-470
+    networks:
+      - net-2
+  svc-471:
+    image: ghcr.io/composure/example-12:1.3.0
+    container_name: svc-471
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "471"
+      SERVICE_NAME: svc-471
+    ports:
+      - "20471:8080"
+    networks:
+      - net-3
+  svc-472:
+    image: ghcr.io/composure/example-13:1.4.0
+    container_name: svc-472
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "472"
+      SERVICE_NAME: svc-472
+    networks:
+      - net-0
+  svc-473:
+    image: ghcr.io/composure/example-14:1.5.0
+    container_name: svc-473
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "473"
+      SERVICE_NAME: svc-473
+    networks:
+      - net-1
+  svc-474:
+    image: ghcr.io/composure/example-15:1.6.0
+    container_name: svc-474
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "474"
+      SERVICE_NAME: svc-474
+    ports:
+      - "20474:8080"
+    networks:
+      - net-2
+  svc-475:
+    image: ghcr.io/composure/example-16:1.7.0
+    container_name: svc-475
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "475"
+      SERVICE_NAME: svc-475
+    volumes:
+      - svc-475-data:/var/lib/svc-475
+    networks:
+      - net-3
+  svc-476:
+    image: ghcr.io/composure/example-0:1.8.0
+    container_name: svc-476
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "476"
+      SERVICE_NAME: svc-476
+    networks:
+      - net-0
+  svc-477:
+    image: ghcr.io/composure/example-1:1.0.0
+    container_name: svc-477
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "477"
+      SERVICE_NAME: svc-477
+    ports:
+      - "20477:8080"
+    networks:
+      - net-1
+  svc-478:
+    image: ghcr.io/composure/example-2:1.1.0
+    container_name: svc-478
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "478"
+      SERVICE_NAME: svc-478
+    networks:
+      - net-2
+  svc-479:
+    image: ghcr.io/composure/example-3:1.2.0
+    container_name: svc-479
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "479"
+      SERVICE_NAME: svc-479
+    networks:
+      - net-3
+  svc-480:
+    image: ghcr.io/composure/example-4:1.3.0
+    container_name: svc-480
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "480"
+      SERVICE_NAME: svc-480
+    ports:
+      - "20480:8080"
+    volumes:
+      - svc-480-data:/var/lib/svc-480
+    networks:
+      - net-0
+  svc-481:
+    image: ghcr.io/composure/example-5:1.4.0
+    container_name: svc-481
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "481"
+      SERVICE_NAME: svc-481
+    networks:
+      - net-1
+  svc-482:
+    image: ghcr.io/composure/example-6:1.5.0
+    container_name: svc-482
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "482"
+      SERVICE_NAME: svc-482
+    networks:
+      - net-2
+  svc-483:
+    image: ghcr.io/composure/example-7:1.6.0
+    container_name: svc-483
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "483"
+      SERVICE_NAME: svc-483
+    ports:
+      - "20483:8080"
+    networks:
+      - net-3
+  svc-484:
+    image: ghcr.io/composure/example-8:1.7.0
+    container_name: svc-484
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "484"
+      SERVICE_NAME: svc-484
+    networks:
+      - net-0
+  svc-485:
+    image: ghcr.io/composure/example-9:1.8.0
+    container_name: svc-485
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "485"
+      SERVICE_NAME: svc-485
+    volumes:
+      - svc-485-data:/var/lib/svc-485
+    networks:
+      - net-1
+  svc-486:
+    image: ghcr.io/composure/example-10:1.0.0
+    container_name: svc-486
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "486"
+      SERVICE_NAME: svc-486
+    ports:
+      - "20486:8080"
+    networks:
+      - net-2
+  svc-487:
+    image: ghcr.io/composure/example-11:1.1.0
+    container_name: svc-487
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "487"
+      SERVICE_NAME: svc-487
+    networks:
+      - net-3
+  svc-488:
+    image: ghcr.io/composure/example-12:1.2.0
+    container_name: svc-488
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "488"
+      SERVICE_NAME: svc-488
+    networks:
+      - net-0
+  svc-489:
+    image: ghcr.io/composure/example-13:1.3.0
+    container_name: svc-489
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "489"
+      SERVICE_NAME: svc-489
+    ports:
+      - "20489:8080"
+    networks:
+      - net-1
+  svc-490:
+    image: ghcr.io/composure/example-14:1.4.0
+    container_name: svc-490
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "490"
+      SERVICE_NAME: svc-490
+    volumes:
+      - svc-490-data:/var/lib/svc-490
+    networks:
+      - net-2
+  svc-491:
+    image: ghcr.io/composure/example-15:1.5.0
+    container_name: svc-491
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "491"
+      SERVICE_NAME: svc-491
+    networks:
+      - net-3
+  svc-492:
+    image: ghcr.io/composure/example-16:1.6.0
+    container_name: svc-492
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "492"
+      SERVICE_NAME: svc-492
+    ports:
+      - "20492:8080"
+    networks:
+      - net-0
+  svc-493:
+    image: ghcr.io/composure/example-0:1.7.0
+    container_name: svc-493
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "493"
+      SERVICE_NAME: svc-493
+    networks:
+      - net-1
+  svc-494:
+    image: ghcr.io/composure/example-1:1.8.0
+    container_name: svc-494
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "494"
+      SERVICE_NAME: svc-494
+    networks:
+      - net-2
+  svc-495:
+    image: ghcr.io/composure/example-2:1.0.0
+    container_name: svc-495
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "495"
+      SERVICE_NAME: svc-495
+    ports:
+      - "20495:8080"
+    volumes:
+      - svc-495-data:/var/lib/svc-495
+    networks:
+      - net-3
+  svc-496:
+    image: ghcr.io/composure/example-3:1.1.0
+    container_name: svc-496
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "496"
+      SERVICE_NAME: svc-496
+    networks:
+      - net-0
+  svc-497:
+    image: ghcr.io/composure/example-4:1.2.0
+    container_name: svc-497
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "497"
+      SERVICE_NAME: svc-497
+    networks:
+      - net-1
+  svc-498:
+    image: ghcr.io/composure/example-5:1.3.0
+    container_name: svc-498
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "498"
+      SERVICE_NAME: svc-498
+    ports:
+      - "20498:8080"
+    networks:
+      - net-2
+  svc-499:
+    image: ghcr.io/composure/example-6:1.4.0
+    container_name: svc-499
+    restart: unless-stopped
+    environment:
+      SERVICE_INDEX: "499"
+      SERVICE_NAME: svc-499
+    networks:
+      - net-3
+
+networks:
+  net-0:
+    driver: bridge
+  net-1:
+    driver: bridge
+  net-2:
+    driver: bridge
+  net-3:
+    driver: bridge
+
+volumes:
+  svc-000-data:
+  svc-005-data:
+  svc-010-data:
+  svc-015-data:
+  svc-020-data:
+  svc-025-data:
+  svc-030-data:
+  svc-035-data:
+  svc-040-data:
+  svc-045-data:
+  svc-050-data:
+  svc-055-data:
+  svc-060-data:
+  svc-065-data:
+  svc-070-data:
+  svc-075-data:
+  svc-080-data:
+  svc-085-data:
+  svc-090-data:
+  svc-095-data:
+  svc-100-data:
+  svc-105-data:
+  svc-110-data:
+  svc-115-data:
+  svc-120-data:
+  svc-125-data:
+  svc-130-data:
+  svc-135-data:
+  svc-140-data:
+  svc-145-data:
+  svc-150-data:
+  svc-155-data:
+  svc-160-data:
+  svc-165-data:
+  svc-170-data:
+  svc-175-data:
+  svc-180-data:
+  svc-185-data:
+  svc-190-data:
+  svc-195-data:
+  svc-200-data:
+  svc-205-data:
+  svc-210-data:
+  svc-215-data:
+  svc-220-data:
+  svc-225-data:
+  svc-230-data:
+  svc-235-data:
+  svc-240-data:
+  svc-245-data:
+  svc-250-data:
+  svc-255-data:
+  svc-260-data:
+  svc-265-data:
+  svc-270-data:
+  svc-275-data:
+  svc-280-data:
+  svc-285-data:
+  svc-290-data:
+  svc-295-data:
+  svc-300-data:
+  svc-305-data:
+  svc-310-data:
+  svc-315-data:
+  svc-320-data:
+  svc-325-data:
+  svc-330-data:
+  svc-335-data:
+  svc-340-data:
+  svc-345-data:
+  svc-350-data:
+  svc-355-data:
+  svc-360-data:
+  svc-365-data:
+  svc-370-data:
+  svc-375-data:
+  svc-380-data:
+  svc-385-data:
+  svc-390-data:
+  svc-395-data:
+  svc-400-data:
+  svc-405-data:
+  svc-410-data:
+  svc-415-data:
+  svc-420-data:
+  svc-425-data:
+  svc-430-data:
+  svc-435-data:
+  svc-440-data:
+  svc-445-data:
+  svc-450-data:
+  svc-455-data:
+  svc-460-data:
+  svc-465-data:
+  svc-470-data:
+  svc-475-data:
+  svc-480-data:
+  svc-485-data:
+  svc-490-data:
+  svc-495-data:

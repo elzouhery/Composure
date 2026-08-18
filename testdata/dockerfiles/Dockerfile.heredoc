@@ -1,0 +1,12 @@
+# syntax=docker/dockerfile:1
+FROM alpine:3.20 AS build
+RUN <<EOT
+apk add --no-cache curl
+echo "FROM this-is-not-an-instruction"
+RUN echo neither is this
+EOT
+COPY <<-"CONF" /etc/app.conf
+key = value
+CONF
+FROM alpine:3.20
+COPY --from=build /etc/app.conf /etc/app.conf

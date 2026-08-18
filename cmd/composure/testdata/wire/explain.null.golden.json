@@ -1,0 +1,25 @@
+{
+  "path": "services.web.healthcheck",
+  "file": "base.yaml",
+  "line": 25,
+  "column": 18,
+  "step": 0,
+  "kind": "null",
+  "value": "",
+  "overrides": [],
+  "files": [
+    {
+      "path": "base.yaml",
+      "step": 0
+    },
+    {
+      "path": "override.yaml",
+      "step": 1
+    },
+    {
+      "path": "override2.yaml",
+      "step": 2
+    }
+  ],
+  "dropped": []
+}

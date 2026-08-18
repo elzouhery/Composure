@@ -1,0 +1,15 @@
+﻿# A compose file that opens with a UTF-8 byte order mark, written by an editor
+# on Windows, with CRLF line endings throughout.
+#
+# Recorded as a permanent regression file by Epic 6. The YAML locator cannot
+# currently address a path in a BOM-prefixed document: goccy reads the mark as
+# part of the first key, so `services.web.image` is not found. That is a
+# REFUSAL, not damage -- the write path returns an error and touches nothing --
+# and internal/edit/edit_test.go asserts exactly that. If the locator is ever
+# taught to skip the mark, the assertion in that test is what has to change,
+# and it will change to "the edit lands", never to "the edit is silent".
+services:
+  web:
+    image: nginx:1.25   # pinned deliberately
+    ports:
+      - "8080:80"

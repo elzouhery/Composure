@@ -1,0 +1,42 @@
+# A compose file whose mappings are free-form, for the real-binary check.
+#
+# The thing this fixture exists to stop: a hand-written `stack/schema` answer
+# with `free_form: true` typed into it. Every webview test in this repository
+# renders one of those, and none of them can tell whether the CORE would ever
+# say so — an invented fixture proves the pane draws what it is handed, not
+# that what it is handed is real. This file is read by the shipped binary.
+#
+# Three properties, and each needs its own service:
+#
+#   web    `environment` and `labels` written as MAPPINGS, beside `healthcheck`,
+#          whose keys the specification names. Free-form and described, in one
+#          answer, so "the core marks every mapping" is distinguishable from
+#          "the core marks the free-form ones";
+#   api    `environment` written as a LIST. The same key, the other legal form,
+#          and the pane must add to whichever the file uses without converting;
+#   build  `build.args`, a free-form mapping one level down from the service,
+#          which is how the pane learns there is no list of Compose keys to
+#          keep — the mark travels with the field wherever the field is.
+services:
+  web:
+    image: nginx:1.27
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:3000
+    labels:
+      com.example.owner: platform
+    healthcheck:
+      interval: 30s
+      retries: 3
+
+  api:
+    image: ghcr.io/example/api:2.1
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://api:3000
+
+  build:
+    build:
+      context: .
+      args:
+        VERSION: "1.0"

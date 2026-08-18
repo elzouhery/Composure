@@ -1,0 +1,11 @@
+services:
+  a:
+    cap_add: [NET_ADMIN, SYS_PTRACE]
+    cap_drop: [MKNOD, SETUID]
+    dns: ["1.1.1.1", "8.8.8.8"]
+    dns_opt: ["use-vc", "no-tld-query"]
+    dns_search: ["example.com", "other.com"]
+    expose: ["3000", "3001"]
+    tmpfs: ["/tmp", "/run"]
+    links: ["b"]
+    profiles: ["p1", "p2"]

@@ -1,0 +1,45 @@
+# Sequence shapes a real compose file mixes, in one fixture, because the
+# indentation of a block sequence under a key has no single right answer: an
+# entry may sit at the key's own indent or one step in, and both are valid
+# YAML. The only correct answer for a NEW entry is whatever the siblings do.
+services:
+  flush:
+    image: nginx
+    # Entries at the KEY's own indent. Widespread, and the case an
+    # implementation that reuses childIndent gets wrong.
+    ports:
+    - "8080:80"
+    - "8443:443"
+  indented:
+    image: nginx
+    # Entries one step in.
+    ports:
+      - "9090:90"
+  wide:
+    image: nginx
+    # A marker with three spaces after it. The engine copies the siblings'
+    # spacing rather than imposing its own.
+    ports:
+    -   "7070:70"
+  empty:
+    image: nginx
+    # No entry to imitate: the fallback is the file's dominantStep applied to
+    # the key's own indent, and this fixture is what pins it.
+    ports:
+  mappings:
+    image: nginx
+    # Long-form entries. Appending a scalar entry after a mapping entry copies
+    # the mapping entry's marker column.
+    ports:
+      - target: 80
+        published: "8080"
+  commented:
+    image: nginx
+    ports:
+      - "6060:60"
+      # A trailing comment under the last entry. subtreeEnd treats a trailing
+      # comment as undecided and the new entry lands BEFORE it, which is what
+      # InsertKey does for a mapping — one rule, pinned here.
+  flow:
+    image: nginx
+    ports: ["5050:50"]

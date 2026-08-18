@@ -1,0 +1,8 @@
+# The same divergence the other way round: a MAPPING here, a LIST in the
+# override. The loss is not an artefact of which form came first.
+services:
+  web:
+    image: nginx:1.25
+    environment:
+      BASE_A: "1"
+      SHARED: base

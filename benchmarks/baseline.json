@@ -1,0 +1,122 @@
+{
+  "compose_files": 146,
+  "dockerfile_files": 180,
+  "metrics": [
+    {
+      "key": "diagnose.corpus.analyzed_pct",
+      "value": 100
+    },
+    {
+      "key": "diagnose.corpus.anchor_bytes_pct",
+      "value": 100
+    },
+    {
+      "key": "diagnose.corpus.anchored_pct",
+      "value": 100
+    },
+    {
+      "key": "dockerbench.delete_clean_pct",
+      "value": 100
+    },
+    {
+      "key": "dockerbench.identity_pct",
+      "value": 100
+    },
+    {
+      "key": "dockerbench.insert_after_clean_pct",
+      "value": 100
+    },
+    {
+      "key": "dockerbench.set_base_image_applied_pct",
+      "value": 100
+    },
+    {
+      "key": "dockerbench.set_base_image_minimal_pct",
+      "value": 100
+    },
+    {
+      "key": "edit.corpus.edited",
+      "value": 70
+    },
+    {
+      "key": "edit.corpus.preview_equals_apply_pct",
+      "value": 100
+    },
+    {
+      "key": "edit.corpus.stale_refused_pct",
+      "value": 100
+    },
+    {
+      "key": "editbench.splice.minimal_pct",
+      "value": 100
+    },
+    {
+      "key": "editbench.splice.neg_worst_lines",
+      "value": -2
+    },
+    {
+      "key": "fidelity.splice.identity_pct",
+      "value": 98.63013698630137
+    },
+    {
+      "key": "fidelity.splice.undamaged",
+      "value": 146
+    },
+    {
+      "key": "resolve.corpus.leaf_provenance_pct",
+      "value": 100
+    },
+    {
+      "key": "resolve.corpus.resolved",
+      "value": 85
+    },
+    {
+      "key": "resolve.corpus.resolved_pct",
+      "value": 58.21917808219178
+    },
+    {
+      "key": "structbench.deletekey.clean_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.deletekey.correct_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.deletekey.reparses_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertentry.clean_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertentry.correct_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertentry.reparses_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertkey.clean_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertkey.correct_pct",
+      "value": 100
+    },
+    {
+      "key": "structbench.insertkey.reparses_pct",
+      "value": 100
+    },
+    {
+      "key": "topology.corpus.built_pct",
+      "value": 100
+    },
+    {
+      "key": "topology.corpus.node_origin_pct",
+      "value": 100
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+# Compose v1: services at the top level, no `services:` key.
+# Compose V2 dropped support for this format. Composure must refuse it with a
+# message that names the format, not a generic "not a compose file" — found in
+# the wild at corpus-repos/gitlabhq/docker-compose.yml.
+app:
+  image: gitlab/gitlab-ce:latest
+  ports:
+    - "80:80"

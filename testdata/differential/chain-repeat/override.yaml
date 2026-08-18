@@ -1,0 +1,7 @@
+services:
+  web:
+    image: nginx:1.24
+    environment:
+      FROM: override
+    ports:
+      - "8081:80"

@@ -1,0 +1,61 @@
+services:
+  web:
+    image: nginx:1.25
+    depends_on:
+      api:
+        condition: service_healthy
+        restart: "true"
+        required: "false"
+    networks:
+      front:
+        aliases: [www, edge]
+      back: {}
+    ports:
+      - "8080:80"
+      - target: 443
+        published: "8443"
+        protocol: udp
+        host_ip: 127.0.0.1
+    volumes:
+      - "data:/var/lib/data:ro"
+      - "./conf:/etc/nginx/conf.d"
+      - "/var/log"
+    configs: [nginxconf]
+    secrets:
+      - source: apikey
+        target: /run/secrets/apikey
+    links: ["api:backend"]
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+      target: runtime
+    depends_on: [worker]
+    profiles: [full]
+  worker:
+    image: busybox
+    depends_on: [api]
+    network_mode: "container:outside"
+    profiles: [full]
+  sidecar:
+    image: alpine
+    network_mode: "service:web"
+  hidden:
+    image: alpine
+    profiles: [never]
+  needy:
+    image: alpine
+    depends_on: [hidden]
+networks:
+  front:
+    internal: true
+  ext:
+    external: true
+volumes:
+  data: {}
+configs:
+  nginxconf:
+    file: ./nginx.conf
+secrets:
+  apikey:
+    file: ./apikey.txt

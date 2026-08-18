@@ -1,0 +1,35 @@
+# e11 — a key whose value is NULL, in the middle of the file.
+#
+# `healthcheck:` with nothing after the colon parses as a value that occupies
+# ZERO bytes. goccy answers the query for that value with a synthesised token
+# whose Origin is the four characters "null" and whose position is one past the
+# colon — none of which are bytes in this file.
+#
+# Deriving an edit range from that synthesised lexeme ran four bytes past the
+# end of line 12, swallowed the newline, and welded line 13 onto line 12:
+#
+#     -    healthcheck:
+#     -    restart: always
+#     +    healthcheck:x restart: always
+#
+# `restart: always` was DESTROYED. Corruption is the one outcome that is never
+# acceptable (AD-8, CLAUDE.md rule 6), and this file is here so that it stays
+# fixed. The line after the null is deliberately a REAL key with a real value,
+# so that eating it is a semantic change a test can see and not just whitespace.
+services:
+  web:
+    image: nginx:1.27-alpine
+    healthcheck:
+    restart: always
+    ports:
+      - "8080:80"
+
+  db:
+    image: postgres:16
+    # A null value followed by a COMMENT line, then a sibling. The comment is
+    # the second thing a swallowed newline destroys, and it is destroyed
+    # silently because a comment has no semantics to break loudly.
+    healthcheck:
+    # keep the password out of the image
+    environment:
+      POSTGRES_PASSWORD: secret

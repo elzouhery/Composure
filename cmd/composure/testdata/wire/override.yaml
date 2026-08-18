@@ -1,0 +1,4 @@
+# Step 1. Replaces the image once, so the value has an override history.
+services:
+  web:
+    image: nginx:1.26

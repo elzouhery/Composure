@@ -1,0 +1,22 @@
+# The trap this fixture exists to spring: a list whose entries are all
+# DISTINCT cannot tell an off-by-one from a correct answer, because every
+# wrong entry looks wrong. Every list below repeats at least one entry, and
+# the interesting edits are in the MIDDLE rather than at index 0.
+services:
+  web:
+    image: nginx
+    healthcheck:
+      # Flow form — this is the shape the owner's screenshot showed.
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+    command:
+      - sh
+      - -c
+      - sh
+      - echo hi
+      - sh
+    ports:
+      - "8080:80"
+      - "8443:443"
+      - "8080:80"
+    environment:
+      8080: "a numeric mapping key, not a sequence index"

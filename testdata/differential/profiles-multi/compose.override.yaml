@@ -1,0 +1,9 @@
+services:
+  web:
+    environment:
+      EXTRA: "1"
+  tools:
+    command: sleep 3600
+  extra:
+    image: alpine:3.20
+    profiles: [debug, ci]

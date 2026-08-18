@@ -1,0 +1,105 @@
+Composure
+Copyright 2026 Mahmoud Ali ElZouhery
+
+This product includes software developed by third parties, listed below.
+Composure itself is licensed under the Apache License, Version 2.0; see LICENSE.
+
+Apache License 2.0 section 4(d) is why this file exists: a redistribution that
+carries Apache-licensed material must carry that material's attribution with it.
+Two of the entries below ship inside the binary, so the obligation travels with
+every release, not just with the source tree.
+
+================================================================================
+Go modules in the build graph
+================================================================================
+
+These are the only two third-party modules Composure links, as verified by
+`make licence` (cmd/licencescan walks the build graph and resolves each module
+to a licence file in the module cache).
+
+--------------------------------------------------------------------------------
+github.com/goccy/go-yaml
+--------------------------------------------------------------------------------
+Version:  v1.19.2
+Licence:  MIT
+Source:   https://github.com/goccy/go-yaml
+
+  MIT License
+  Copyright (c) 2019 Masaaki Goshima
+
+Full licence text: the LICENSE file in the module at the version above.
+
+--------------------------------------------------------------------------------
+gopkg.in/yaml.v3
+--------------------------------------------------------------------------------
+Version:  v3.0.1
+Licence:  Apache-2.0 and MIT (the distribution is covered by both)
+Source:   https://github.com/go-yaml/yaml/tree/v3
+
+The Go source of this library is Apache-2.0; the parts derived from libyaml are
+MIT. The upstream distribution carries a NOTICE file, reproduced verbatim:
+
+  Copyright 2011-2016 Canonical Ltd.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+The MIT-licensed portions carry:
+
+  Copyright (c) 2006-2011 Kirill Simonov
+  Copyright (c) 2011-2019 Canonical Ltd
+
+Full licence text: the LICENSE file in the module at the version above.
+
+================================================================================
+Vendored data
+================================================================================
+
+--------------------------------------------------------------------------------
+The Compose Specification JSON Schema
+--------------------------------------------------------------------------------
+File:     schema/compose-spec.json (embedded in the binary via schema/embed.go)
+Licence:  Apache-2.0
+Source:   https://github.com/compose-spec/compose-spec
+Commit:   4e2fe7602af8c965ab4fef891e9dde9c5940775f
+Path:     schema/compose-spec.json
+Fetched:  2026-08-12
+SHA-256:  73ca5878c77570ba222a558016c7b3c6770ba5f3377786593e32180666512f8f
+
+Vendored verbatim and unmodified. The commit above is recorded in three places
+that must move together -- this file, schema/PROVENANCE.md, and the Commit
+constant in schema/embed.go -- and the digest above was verified against
+upstream at that commit.
+
+`make licence` cannot see this file: it walks the Go build graph, and a
+vendored data file is not a module. That is precisely why the attribution is
+recorded here by hand rather than left to the gate.
+
+The upstream project's NOTICE file, reproduced verbatim:
+
+  The Compose Specification
+  Copyright 2020 The Compose Specification Authors
+
+--------------------------------------------------------------------------------
+schema/compose-min-version.json
+--------------------------------------------------------------------------------
+Not third-party. Written for this project; see schema/PROVENANCE.md for why the
+Compose Specification carries no version information and this file exists.
+
+================================================================================
+Not third-party
+================================================================================
+
+The Compose file corpus that `make corpus` fetches is thousands of shallow
+clones of unrelated projects, used only as measurement input. It is never
+committed, never redistributed, and no part of it is linked or embedded. It is
+therefore outside the scope of this file.

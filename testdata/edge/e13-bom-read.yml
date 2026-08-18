@@ -1,0 +1,13 @@
+﻿# A BOM-prefixed compose file, LF endings, no comments above the document.
+#
+# The READ-path twin of e10-bom-crlf.yml. e10 covers the WRITE path and
+# combines the mark with CRLF and ten comment lines, which turned out to hide
+# a second, unrelated defect (goccy counts a CRLF comment line twice). This
+# file isolates the mark: if a path in it stops resolving, the regression is
+# the byte order mark and nothing else.
+name: bom-read
+services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"

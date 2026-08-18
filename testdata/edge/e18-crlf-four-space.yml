@@ -1,0 +1,12 @@
+# A compose file written on Windows: CRLF throughout, four-space indent.
+#
+# The insert defect this pins wrote an LF-terminated line into it, and both
+# gates score that as one clean inserted block because singleBlockDiff splits
+# on "\n" and cannot see a missing \r.
+services:
+    web:
+        image: nginx:1.25
+        ports:
+            - "8080:80"
+    cache:
+        image: redis:7

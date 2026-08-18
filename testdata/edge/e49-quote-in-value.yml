@@ -1,0 +1,10 @@
+# A credential holding a double quote. Paired with `e49-unterminated-quote.env`.
+#
+# The quote is the whole point: it is what closes the unterminated quote already
+# in that `.env`, and it is why the per-line readback in `renderEnvValue` is not
+# enough on its own.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: 'pa"ss'

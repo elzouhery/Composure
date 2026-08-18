@@ -1,0 +1,9 @@
+services:
+  app:
+    image: alpine
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+  last:
+    image: nginx

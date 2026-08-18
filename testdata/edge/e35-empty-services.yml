@@ -1,0 +1,5 @@
+# A stack that has been started and nothing has been declared in it yet.
+# EXPERIENCE.md's empty-stack state: `Add service` has to be a starting point
+# rather than a dead end.
+name: demo
+services:

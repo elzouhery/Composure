@@ -1,0 +1,38 @@
+# Every WIDTH of multi-byte character, to the LEFT of a token being addressed.
+#
+# e17 pins the defect with one accent. This file is the width sweep, because the
+# skew is exactly "the extra bytes the character costs" and a fix that converts
+# runes to bytes has to be right for all of them, not for the two-byte case that
+# happened to be measured first:
+#
+#   é      2 bytes, 1 rune
+#   東京   3 bytes each, 1 rune each
+#   🎉     4 bytes, 1 rune — and TWO UTF-16 code units. Measured 2026-08-13
+#          against goccy: it reports this as ONE column, so the parser counts
+#          runes and not UTF-16 units. If that ever changes, the emoji rows here
+#          are the first thing that fails.
+#   e◌́     a combining mark: two runes, three bytes, one glyph. Neither a rune
+#          count nor a byte count is the number of glyphs, and the engine must
+#          use the parser's unit rather than the reader's.
+#
+# Quoted and unquoted, flow mapping and flow sequence, and non-ASCII inside a
+# KEY as well as a value — a key is a token with a position too, and a path that
+# names one has to survive the same conversion.
+services:
+  two-byte:
+    labels: {city: "café", tier: "gold"}
+    environment: [CAFÉ=1, PLAIN=2]
+  three-byte:
+    labels: {city: "東京", tier: "silver"}
+    environment: [東京=1, PLAIN=2]
+  four-byte:
+    labels: {city: "🎉🎉", tier: "bronze"}
+    environment: [PARTY=🎉, PLAIN=2]
+  combining:
+    labels: {city: "café", tier: "plain"}
+  unquoted:
+    labels: {city: café, tier: gold}
+  accented-key:
+    labels: {café: "x", plain: "y"}
+  mixed:
+    labels: {a: "é", b: "東", c: "🎉", d: "tail"}

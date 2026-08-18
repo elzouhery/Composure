@@ -1,0 +1,18 @@
+# The nineteen merge-table rows deleted in 89fa598, as a project that declares
+# the same entry in two files. What Compose does with the repeat is the whole
+# question, and it is a question only the oracle can answer.
+services:
+  a:
+    image: busybox:1.36
+    cap_add: [NET_ADMIN]
+    cap_drop: [MKNOD]
+    dns: ["1.1.1.1"]
+    dns_opt: ["use-vc"]
+    dns_search: ["example.com"]
+    expose: ["3000"]
+    tmpfs: ["/tmp"]
+    links: ["b"]
+    profiles: ["p1"]
+  b:
+    image: busybox:1.36
+    profiles: ["p1"]

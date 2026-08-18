@@ -1,0 +1,60 @@
+# Merge-key precedence, every way it can be got backwards.
+#
+# Each service below has a right answer that differs from what a naive
+# "apply merges as you meet them, last write wins" implementation produces.
+# Resolving this file wrong does not crash anything — it silently reports a
+# different stack than the one that runs, which is the failure mode this
+# engine is prone to.
+
+x-a: &a
+  restart: from-a
+  only-in-a: yes-a
+  image: anchor-image
+
+x-b: &b
+  restart: from-b
+  only-in-b: yes-b
+
+x-nested: &nested
+  <<: *a
+  restart: from-nested
+
+services:
+  # The parent's own key wins over the merged one, even though the `<<:`
+  # is written first.
+  parent-wins-below:
+    <<: *a
+    image: own-image
+    restart: from-parent
+
+  # ...and even though the `<<:` is written last. Merge position in the file
+  # does not change precedence; only YAML's own rule does.
+  parent-wins-above:
+    image: own-image
+    restart: from-parent
+    <<: *a
+
+  # Left wins over right in a sequence of merge keys: restart is from-a.
+  # only-in-b still arrives, because nothing to its left defines it.
+  left-wins:
+    <<: [*a, *b]
+    image: seq-image
+
+  # An anchor that itself contains a merge key. The inner override stands, so
+  # restart is from-nested and only-in-a still comes through.
+  nested-merge:
+    <<: *nested
+    image: nested-image
+
+  # An inline mapping is a legal merge value; it is not required to be an alias.
+  inline-merge:
+    <<: {restart: from-inline}
+    image: inline-image
+
+  # A *quoted* "<<" is an ordinary string key, not a directive. It must survive
+  # into the model as a key called `<<`, while the merge above it does not.
+  literal-merge-key:
+    <<: *b
+    image: literal-image
+    labels:
+      "<<": not-a-directive

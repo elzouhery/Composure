@@ -1,0 +1,18 @@
+﻿services:
+  web:
+    image: nginx:1.25
+    labels: {owner: "café", team: "x"}
+    environment: [CAFÉ=1, PLAIN=2]
+
+# A byte order mark AND non-ASCII text on an addressed line, together.
+#
+# Two corrections that both turn a parser position into a byte offset, in one
+# file. The mark shifts every offset in the buffer by three bytes (bom.go); the
+# accent shifts every offset to its right on ONE line by the extra bytes it
+# costs. They compose, and a fix for either that quietly assumed the other was
+# absent would pass its own fixture and fail here.
+#
+# The explanation is at the FOOT of the file rather than the head so that
+# `services:` sits on line 1: a leading comment block would push every addressed
+# token off the only line the mark shares, which is the shape that made an
+# earlier BOM assertion unable to fail (see bom_test.go on e13 vs e15).

@@ -1,0 +1,19 @@
+# A file whose LAST service ends with a comment, and whose first service
+# carries an anchor. Story 7.3: a service added here must not land between the
+# comment and the service it belongs to, and must not disturb the anchor.
+x-defaults: &defaults
+  restart: unless-stopped
+
+services:
+  web:
+    <<: *defaults
+    image: nginx  # pinned deliberately
+
+  db:
+    image: postgres:15
+    # the volume below is managed by the platform team
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:

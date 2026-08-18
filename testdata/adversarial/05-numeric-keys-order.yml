@@ -1,0 +1,17 @@
+services:
+  zebra:
+    image: alpine
+  8080:
+    image: alpine
+  alpha:
+    image: alpine
+  80:
+    image: alpine
+  m1:
+    image: alpine
+    sysctls:
+      net.ipv4.ip_forward: 1
+    labels:
+      1000: "numeric label key"
+      zzz: "last"
+      aaa: "first alphabetically but written third"

@@ -1,0 +1,10 @@
+﻿# A BOM'd, CRLF compose file with comments at three indents.
+# The mark belongs to the FILE, not to the line it is written on, and a
+# comment inserted at the head must land after it.
+services:
+  # web is documented in two lines, on purpose.
+  # A fixture with one comment cannot tell a run from its first line.
+  web:
+    image: nginx  # pinned
+  db:
+    image: postgres:16

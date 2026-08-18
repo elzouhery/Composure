@@ -1,0 +1,26 @@
+# A compose file that RELIABLY produces findings, for the real-binary join test.
+#
+# compose.fixture.yml is deliberately boring, which is right for the schema and
+# topology assertions but wrong for the diagnostics one: with no findings, the
+# loop that checks a finding can be joined back to a field never executed, and
+# the severity assertion above it was true by construction. A test whose body is
+# skipped is a test that cannot fail.
+#
+# Two rules, chosen because they anchor differently:
+#
+#   depends_on ... condition: service_healthy against a service that declares no
+#   healthcheck  — anchors on the depends_on entry, inside a service;
+#   a plaintext credential in environment — anchors on an environment entry.
+#
+# Between them they cover both shapes of join the inspector performs.
+services:
+  web:
+    image: nginx:1.27
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: hunter2

@@ -1,0 +1,19 @@
+# A file header. It belongs to nothing and must never move.
+
+# The services block.
+services:
+  # web is the front door.
+  # It is documented in two lines on purpose: a fixture with ONE comment
+  # cannot tell "replaced the run" from "replaced the first line of it".
+  web:
+    image: nginx  # pinned by ops, with two spaces before the hash
+    # This comment is separated from `restart` by a blank line below, so it
+    # is NOT attached to it.
+
+    restart: always
+    labels:
+      note: "a value with a # inside it"   # and a real trailing comment
+    ports:
+      - "8080:80"
+  db:
+    image: postgres:16

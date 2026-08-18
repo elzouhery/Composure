@@ -1,0 +1,5 @@
+ARG NODE_VERSION=22
+FROM node:${NODE_VERSION}-alpine AS deps
+FROM alpine@sha256:beefcafe1234567890abcdef1234567890abcdef1234567890abcdef12345678 AS pinned
+FROM scratch
+COPY --from=deps /app /app

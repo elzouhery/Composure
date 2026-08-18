@@ -1,0 +1,26 @@
+{
+  "path": "services.web.environment.TAG",
+  "file": "base.yaml",
+  "line": 23,
+  "column": 12,
+  "step": 0,
+  "kind": "scalar",
+  "value": "v3",
+  "raw": "${COMPOSURE_WIRE_TAG}",
+  "overrides": [],
+  "files": [
+    {
+      "path": "base.yaml",
+      "step": 0
+    },
+    {
+      "path": "override.yaml",
+      "step": 1
+    },
+    {
+      "path": "override2.yaml",
+      "step": 2
+    }
+  ],
+  "dropped": []
+}

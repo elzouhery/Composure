@@ -1,0 +1,977 @@
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+
+// webview/layout.ts
+var NODE_WIDTH = 188;
+var NODE_HEIGHT = 53;
+var RESOURCE_WIDTH = 152;
+var RESOURCE_HEIGHT = 46;
+var PORT_WIDTH = 132;
+var PORT_HEIGHT = 46;
+var DOCKERFILE_WIDTH = 172;
+var DOCKERFILE_HEIGHT = 46;
+var DETAIL_LINES = 2;
+var DETAIL_COLUMNS = 23;
+var GAP_X = 36;
+var GAP_Y = 34;
+var SATELLITE_GAP = 14;
+var SATELLITE_INDENT = 14;
+var DETAIL_Y = 41;
+var LINE_HEIGHT = 16;
+var MARKER_LINE_HEIGHT = 14;
+var BOTTOM_PAD = 12;
+function kindWord(kind) {
+  return kind === "dockerfile" ? "Dockerfile" : kind;
+}
+function describeNode(node) {
+  if (node.collapsed) {
+    const n = node.collapsed.count;
+    return `${n} ${n === 1 ? "service" : "services"} \xB7 collapsed by ${node.collapsed.by}`;
+  }
+  const tags = [];
+  switch (node.kind) {
+    case "service":
+      if (node.image) {
+        return node.image;
+      }
+      return node.declared ? "no image" : "not declared";
+    case "port": {
+      const p = node.port;
+      if (!p) {
+        return "port";
+      }
+      const host = p.host_ip ? `${p.host_ip}:` : "";
+      const published = p.published ? `${host}${p.published} \u2192 ` : "exposed ";
+      return `${published}${p.target}/${p.protocol}`;
+    }
+    case "dockerfile": {
+      const b = node.build;
+      if (!b) {
+        return "Dockerfile";
+      }
+      if (b.inline) {
+        return "inline, in the compose file";
+      }
+      return b.target ? `target ${b.target}` : `context ${b.context || "."}`;
+    }
+    default:
+      tags.push(kindWord(node.kind));
+      if (!node.declared) {
+        tags.push("not declared");
+      } else if (node.external) {
+        tags.push("external");
+      }
+      if (node.internal) {
+        tags.push("internal");
+      }
+      return tags.join(" \xB7 ");
+  }
+}
+function serviceDetailLines(node) {
+  return wrapImageRef(describeNode(node), DETAIL_COLUMNS, DETAIL_LINES);
+}
+function nodeSize(node, markers = 0) {
+  switch (node.kind) {
+    case "port":
+      return { width: PORT_WIDTH, height: PORT_HEIGHT };
+    case "dockerfile":
+      return { width: DOCKERFILE_WIDTH, height: DOCKERFILE_HEIGHT };
+    case "service": {
+      const detail = serviceDetailLines(node).length;
+      const content = DETAIL_Y + (detail - 1) * LINE_HEIGHT + markers * MARKER_LINE_HEIGHT + BOTTOM_PAD;
+      return { width: NODE_WIDTH, height: Math.max(NODE_HEIGHT, content) };
+    }
+    default:
+      return { width: RESOURCE_WIDTH, height: RESOURCE_HEIGHT };
+  }
+}
+function markerIndex(graph, missing = []) {
+  const out = {};
+  const push = (id, line) => {
+    (out[id] ??= []).push(line);
+  };
+  for (const e of graph.edges) {
+    if (e.kind !== "bind" || !e.mount) {
+      continue;
+    }
+    const host = e.mount.host_path || e.mount.source || "(anonymous)";
+    const mode = e.mount.read_only ? " ro" : "";
+    push(e.from, `bind ${host} \u2192 ${e.mount.target}${mode}`);
+  }
+  for (const d of graph.dangling) {
+    push(d.from, `unresolved ${d.kind} ${d.ref} \u2014 ${d.reason}`);
+  }
+  for (const cycle of graph.cycles) {
+    const names = cycle.map(lastSegment);
+    for (const id of cycle) {
+      push(id, `dependency cycle: ${names.join(" \u2192 ")}`);
+    }
+  }
+  for (const id of missing) {
+    push(id, "missing \u2014 this file is not on disk");
+  }
+  return out;
+}
+function lastSegment(id) {
+  const parts = id.split(".");
+  return parts[parts.length - 1] || id;
+}
+function bandOf(node, maxLayer) {
+  switch (node.kind) {
+    case "port":
+      return 0;
+    case "service":
+    case "dockerfile":
+      return 1 + Math.max(0, maxLayer - node.layer);
+    default:
+      return maxLayer + 2;
+  }
+}
+function layoutGraph(graph, saved, missing = []) {
+  const markers = markerIndex(graph, missing);
+  const sizes = {};
+  for (const node of graph.nodes) {
+    sizes[node.id] = nodeSize(node, markers[node.id]?.length ?? 0);
+  }
+  const parentOf = {};
+  const satellites = /* @__PURE__ */ new Map();
+  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
+  for (const e of graph.edges) {
+    if (e.kind !== "build" || !byId.has(e.to) || !byId.has(e.from)) {
+      continue;
+    }
+    parentOf[e.to] = e.from;
+    const list = satellites.get(e.from) ?? [];
+    list.push(e.to);
+    satellites.set(e.from, list);
+  }
+  const bandCount = Math.max(1, graph.max_layer + 3);
+  const bands = Array.from({ length: bandCount }, () => []);
+  for (const node of graph.nodes) {
+    if (parentOf[node.id] !== void 0) {
+      continue;
+    }
+    const band = Math.min(bandCount - 1, Math.max(0, bandOf(node, graph.max_layer)));
+    bands[band].push(node.id);
+  }
+  orderBands(bands, graph.edges);
+  const positions = {};
+  let y = 0;
+  for (const band of bands) {
+    if (band.length === 0) {
+      continue;
+    }
+    for (const run of wrapBand(band)) {
+      let rowHeight = 0;
+      let total = 0;
+      for (const id of run) {
+        total += sizes[id].width;
+        rowHeight = Math.max(rowHeight, sizes[id].height + satelliteExtent(id, satellites, sizes));
+      }
+      total += GAP_X * (run.length - 1);
+      let x = -total / 2;
+      for (const id of run) {
+        positions[id] = { x, y };
+        x += sizes[id].width + GAP_X;
+      }
+      y += rowHeight + GAP_Y;
+    }
+  }
+  for (const node of graph.nodes) {
+    if (parentOf[node.id] !== void 0) {
+      continue;
+    }
+    const kept = saved[node.id];
+    if (kept && Number.isFinite(kept.x) && Number.isFinite(kept.y)) {
+      positions[node.id] = { x: kept.x, y: kept.y };
+    }
+  }
+  for (const [parent, children] of satellites) {
+    const base = positions[parent];
+    if (!base) {
+      continue;
+    }
+    let sy = base.y + sizes[parent].height + SATELLITE_GAP;
+    for (const child of children) {
+      const kept = saved[child];
+      if (kept && Number.isFinite(kept.x) && Number.isFinite(kept.y)) {
+        positions[child] = { x: kept.x, y: kept.y };
+      } else {
+        positions[child] = { x: base.x + SATELLITE_INDENT, y: sy };
+      }
+      sy += sizes[child].height + 6;
+    }
+  }
+  const ids = graph.nodes.map((n) => n.id).filter((id) => positions[id] !== void 0);
+  const rows = navigationRows(ids, positions, sizes);
+  return { positions, sizes, markers, rows, order: rows.flat(), parentOf };
+}
+var BAND_WRAP_MIN = 9;
+function wrapBand(band) {
+  if (band.length < BAND_WRAP_MIN) {
+    return [band];
+  }
+  const perRow = Math.ceil(Math.sqrt(band.length * 1.6));
+  const rows = [];
+  for (let i = 0; i < band.length; i += perRow) {
+    rows.push(band.slice(i, i + perRow));
+  }
+  return rows;
+}
+function satelliteExtent(id, satellites, sizes) {
+  const children = satellites.get(id);
+  if (!children || children.length === 0) {
+    return 0;
+  }
+  let extent = SATELLITE_GAP;
+  for (const child of children) {
+    extent += sizes[child].height + 6;
+  }
+  return extent;
+}
+var ORDER_SWEEPS = 12;
+function orderSpan(bands, edges) {
+  const at = /* @__PURE__ */ new Map();
+  for (const band of bands) {
+    const span = Math.max(1, band.length - 1);
+    band.forEach((id, i) => at.set(id, band.length === 1 ? 0.5 : i / span));
+  }
+  let total = 0;
+  for (const e of edges) {
+    if (e.kind === "build" || e.from === e.to) {
+      continue;
+    }
+    const u = at.get(e.from);
+    const v = at.get(e.to);
+    if (u !== void 0 && v !== void 0) {
+      total += Math.abs(u - v);
+    }
+  }
+  return total;
+}
+function orderBands(bands, edges) {
+  const neighbours = /* @__PURE__ */ new Map();
+  for (const e of edges) {
+    if (e.kind === "build" || e.from === e.to) {
+      continue;
+    }
+    (neighbours.get(e.from) ?? neighbours.set(e.from, []).get(e.from)).push(e.to);
+    (neighbours.get(e.to) ?? neighbours.set(e.to, []).get(e.to)).push(e.from);
+  }
+  const sortAgainst = (band, reference) => {
+    if (band.length < 2 || reference.length === 0) {
+      return;
+    }
+    const rank = /* @__PURE__ */ new Map();
+    reference.forEach((id, i) => rank.set(id, i));
+    const span = Math.max(1, reference.length - 1);
+    const ownSpan = Math.max(1, band.length - 1);
+    const keyed = band.map((id, index) => {
+      let sum = 0;
+      let count = 0;
+      for (const other of neighbours.get(id) ?? []) {
+        const r = rank.get(other);
+        if (r !== void 0) {
+          sum += r;
+          count++;
+        }
+      }
+      const key = count === 0 ? index / ownSpan : sum / count / span;
+      return { id, key, index };
+    });
+    keyed.sort((a, b) => a.key - b.key || a.index - b.index);
+    band.length = 0;
+    band.push(...keyed.map((k) => k.id));
+  };
+  if (bands.length < 2) {
+    return;
+  }
+  let best = bands.map((band) => [...band]);
+  let bestScore = orderSpan(bands, edges);
+  const keepIfBetter = () => {
+    const score = orderSpan(bands, edges);
+    if (score < bestScore - 1e-9) {
+      bestScore = score;
+      best = bands.map((band) => [...band]);
+    }
+  };
+  for (let sweep = 0; sweep < ORDER_SWEEPS; sweep++) {
+    for (let i = 1; i < bands.length; i++) {
+      sortAgainst(bands[i], bands[i - 1]);
+    }
+    keepIfBetter();
+    for (let i = bands.length - 2; i >= 0; i--) {
+      sortAgainst(bands[i], bands[i + 1]);
+    }
+    keepIfBetter();
+  }
+  for (let i = 0; i < bands.length; i++) {
+    bands[i].length = 0;
+    bands[i].push(...best[i]);
+  }
+}
+function navigationRows(ids, positions, sizes) {
+  const placed = ids.filter((id) => positions[id] !== void 0);
+  const byY = [...placed].sort(
+    (a, b) => positions[a].y - positions[b].y || positions[a].x - positions[b].x || (a < b ? -1 : a > b ? 1 : 0)
+  );
+  const rows = [];
+  let current = [];
+  let top = 0;
+  let tolerance = 0;
+  const flush = () => {
+    if (current.length > 0) {
+      rows.push(sortByX(current, positions));
+      current = [];
+    }
+  };
+  for (const id of byY) {
+    const y = positions[id].y;
+    const half = (sizes[id]?.height ?? NODE_HEIGHT) / 2;
+    if (current.length === 0) {
+      current = [id];
+      top = y;
+      tolerance = half;
+      continue;
+    }
+    if (y - top <= tolerance) {
+      current.push(id);
+      tolerance = Math.max(tolerance, half);
+    } else {
+      flush();
+      current = [id];
+      top = y;
+      tolerance = half;
+    }
+  }
+  flush();
+  return rows;
+}
+function sortByX(ids, positions) {
+  return [...ids].sort(
+    (a, b) => positions[a].x - positions[b].x || (a < b ? -1 : a > b ? 1 : 0)
+  );
+}
+function boxOf(p, size) {
+  return { x: p.x, y: p.y, width: size.width, height: size.height };
+}
+function edgeAnchors(a, b) {
+  const aCx = a.x + a.width / 2;
+  const bCx = b.x + b.width / 2;
+  const aCy = a.y + a.height / 2;
+  const bCy = b.y + b.height / 2;
+  if (b.y >= a.y + a.height) {
+    return { x1: aCx, y1: a.y + a.height, x2: bCx, y2: b.y, axis: "vertical" };
+  }
+  if (a.y >= b.y + b.height) {
+    return { x1: aCx, y1: a.y, x2: bCx, y2: b.y + b.height, axis: "vertical" };
+  }
+  if (bCx >= aCx) {
+    return { x1: a.x + a.width, y1: aCy, x2: b.x, y2: bCy, axis: "horizontal" };
+  }
+  return { x1: a.x, y1: aCy, x2: b.x + b.width, y2: bCy, axis: "horizontal" };
+}
+var CURVE_MIN = 14;
+var CURVE_MAX = 64;
+function edgeGeometry(a, b) {
+  const { x1, y1, x2, y2, axis } = edgeAnchors(a, b);
+  const distance = axis === "vertical" ? Math.abs(y2 - y1) : Math.abs(x2 - x1);
+  const bend = Math.min(CURVE_MAX, Math.max(CURVE_MIN, distance / 2));
+  const c1 = axis === "vertical" ? { x: x1, y: y1 + Math.sign(y2 - y1 || 1) * bend } : { x: x1 + Math.sign(x2 - x1 || 1) * bend, y: y1 };
+  const c2 = axis === "vertical" ? { x: x2, y: y2 - Math.sign(y2 - y1 || 1) * bend } : { x: x2 - Math.sign(x2 - x1 || 1) * bend, y: y2 };
+  const mid = {
+    x: (x1 + 3 * c1.x + 3 * c2.x + x2) / 8,
+    y: (y1 + 3 * c1.y + 3 * c2.y + y2) / 8
+  };
+  const d = `M${round(x1)} ${round(y1)}C${round(c1.x)} ${round(c1.y)} ${round(c2.x)} ${round(c2.y)} ${round(x2)} ${round(y2)}`;
+  return { d, mid: { x: round(mid.x), y: round(mid.y) } };
+}
+function round(n) {
+  return Math.round(n * 10) / 10;
+}
+var ROUTE_CLEARANCE = 9;
+var ROUTE_TURN = 16;
+var ROUTE_RADIUS = 8;
+var OCCLUSION_SAMPLES = 16;
+function cubicAt(p0, p1, p2, p3, t) {
+  const u = 1 - t;
+  return {
+    x: u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
+    y: u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y
+  };
+}
+function inside(box, x, y) {
+  return x > box.x && x < box.x + box.width && y > box.y && y < box.y + box.height;
+}
+function curveObstructed(a, b, obstacles) {
+  if (obstacles.length === 0) {
+    return false;
+  }
+  const { x1, y1, x2, y2, axis } = edgeAnchors(a, b);
+  const [c1, c2] = controlPoints(x1, y1, x2, y2, axis);
+  const lo = { x: Math.min(x1, x2, c1.x, c2.x), y: Math.min(y1, y2, c1.y, c2.y) };
+  const hi = { x: Math.max(x1, x2, c1.x, c2.x), y: Math.max(y1, y2, c1.y, c2.y) };
+  const near = obstacles.filter(
+    (o) => o !== a && o !== b && o.x < hi.x && o.x + o.width > lo.x && o.y < hi.y && o.y + o.height > lo.y
+  );
+  if (near.length === 0) {
+    return false;
+  }
+  for (let i = 1; i < OCCLUSION_SAMPLES; i++) {
+    const p = cubicAt({ x: x1, y: y1 }, c1, c2, { x: x2, y: y2 }, i / OCCLUSION_SAMPLES);
+    for (const o of near) {
+      if (inside(o, p.x, p.y)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+function controlPoints(x1, y1, x2, y2, axis) {
+  const distance = axis === "vertical" ? Math.abs(y2 - y1) : Math.abs(x2 - x1);
+  const bend = Math.min(CURVE_MAX, Math.max(CURVE_MIN, distance / 2));
+  return axis === "vertical" ? [
+    { x: x1, y: y1 + Math.sign(y2 - y1 || 1) * bend },
+    { x: x2, y: y2 - Math.sign(y2 - y1 || 1) * bend }
+  ] : [
+    { x: x1 + Math.sign(x2 - x1 || 1) * bend, y: y1 },
+    { x: x2 - Math.sign(x2 - x1 || 1) * bend, y: y2 }
+  ];
+}
+function mergedSpans(blockers) {
+  const spans = blockers.map((o) => [o.x - ROUTE_CLEARANCE, o.x + o.width + ROUTE_CLEARANCE]).sort((p, q) => p[0] - q[0]);
+  const merged = [];
+  for (const span of spans) {
+    const last = merged[merged.length - 1];
+    if (last && span[0] <= last[1]) {
+      last[1] = Math.max(last[1], span[1]);
+    } else {
+      merged.push([span[0], span[1]]);
+    }
+  }
+  return merged;
+}
+function nearestFree(merged, desired, bounds) {
+  if (bounds.min > bounds.max) {
+    return null;
+  }
+  let best = null;
+  const consider = (lo, hi) => {
+    const l = Math.max(lo, bounds.min);
+    const h = Math.min(hi, bounds.max);
+    if (l > h) {
+      return;
+    }
+    const x = Math.min(h, Math.max(l, desired));
+    if (best === null || Math.abs(x - desired) < Math.abs(best - desired)) {
+      best = x;
+    }
+  };
+  let cursor = -Infinity;
+  for (const [lo, hi] of merged) {
+    consider(cursor, lo);
+    cursor = Math.max(cursor, hi);
+  }
+  consider(cursor, Infinity);
+  return best;
+}
+function roundedPath(points, radius) {
+  const pts = points.filter(
+    (p, i) => i === 0 || Math.abs(p.x - points[i - 1].x) > 0.01 || Math.abs(p.y - points[i - 1].y) > 0.01
+  );
+  if (pts.length < 2) {
+    return "";
+  }
+  let d = `M${round(pts[0].x)} ${round(pts[0].y)}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const prev = pts[i - 1];
+    const here = pts[i];
+    const next = pts[i + 1];
+    const inLen = Math.hypot(here.x - prev.x, here.y - prev.y);
+    const outLen = Math.hypot(next.x - here.x, next.y - here.y);
+    const r = Math.min(radius, inLen / 2, outLen / 2);
+    const a = {
+      x: here.x + (prev.x - here.x) / inLen * r,
+      y: here.y + (prev.y - here.y) / inLen * r
+    };
+    const b = {
+      x: here.x + (next.x - here.x) / outLen * r,
+      y: here.y + (next.y - here.y) / outLen * r
+    };
+    d += `L${round(a.x)} ${round(a.y)}Q${round(here.x)} ${round(here.y)} ${round(b.x)} ${round(b.y)}`;
+  }
+  const end = pts[pts.length - 1];
+  d += `L${round(end.x)} ${round(end.y)}`;
+  return d;
+}
+function routeGeometry(a, b, obstacles, extent, spans) {
+  const direct2 = edgeGeometry(a, b);
+  const { x1, y1, x2, y2, axis } = edgeAnchors(a, b);
+  const lo = Math.min(y1, y2);
+  const hi = Math.max(y1, y2);
+  const between = [];
+  for (const o of obstacles) {
+    if (o !== a && o !== b && o.y < hi && o.y + o.height > lo) {
+      between.push(o);
+    }
+  }
+  if (!curveObstructed(a, b, between)) {
+    return direct2;
+  }
+  if (axis !== "vertical") {
+    return direct2;
+  }
+  const dir = Math.sign(y2 - y1 || 1);
+  let nearEdge = dir > 0 ? Infinity : -Infinity;
+  let farEdge = dir > 0 ? -Infinity : Infinity;
+  for (const o of between) {
+    const oTop = o.y;
+    const oBottom = o.y + o.height;
+    if (dir > 0) {
+      if (oTop > y1) {
+        nearEdge = Math.min(nearEdge, oTop);
+      }
+      if (oBottom < y2) {
+        farEdge = Math.max(farEdge, oBottom);
+      }
+    } else {
+      if (oBottom < y1) {
+        nearEdge = Math.max(nearEdge, oBottom);
+      }
+      if (oTop > y2) {
+        farEdge = Math.min(farEdge, oTop);
+      }
+    }
+  }
+  const nearGap = Number.isFinite(nearEdge) ? Math.abs(nearEdge - y1) : Infinity;
+  const farGap = Number.isFinite(farEdge) ? Math.abs(y2 - farEdge) : Infinity;
+  if (nearGap < 10 || farGap < 10) {
+    return direct2;
+  }
+  const turn1 = y1 + dir * Math.min(ROUTE_TURN, nearGap / 2);
+  const turn2 = y2 - dir * Math.min(ROUTE_TURN, farGap / 2);
+  if ((turn2 - turn1) * dir <= 0) {
+    return direct2;
+  }
+  const corridorLo = Math.min(turn1, turn2);
+  const corridorHi = Math.max(turn1, turn2);
+  const key = `${corridorLo}:${corridorHi}`;
+  let merged = spans?.get(key);
+  if (merged === void 0) {
+    const blockers = [];
+    for (const o of between) {
+      if (o.y < corridorHi && o.y + o.height > corridorLo) {
+        blockers.push(o);
+      }
+    }
+    merged = mergedSpans(blockers);
+    spans?.set(key, merged);
+  }
+  let bounds = extent;
+  if (bounds === void 0) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const o of obstacles) {
+      min = Math.min(min, o.x);
+      max = Math.max(max, o.x + o.width);
+    }
+    bounds = { min, max };
+  }
+  const corridor = nearestFree(merged, (x1 + x2) / 2, bounds);
+  if (corridor === null) {
+    return direct2;
+  }
+  const d = roundedPath(
+    [
+      { x: x1, y: y1 },
+      { x: x1, y: turn1 },
+      { x: corridor, y: turn1 },
+      { x: corridor, y: turn2 },
+      { x: x2, y: turn2 },
+      { x: x2, y: y2 }
+    ],
+    ROUTE_RADIUS
+  );
+  if (d === "") {
+    return direct2;
+  }
+  return { d, mid: { x: round(corridor), y: round((turn1 + turn2) / 2) } };
+}
+function routeEdges(edges, boxes) {
+  const all = Object.values(boxes);
+  let min = Infinity;
+  let max = -Infinity;
+  for (const o of all) {
+    min = Math.min(min, o.x);
+    max = Math.max(max, o.x + o.width);
+  }
+  const extent = { min, max };
+  const spans = /* @__PURE__ */ new Map();
+  const out = [];
+  for (const e of edges) {
+    if (e.from === e.to) {
+      continue;
+    }
+    const a = boxes[e.from];
+    const b = boxes[e.to];
+    if (!a || !b) {
+      continue;
+    }
+    out.push({ edge: e, geometry: routeGeometry(a, b, all, extent, spans) });
+  }
+  return out;
+}
+function edgeLabel(edge) {
+  if (edge.kind !== "depends_on" || !edge.depends_on) {
+    return "";
+  }
+  const parts = [edge.depends_on.condition];
+  if (edge.depends_on.required === "false") {
+    parts.push("not required");
+  }
+  return parts.join(" \xB7 ");
+}
+var LABEL_CHAR_WIDTH = 6.2;
+var LABEL_PAD_X = 8;
+var LABEL_HEIGHT = 15;
+var LABEL_TOP = -8;
+function placeLabels(labels, obstacles = []) {
+  const offsets = [
+    { x: 0, y: 0 },
+    { x: 0, y: -(LABEL_HEIGHT + 3) },
+    { x: 0, y: LABEL_HEIGHT + 3 },
+    { x: 0, y: -2 * (LABEL_HEIGHT + 3) },
+    { x: 0, y: 2 * (LABEL_HEIGHT + 3) }
+  ];
+  const overlaps = (a, b) => a.x + a.width > b.x && b.x + b.width > a.x && a.y + a.height > b.y && b.y + b.height > a.y;
+  const taken = [];
+  const out = [];
+  for (const label of labels) {
+    const width = label.text.length * LABEL_CHAR_WIDTH + LABEL_PAD_X;
+    const sideways = width / 2 + 10;
+    const candidates = [...offsets, { x: sideways, y: 0 }, { x: -sideways, y: 0 }];
+    let chosen = null;
+    let fallback = null;
+    for (const offset of candidates) {
+      const at = { x: label.mid.x + offset.x, y: label.mid.y + offset.y };
+      const plate = {
+        x: at.x - width / 2,
+        y: at.y + LABEL_TOP,
+        width,
+        height: LABEL_HEIGHT
+      };
+      if (taken.some((t) => overlaps(t, plate))) {
+        continue;
+      }
+      if (fallback === null) {
+        fallback = { at, plate };
+      }
+      if (!obstacles.some((o) => overlaps(o, plate))) {
+        chosen = { at, plate };
+        break;
+      }
+    }
+    const placed = chosen ?? fallback;
+    if (placed === null) {
+      out.push({
+        edge: label.edge,
+        text: label.text,
+        at: label.mid,
+        plate: { x: label.mid.x, y: label.mid.y, width: 0, height: 0 },
+        dropped: true
+      });
+      continue;
+    }
+    taken.push(placed.plate);
+    out.push({ edge: label.edge, text: label.text, at: placed.at, plate: placed.plate, dropped: false });
+  }
+  return out;
+}
+function wrapText(text, columns, maxLines) {
+  if (columns <= 0 || maxLines <= 0) {
+    return [];
+  }
+  if (text.length <= columns) {
+    return [text];
+  }
+  const lines = [];
+  let rest = text;
+  while (rest.length > columns && lines.length < maxLines - 1) {
+    const window = rest.slice(0, columns + 1);
+    let cut = Math.max(window.lastIndexOf("/"), window.lastIndexOf(":"));
+    cut = cut > 0 ? cut + 1 : columns;
+    const linesLeftAfter = maxLines - lines.length - 1;
+    if (rest.length - cut > columns * linesLeftAfter) {
+      cut = columns;
+    }
+    lines.push(rest.slice(0, cut));
+    rest = rest.slice(cut);
+  }
+  lines.push(rest.length > columns ? `${rest.slice(0, columns - 1)}\u2026` : rest);
+  return lines;
+}
+function wrapImageRef(image, columns, maxLines) {
+  if (columns <= 0 || maxLines <= 0) {
+    return [];
+  }
+  const budget = columns * maxLines;
+  if (image.length <= budget) {
+    return wrapText(image, columns, maxLines);
+  }
+  const tail = image.slice(-(budget - 1));
+  return wrapText(`\u2026${tail}`, columns, maxLines);
+}
+
+// host/topology.ts
+var MalformedGraphError = class extends Error {
+  constructor(detail) {
+    super(detail);
+    this.detail = detail;
+    this.name = "MalformedGraphError";
+  }
+};
+function isRecord(v) {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+function readGraph(raw) {
+  if (!isRecord(raw)) {
+    throw new MalformedGraphError("the core returned something that is not an object");
+  }
+  for (const key of ["nodes", "edges", "cycles", "dangling", "profiles"]) {
+    if (!Array.isArray(raw[key])) {
+      throw new MalformedGraphError(`the core's topology has no "${key}" array`);
+    }
+  }
+  const nodes = raw.nodes.filter(
+    (n) => isRecord(n) && typeof n.id === "string" && n.id !== "" && typeof n.kind === "string"
+  );
+  if (nodes.length !== raw.nodes.length) {
+    throw new MalformedGraphError("the core returned a node with no id or no kind");
+  }
+  const known = new Set(nodes.map((n) => n.id));
+  const edges = [];
+  let droppedEdges = 0;
+  for (const e of raw.edges) {
+    if (!isRecord(e) || typeof e.from !== "string" || typeof e.to !== "string") {
+      throw new MalformedGraphError("the core returned an edge with no endpoints");
+    }
+    if (!known.has(e.from) || !known.has(e.to)) {
+      droppedEdges++;
+      continue;
+    }
+    edges.push(e);
+  }
+  return {
+    graph: {
+      profiles: raw.profiles,
+      nodes,
+      edges,
+      cycles: raw.cycles,
+      dangling: raw.dangling,
+      max_layer: typeof raw.max_layer === "number" ? raw.max_layer : 0
+    },
+    droppedEdges
+  };
+}
+
+// harness/graphmetrics.ts
+var fs = __toESM(require("node:fs"));
+var path = __toESM(require("node:path"));
+var f = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "fixtures/core.json"), "utf8"));
+var SAMPLES = 24;
+var verbose = process.argv.includes("-v");
+var direct = process.argv.includes("--direct");
+function geometryOf(edges, boxes) {
+  if (!direct) {
+    return routeEdges(edges, boxes);
+  }
+  const out = [];
+  for (const e of edges) {
+    if (e.from === e.to) continue;
+    const a = boxes[e.from], b = boxes[e.to];
+    if (!a || !b) continue;
+    out.push({ edge: e, geometry: edgeGeometry(a, b) });
+  }
+  return out;
+}
+function labelsOf(routed, boxes) {
+  const wanted = routed.map((r) => ({ edge: r.edge, text: edgeLabel(r.edge), mid: r.geometry.mid })).filter((r) => r.text !== "");
+  if (!direct) {
+    return placeLabels(wanted, boxes);
+  }
+  return wanted.map((w) => {
+    const width = w.text.length * LABEL_CHAR_WIDTH + LABEL_PAD_X;
+    return {
+      text: w.text,
+      at: w.mid,
+      plate: { x: w.mid.x - width / 2, y: w.mid.y + LABEL_TOP, width, height: LABEL_HEIGHT },
+      dropped: false
+    };
+  });
+}
+function lerp(a, b, t) {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+}
+function quad(p0, p1, p2, t) {
+  const u = 1 - t;
+  return {
+    x: u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x,
+    y: u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y
+  };
+}
+function cubic(p0, p1, p2, p3, t) {
+  const u = 1 - t;
+  return {
+    x: u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
+    y: u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y
+  };
+}
+function samplePath(d, per) {
+  const tokens = d.match(/[MLCQ]|-?\d+(?:\.\d+)?/g) ?? [];
+  const pts = [];
+  let i = 0;
+  let cur = { x: 0, y: 0 };
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    const cmd = tokens[i++];
+    if (cmd === "M") {
+      cur = { x: num(), y: num() };
+      pts.push(cur);
+    } else if (cmd === "L") {
+      const to = { x: num(), y: num() };
+      for (let s = 1; s <= 4; s++) pts.push(lerp(cur, to, s / 4));
+      cur = to;
+    } else if (cmd === "Q") {
+      const c = { x: num(), y: num() };
+      const to = { x: num(), y: num() };
+      for (let s = 1; s <= 4; s++) pts.push(quad(cur, c, to, s / 4));
+      cur = to;
+    } else if (cmd === "C") {
+      const c1 = { x: num(), y: num() };
+      const c2 = { x: num(), y: num() };
+      const to = { x: num(), y: num() };
+      for (let s = 1; s <= per; s++) pts.push(cubic(cur, c1, c2, to, s / per));
+      cur = to;
+    } else {
+      i++;
+    }
+  }
+  return pts;
+}
+function cr(o, a, b) {
+  return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+}
+function hits(A, B, C, D) {
+  const d1 = cr(A, B, C), d2 = cr(A, B, D), d3 = cr(C, D, A), d4 = cr(C, D, B);
+  return d1 > 0 !== d2 > 0 && d3 > 0 !== d4 > 0;
+}
+function measure(name, raw) {
+  const { graph } = readGraph(raw);
+  let ms = Infinity;
+  for (let run = 0; run < 3; run++) {
+    const t0 = process.hrtime.bigint();
+    const l = layoutGraph(graph, {}, []);
+    const bx = {};
+    for (const id of Object.keys(l.positions)) bx[id] = boxOf(l.positions[id], l.sizes[id]);
+    geometryOf(graph.edges, bx);
+    ms = Math.min(ms, Number(process.hrtime.bigint() - t0) / 1e6);
+  }
+  const layout = layoutGraph(graph, {}, []);
+  const boxes = {};
+  for (const id of Object.keys(layout.positions)) boxes[id] = boxOf(layout.positions[id], layout.sizes[id]);
+  const routed = geometryOf(graph.edges, boxes);
+  const polys = routed.map((r) => ({ pts: samplePath(r.geometry.d, SAMPLES), a: r.edge.from, b: r.edge.to }));
+  let through = 0;
+  const occluded = [];
+  const entries = Object.entries(boxes);
+  for (let k = 0; k < polys.length; k++) {
+    const p = polys[k];
+    let over = false;
+    for (let s = 1; s < p.pts.length - 1 && !over; s++) {
+      const q = p.pts[s];
+      for (const [id, bx] of entries) {
+        if (id === p.a || id === p.b) continue;
+        const o = bx;
+        if (q.x > o.x && q.x < o.x + o.width && q.y > o.y && q.y < o.y + o.height) {
+          over = true;
+          break;
+        }
+      }
+    }
+    if (over) {
+      through++;
+      occluded.push(`${p.a} -> ${p.b}`);
+    }
+  }
+  const bbs = polys.map((p) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const q of p.pts) {
+      x0 = Math.min(x0, q.x);
+      y0 = Math.min(y0, q.y);
+      x1 = Math.max(x1, q.x);
+      y1 = Math.max(y1, q.y);
+    }
+    return { x0, y0, x1, y1 };
+  });
+  let crossings = 0;
+  const crossPairs = [];
+  for (let i = 0; i < polys.length; i++) {
+    for (let j = i + 1; j < polys.length; j++) {
+      const p = polys[i], q = polys[j];
+      if (p.a === q.a || p.a === q.b || p.b === q.a || p.b === q.b) continue;
+      const bi = bbs[i], bj = bbs[j];
+      if (bi.x1 < bj.x0 || bj.x1 < bi.x0 || bi.y1 < bj.y0 || bj.y1 < bi.y0) continue;
+      let found = false;
+      for (let s = 0; s + 1 < p.pts.length && !found; s++)
+        for (let t = 0; t + 1 < q.pts.length && !found; t++)
+          if (hits(p.pts[s], p.pts[s + 1], q.pts[t], q.pts[t + 1])) found = true;
+      if (found) {
+        crossings++;
+        if (verbose && crossPairs.length < 12) crossPairs.push(`${p.a}->${p.b} x ${q.a}->${q.b}`);
+      }
+    }
+  }
+  const placed = labelsOf(routed, Object.values(boxes));
+  let overlaps = 0;
+  const pairs = [];
+  for (let i = 0; i < placed.length; i++)
+    for (let j = i + 1; j < placed.length; j++) {
+      const a = placed[i].plate, b = placed[j].plate;
+      if (a.x + a.width > b.x && b.x + b.width > a.x && a.y + a.height > b.y && b.y + b.height > a.y) {
+        overlaps++;
+        pairs.push(`${placed[i].text} / ${placed[j].text}`);
+      }
+    }
+  const dropped = placed.filter((p) => p.dropped).length;
+  console.log(
+    `${name}: ${graph.nodes.length} nodes, ${polys.length} drawn edges, ${crossings} crossing pairs, ${through} occluded edges, ${placed.length - dropped}/${placed.length} labels shown, ${overlaps} overlapping label pairs, layout+route ${ms.toFixed(1)}ms`
+  );
+  if (verbose) {
+    for (const o of occluded.slice(0, 20)) console.log(`    occluded: ${o}`);
+    for (const p of pairs) console.log(`    label overlap: ${p}`);
+    for (const c of crossPairs) console.log(`    crossing: ${c}`);
+  }
+}
+measure("webstack", f.topology);
+measure("large", f["topology.large"]);

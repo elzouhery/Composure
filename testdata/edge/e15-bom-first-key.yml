@@ -1,0 +1,18 @@
+﻿services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"
+  cache:
+    image: redis:7
+
+# A BOM-prefixed compose file whose FIRST KEY IS ON LINE 1. The comment block
+# belongs at the BOTTOM on purpose.
+#
+# e13-bom-read.yml and e10-bom-crlf.yml both open with seven comment lines, so
+# `services:` sits on line 8 and every line-oriented range for it starts far
+# past the three-byte mark. `afterBOM` can therefore never fire on them, and
+# both BOM assertions in the suite were checks that could not fail. Deleting
+# afterBOM outright left them green while DeleteKey silently ate the mark.
+#
+# Nothing may be added ABOVE line 1 of this file.

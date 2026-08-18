@@ -1,0 +1,37 @@
+# Non-ASCII text EARLIER ON THE SAME LINE as the token being addressed.
+#
+# goccy reports a token's Column in RUNES; offsetOf converts line/column to a
+# byte offset by walking the line. Every multi-byte character to the left of a
+# token on its own line costs extra bytes — one for é, two for 東, three for an
+# emoji — so a conversion that adds col-1 BYTES lands short by exactly that.
+#
+# Block style hides it: each value sits on its own line and the multi-byte text
+# is to the RIGHT of everything addressed. Flow style is what puts a scalar and
+# the accented text on one line, which is why this file is mostly flow.
+#
+# Story 6.4 made the conversion rune-aware, so ALL SIX paths in this file are
+# editable and each produces a two-line diff. Before it, `labels.team` and
+# `environment.1` were refused with ErrPositionMismatch — the assertion at the
+# foot of scalarSpan compares the bytes at the computed offset against the
+# token's own lexeme, and they disagreed (` "x` against `"x"`). That refusal was
+# correct and the assertion is kept: without it the range comes back plausible
+# and wrong, and the splice writes into the neighbouring value.
+#
+# Two properties this file pins, and both halves are load-bearing. The paths
+# with an accent to their LEFT must be addressable; and the block-style paths,
+# and the paths to the left of the accent, must STAY addressable — a guard that
+# refused every file containing an accent would be a different defect.
+#
+# One fresh copy of this file per path, always. Applying the edits in sequence
+# to one buffer removes the accent before the later paths are tried, so every
+# one of them passes against unfixed code and the test proves nothing.
+# e38-multibyte-widths.yml is the width sweep; e39-bom-multibyte.yml adds a byte
+# order mark to the same shape.
+services:
+  web:
+    image: nginx:1.25
+    labels: {owner: "café", team: "x"}
+    environment: [CAFÉ=1, PLAIN=2]
+  worker:
+    image: busybox
+    command: echo café
