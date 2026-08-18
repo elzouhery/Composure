@@ -1,0 +1,71 @@
+name: Bug report
+description: Something Composure did that it should not have, or did not do that it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **If this is a security issue, stop.** Do not file it here. See
+        [SECURITY.md](../blob/main/SECURITY.md) — use the Security tab's
+        private vulnerability reporting instead.
+
+        The most valuable thing you can give us is the file. This engine does
+        not crash, it returns a confident wrong answer, so "it looked wrong"
+        without the input is usually not reproducible.
+
+  - type: textarea
+    id: input
+    attributes:
+      label: The file, or the smallest version of it that still shows the problem
+      description: |
+        Compose file, Dockerfile, `.env` — whatever is needed to reproduce.
+        Redact secrets; the values rarely matter, the shape does.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened instead
+      description: |
+        If Composure wrote bytes you did not ask for, paste the diff. That is
+        the most serious class of defect this project has.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open compose.yaml
+        2. Select the service `web`
+        3. Change `image` to …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Composure version
+      description: Extensions view → Composure, or `composure --version` for the CLI.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS, architecture, and VS Code version
+      placeholder: macOS 15.3 arm64, VS Code 1.97.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output panel
+      description: View → Output → Composure. Paste anything that looks relevant.
+      render: shell
+    validations:
+      required: false

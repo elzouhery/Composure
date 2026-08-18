@@ -50,6 +50,15 @@ extension/dist-test/
 /AGENTS.local.md
 /CLAUDE.local.md
 
+# --- CI output ---------------------------------------------------------------
+# The metric history the fidelity gate appends a row to on every run. It is
+# output, not source: it lives on the orphan branch `metrics`, which is where
+# CI pushes it, and a local `make gate` writes a throwaway copy here.
+#
+# It was tracked on main until the branch was protected, which meant CI needed
+# write access to the branch every human change has to be reviewed to reach.
+benchmarks/history.jsonl
+
 # --- Harness output ----------------------------------------------------------
 # The screenshot harness writes PNGs OUTSIDE extension/, which is how six of
 # them reached the repository root. All four scripts now default into this one

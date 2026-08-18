@@ -1,0 +1,42 @@
+name: Feature request
+description: Something Composure should be able to do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read **[README.md](../blob/main/README.md)** first — it says plainly
+        what this project does not do and, for several of those, why not. A
+        request the README already answers is still welcome if you disagree
+        with the answer; say which part you disagree with.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: |
+        What are you trying to do, and what happens today? Describe the
+        situation rather than the feature — the best solution is often not the
+        one the reporter had in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+    validations:
+      required: false
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Where would the answer come from?
+      description: |
+        Composure reports what a file says. It does not report what a builder
+        or a running daemon knows — base-image age ships, per-layer size does
+        not, and that line is deliberate: a number with nothing behind it is
+        worse than no number. If your request needs an answer from outside the
+        file, say where it comes from.
+    validations:
+      required: false
