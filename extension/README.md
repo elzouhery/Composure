@@ -8,7 +8,7 @@ and key order around it are untouched — measured at 98.63% byte-identical roun
 trip across 146 real compose files, against 19.86% for the parse-and-re-emit
 approach every YAML example teaches.
 
-![The stack graph and the inspector, with the service `web` selected](https://raw.githubusercontent.com/elzouhery/composure-assets/main/stack-and-inspector.png)
+![The stack graph and the inspector, with the service `web` selected](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/stack-and-inspector.png)
 
 Open a compose file and the panel opens beside it. The graph is the **resolved**
 project — overrides, `-f` chains, `include:`, `extends:`, `.env` interpolation,
@@ -27,7 +27,7 @@ Every resolved value carries `{file, line, column, merge step}`. The inspector
 prints it under the value, and clicking it moves your cursor to the line that
 won — the inspector stays where it is.
 
-![Two values whose provenance names the file, the line, and the anchor they were merged from](https://raw.githubusercontent.com/elzouhery/composure-assets/main/provenance.png)
+![Two values whose provenance names the file, the line, and the anchor they were merged from](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/provenance.png)
 
 The service block here never mentions a network. `networks: shipyard` is at line
 11, reached through the merge key `*defaults` on line 29 — which is the answer to
@@ -47,7 +47,7 @@ selected thing and this file does not use — generated at runtime from the
 vendored specification, never from a list somebody typed once. Keys newer than
 the `docker compose` on your machine are marked rather than hidden.
 
-![The grouped list of every key the specification permits here and the file does not use](https://raw.githubusercontent.com/elzouhery/composure-assets/main/available-not-set.png)
+![The grouped list of every key the specification permits here and the file does not use](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/available-not-set.png)
 
 Reading a compose file tells you what someone declared. It does not tell you
 what they could have declared and did not, which is usually the question behind
@@ -59,7 +59,7 @@ Diagnostics appear inline against the value they are about, and are also
 published to VS Code's problems panel. Each one says what breaks and what to do
 about it, rather than "invalid configuration".
 
-![An undefined-variable finding printed under the environment key that references it](https://raw.githubusercontent.com/elzouhery/composure-assets/main/diagnostic.png)
+![An undefined-variable finding printed under the environment key that references it](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/diagnostic.png)
 
 Ten rules run: host port collisions across the merged configuration; a
 `service_healthy` dependency on a service that declares no healthcheck; circular
@@ -74,7 +74,7 @@ mapping in another; and an obsolete top-level `version:`.
 Change a value and it stages. Nothing is written until you press the button that
 names the file it will write.
 
-![The pending strip: one edit, one line removed and one added, with the diff and a Save to compose.yaml control](https://raw.githubusercontent.com/elzouhery/composure-assets/main/pending-diff.png)
+![The pending strip: one edit, one line removed and one added, with the diff and a Save to compose.yaml control](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/pending-diff.png)
 
 The staged field keeps saying what the file still holds, so the panel never
 shows you a value your file does not have. `Discard` puts it back, and after a
@@ -109,7 +109,7 @@ form: one group per build stage, instructions in file order, each carrying its
 line. Editing works the same way, through a separate engine written for a
 separate grammar.
 
-![The Dockerfile view: the escape directive, the build stage, and its instructions each with a line number](https://raw.githubusercontent.com/elzouhery/composure-assets/main/dockerfile-stages.png)
+![The Dockerfile view: the escape directive, the build stage, and its instructions each with a line number](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/dockerfile-stages.png)
 
 Continuations, heredocs, escape directives and keyword casing survive an edit
 because they are never re-emitted. Each stage also lists `Available here:` —
@@ -122,7 +122,7 @@ Dockerfile engine scores 100% on all five of its measured properties across the
 Typing in an `image` field searches Docker Hub. Choosing a result fills the
 field; nothing is written until you save.
 
-![The Docker Hub search results under an image field, with official and verified-publisher badges](https://raw.githubusercontent.com/elzouhery/composure-assets/main/image-search.png)
+![The Docker Hub search results under an image field, with official and verified-publisher badges](https://raw.githubusercontent.com/elzouhery/composure/main/extension/media/image-search.png)
 
 This is the only part of Composure that makes a network request. Set
 `composure.dockerHub` to `off` and the panel is exactly what it is with no
@@ -175,7 +175,7 @@ committed baseline on every commit and fails the build when one drops. A failing
 fidelity number is never fixed by moving the threshold. The corpus is fetched by
 one command, the harness that measures it is in the repository, and the full
 tables are in
-[RESULTS.md](https://github.com/elzouhery/composure-assets/blob/main/RESULTS.md).
+[RESULTS.md](https://github.com/elzouhery/composure/blob/main/RESULTS.md).
 
 ## Requirements
 
@@ -267,7 +267,7 @@ DX does that well; Composure works in the panel beside it.
 
 ## The full manual
 
-📖 **[docs/USER-MANUAL.md](https://github.com/elzouhery/composure-assets/blob/main/USER-MANUAL.md)**
+📖 **[docs/USER-MANUAL.md](https://github.com/elzouhery/composure/blob/main/docs/USER-MANUAL.md)**
 — the graph and what its edges mean, provenance, staging and the pending diff,
 the full list of why an edit gets refused, adding services and instructions,
 comments, moving a value into a `.env` or a build `ARG`, Docker Hub, the CLI,
@@ -284,6 +284,6 @@ License or AGPL is an input to it, and a licence scan enforces that on every
 commit. The extension carries zero runtime npm dependencies, asserted by a test.
 
 The measured evidence behind every number above is published in
-[RESULTS.md](https://github.com/elzouhery/composure-assets/blob/main/RESULTS.md)
+[RESULTS.md](https://github.com/elzouhery/composure/blob/main/RESULTS.md)
 — the corpus, the benchmarks and the numbers the gate enforces on every commit.
 The source repository is not public yet.
