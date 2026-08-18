@@ -1,0 +1,94 @@
+{
+  "name": "composure",
+  "displayName": "Composure",
+  "description": "See the stack your compose file declares, find out which file and line set each value, and edit compose files and Dockerfiles without reformatting them — one changed value is a two-line diff.",
+  "version": "0.1.0",
+  "publisher": "elzouhery",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elzouhery/composure-assets.git"
+  },
+  "homepage": "https://github.com/elzouhery/composure-assets#readme",
+  "bugs": {
+    "url": "https://github.com/elzouhery/composure-assets/issues"
+  },
+  "qna": "https://github.com/elzouhery/composure-assets/issues",
+  "//categories": "`Other` was dropped: it is the marketplace's dumping ground and adds no way to be found that the two accurate categories do not. `Formatters` is deliberately NOT claimed — this extension's whole property is that it never reformats a file.",
+  "categories": [
+    "Visualization",
+    "Linters"
+  ],
+  "//keywords": "Capped at 5 by the marketplace. Chosen as five DISTINCT queries a searcher types, not five spellings of one: bare `compose` was dropped because the word is already in `description` and in `docker-compose`, and its slot went to `containers`.",
+  "keywords": [
+    "docker",
+    "docker-compose",
+    "dockerfile",
+    "yaml",
+    "containers"
+  ],
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/compose.{yml,yaml}",
+    "workspaceContains:**/compose.*.{yml,yaml}",
+    "workspaceContains:**/docker-compose.{yml,yaml}",
+    "workspaceContains:**/docker-compose.*.{yml,yaml}"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "composure.showStack",
+        "title": "Show Stack",
+        "category": "Composure"
+      }
+    ],
+    "configuration": {
+      "title": "Composure",
+      "properties": {
+        "composure.corePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "Absolute path to a `composure` core binary. For development only — when empty the extension uses the binary shipped for this platform under `bin/<goos>-<goarch>/`. Machine-scoped on purpose: this names an executable to run, and a `.vscode/settings.json` committed to a repository must not be able to redirect it."
+        },
+        "composure.dockerHub": {
+          "type": "string",
+          "enum": [
+            "on",
+            "off"
+          ],
+          "default": "on",
+          "markdownDescription": "Whether Composure may ask Docker Hub how old an image is and what newer tags exist. This is the **only** part of Composure that leaves your machine; everything else is read from your files. Set to `off` and the panel is exactly what it is with no network: no upgrade pills, no image search, and no requests made. Anonymous Docker Hub allows 180 requests a minute per IP address, shared by everyone behind it."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc --noEmit && node build.mjs",
+    "watch": "node build.mjs --watch",
+    "test": "node build.mjs --tests && node run-tests.mjs"
+  },
+  "//dependencies": "Deliberately empty and asserted empty by host/packaging.test.ts. `make licence` walks the Go build graph and cannot see node_modules, so the only tree size that gate can vouch for is zero. NOTE: `npm install --save-dev` deletes this empty object; restore it by hand afterwards.",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.24.2",
+    "ovsx": "^1.1.1",
+    "puppeteer-core": "^24.43.1",
+    "typescript": "^5.7.3"
+  },
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1B2028",
+    "theme": "dark"
+  }
+}

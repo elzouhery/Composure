@@ -1,0 +1,72 @@
+bin/
+corpus-repos/
+/fidelity
+/hubsearch
+/dockerbench
+/structbench
+/editbench
+/demo
+/probe
+.DS_Store
+
+# Publishing tokens. Never committed.
+.env
+.env.*
+!.env.example
+
+# ...but the .env rule above is unanchored, so it also matches the dotenv
+# FIXTURES under testdata/, which are inputs to the interpolation tests and must
+# stay tracked. They survive today only because the index outranks .gitignore;
+# re-adding one after a delete would need `git add -f` and would otherwise fail
+# silently. Exempt them by path so the rule keeps meaning "tokens at the root".
+!testdata/**/.env
+!cmd/composure/testdata/**/.env
+!examples/**/.env
+
+# VS Code extension build artefacts
+extension/node_modules/
+extension/dist/
+extension/out/
+extension/bin/
+extension/*.vsix
+
+# `make package` output: the .vsix set and the generated per-target ignore
+# files. Build artefacts, rebuilt in one command, never committed.
+extension/build/
+
+# The extension test bundle
+extension/dist-test/
+
+# --- Agent tooling -----------------------------------------------------------
+# A local agent-skill installation: 1075 files and 13MB of a third-party
+# framework, referenced by neither the Makefile nor CI, and no part of what
+# ships. Untracked rather than deleted, because it is the owner's local tooling
+# and not this project's.
+.claude/
+
+# Local, untracked notes for whoever is working in this checkout -- the place
+# for anything that must not travel to a public reader. Tracked documents state
+# their conclusions; these hold what is private to the working environment.
+/AGENTS.local.md
+/CLAUDE.local.md
+
+# --- Harness output ----------------------------------------------------------
+# The screenshot harness writes PNGs OUTSIDE extension/, which is how six of
+# them reached the repository root. All four scripts now default into this one
+# family -- `epic9.mjs` to `../shots-epic9`, `system.mjs` to `../shots-freeform`,
+# `shoot.mjs` to `../shots-render` and `comboshot.mjs` to `../shots-combo` --
+# so ignoring it by shape covers the next one too, whatever it is called.
+/shots-*/
+
+# The harness's captured RPC transcript: 942KB of verbatim `composure serve`
+# output whose 1893 embedded absolute paths are those of the machine that
+# captured it, so a committed copy is stale for every other clone. Regenerate
+# with `node extension/harness/capture.mjs` — which needs a built core in
+# extension/bin/ anyway, itself ignored above.
+extension/harness/fixtures/
+
+# --- Python bytecode ---------------------------------------------------------
+# No Python ships from this repository; the interpreter still leaves these
+# wherever a script is run, and five of them were committed under .claude/.
+__pycache__/
+*.pyc

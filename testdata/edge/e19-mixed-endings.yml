@@ -1,0 +1,10 @@
+# Mixed line endings, deliberately.
+#
+# services.web ends CRLF, services.api ends LF. An insert under web must
+# produce CRLF and an insert under api must produce LF -- a fixture with one
+# ending everywhere cannot tell "copies the neighbour" from "always CRLF".
+services:
+  web:
+    image: nginx
+  api:
+    image: node

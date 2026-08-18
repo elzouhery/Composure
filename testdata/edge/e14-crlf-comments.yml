@@ -1,0 +1,15 @@
+# A CRLF compose file whose document is preceded by comment lines.
+# No byte order mark: this defect is entirely independent of one.
+#
+# goccy counted each of the comment lines above as TWO lines, so every
+# position below them was reported four lines too far down. strategy.Range
+# indexed past the end of its line table and PANICKED on a short file; on a
+# long one it returned a plausible range over the wrong bytes, which is the
+# confident wrong answer this engine is built not to give. Found while
+# repairing the BOM read path, which is why e10 combines both and this file
+# isolates the CRLF half.
+services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Composure webview harness</title>
+<link href="../dist/webview.css" rel="stylesheet">
+<script src="theme.js"></script>
+<script src="dist/adapter.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+  // The same two things VS Code gives a webview: the theme's custom properties
+  // on the document element, and acquireVsCodeApi(). Everything else on the
+  // page is the shipped bundle, unmodified.
+  const params = new URLSearchParams(location.search);
+  const theme = window.ComposureThemes[params.get('theme') === 'light' ? 'light' : 'dark'];
+  for (const [k, v] of Object.entries(theme)) {
+    document.documentElement.style.setProperty(`--vscode-${k}`, v);
+  }
+  document.body.classList.add(params.get('theme') === 'light' ? 'vscode-light' : 'vscode-dark');
+  window.__posted = [];
+  window.acquireVsCodeApi = () => ({ postMessage: (m) => window.__posted.push(m) });
+  window.__ready = false;
+</script>
+<script src="../dist/webview.js"></script>
+<script>
+  fetch('fixtures/core.json')
+    .then((r) => r.json())
+    .then((fixtures) => {
+      const scenario = new URLSearchParams(location.search).get('scenario') || 'service';
+      for (const msg of window.ComposureHarness.messages(fixtures, scenario)) {
+        window.postMessage(msg, '*');
+      }
+      setTimeout(() => { window.__ready = true; }, 250);
+    });
+</script>
+</body>
+</html>

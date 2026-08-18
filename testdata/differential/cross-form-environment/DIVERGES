@@ -1,0 +1,21 @@
+# An EXPECTED-DIVERGENCE REGISTER, not a pass.
+#
+# Every config path below is one this project and `docker compose config`
+# genuinely disagree about. The harness asserts the disagreement STILL HAPPENS
+# and fails if the set changes in either direction — a fixture that starts
+# agreeing is as much a signal as one that starts diverging somewhere new.
+#
+# It is a register and not a suppression: a divergence listed here is counted,
+# printed, and excluded from the pass rate rather than folded into it. A reader
+# must not be able to mistake "known and documented" for "agrees".
+#
+# services.web.environment
+#   `environment` is a list in compose.yaml and a mapping in
+#   compose.override.yaml. Compose normalises both spellings to a mapping and
+#   keeps BASE_A. Composure replaces the collection whole, so BASE_A is not in the
+#   resolved model. This is deliberate — the model keeps the shape each file
+#   wrote so the splice engine addresses real bytes — and it is reported as a
+#   `merge-form-mismatch` finding by `composure resolve`, `composure explain` and
+#   `composure diagnose`. It is a divergence all the same, and this is where that
+#   is written down.
+services.web.environment

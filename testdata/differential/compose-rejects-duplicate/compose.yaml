@@ -1,0 +1,23 @@
+# The three attributes Compose neither deduplicates nor tolerates a repeat of.
+#
+# `docker compose config` on this project FAILS:
+#
+#   validating .../compose.override.yaml: services.a.security_opt items at 0 and 1 are equal
+#
+# so this fixture lands in the harness's "oracle refused" bucket by design. It
+# is here to be re-run by hand, because it is the evidence behind three rows of
+# the merge table — the rows that append rather than dedupe. A dedupe would make
+# the resolved model describe a project that cannot be loaded, in silence.
+#
+#   cd testdata/differential/compose-rejects-duplicate && docker compose config
+#
+# Composure resolves it, keeps both copies of each repeated entry, and raises a
+# `repeated-list-item` finding per repeat. See TestRepeatedStrictListItemIsKeptAndReported.
+services:
+  a:
+    image: busybox:1.36
+    security_opt: ["no-new-privileges:true"]
+    group_add: ["1001"]
+    volumes_from: ["b"]
+  b:
+    image: busybox:1.36

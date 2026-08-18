@@ -1,0 +1,9 @@
+{
+  // Shown to anyone who opens this repository in VS Code, under
+  // "Workspace Recommendations". This repository IS the extension, so the
+  // recommendation is the one place a reader lands on the product itself
+  // rather than on its source.
+  "recommendations": [
+    "elzouhery.composure"
+  ]
+}

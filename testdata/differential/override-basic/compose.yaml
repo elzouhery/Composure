@@ -1,0 +1,24 @@
+services:
+  web:
+    image: nginx:1.24
+    command: ["nginx", "-g", "daemon off;"]
+    environment:
+      LOG_LEVEL: info
+      BASE_ONLY: "1"
+    labels:
+      com.example.tier: web
+      com.example.owner: base
+    ports:
+      - "8080:80"
+    volumes:
+      - data:/var/lib/data
+    depends_on:
+      - api
+    user: "1000"
+    working_dir: /srv
+  api:
+    image: busybox:1.36
+    command: sleep infinity
+    restart: unless-stopped
+volumes:
+  data: {}

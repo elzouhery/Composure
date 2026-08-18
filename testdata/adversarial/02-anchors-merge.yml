@@ -1,0 +1,32 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-common: &common
+  restart: unless-stopped
+  logging: *default-logging
+  networks:
+    - backend
+
+services:
+  worker-a:
+    <<: *common
+    image: acme/worker:1.0
+    command: ["worker", "--queue", "a"]
+
+  worker-b:
+    <<: *common
+    image: acme/worker:1.0
+    command: ["worker", "--queue", "b"]
+
+  scheduler:
+    <<: *common
+    image: acme/scheduler:1.0
+    environment:
+      TZ: Africa/Cairo
+
+networks:
+  backend:
+    driver: bridge

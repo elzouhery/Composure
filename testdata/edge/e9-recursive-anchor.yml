@@ -1,0 +1,13 @@
+# A self-referential anchor. Valid YAML, parses without complaint, and
+# expanding it naively recurses until the stack is exhausted — which is fatal
+# in Go and cannot be recovered from, so the editor dies with the file.
+#
+# The resolver must refuse this with ErrAliasCycle. It stays here as a permanent
+# regression file because the splice engine still has to handle the bytes
+# normally: an unresolvable document is not an unspliceable one.
+x-loop: &loop
+  self: *loop
+
+services:
+  web:
+    image: nginx:1.27-alpine

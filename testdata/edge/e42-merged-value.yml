@@ -1,0 +1,68 @@
+# e42 — values that are not written where they are read.
+#
+# The reader's pane says `services.inherits.restart` is `unless-stopped`. The
+# file says no such thing: there is no `restart` under `inherits` at all, and
+# an edit aimed at that path lands on nothing. Until this fixture existed, the
+# write path discovered that from `path ... not found` and told the reader
+# their edit "could not be made".
+#
+# THE TRAP THIS FIXTURE EXISTS TO AVOID: a service that declares the key it
+# also inherits cannot tell an inherited value from a declared one — both
+# resolve to a value at `services.<name>.restart` and only one of them has
+# bytes there. So `inherits` does NOT declare restart and `declares` DOES, and
+# every assertion names which it is asking about.
+#
+# The rest of the file is the same question in its other shapes, each of which
+# the splice engine used to answer confidently and wrongly:
+#
+#   anchored    `&entry` on the scalar itself — the splice dropped the anchor
+#               and left `*entry` below dangling.
+#   references  `*entry` — the splice overwrote the `*` and wrote `ZZZentry`.
+#   blocked     a `|` block scalar — the splice replaced the `|` and welded the
+#               body into a multi-line plain scalar. Still valid YAML. Wrong.
+#   flowed      a flow mapping — a scalar inside one is editable, a key
+#               inserted into one is refused (ErrFlowStyle).
+#   deep        a nested key reached THROUGH the merge: writing it locally
+#               would replace the whole inherited mapping, dropping its
+#               siblings.
+
+x-defaults: &defaults
+  restart: unless-stopped
+  networks:
+    - back
+  healthcheck:
+    test: ["CMD", "true"]
+    interval: 30s
+    retries: 3
+
+services:
+  inherits:
+    <<: *defaults
+    image: nginx:1.27
+
+  declares:
+    <<: *defaults
+    restart: always
+    image: nginx:1.27
+
+  anchored:
+    image: nginx:1.27
+    entrypoint: &entry /docker-entrypoint.sh
+
+  references:
+    image: nginx:1.27
+    entrypoint: *entry
+
+  blocked:
+    image: nginx:1.27
+    command: |
+      one
+      two
+
+  flowed:
+    image: nginx:1.27
+    deploy: {replicas: 2}
+
+networks:
+  back:
+    driver: bridge

@@ -1,0 +1,9 @@
+# See .env beside this file. Every value here is a variable whose definition
+# carries something that looks like a comment.
+services:
+  vpn:
+    image: linuxserver/wireguard
+    environment:
+      SERVERURL: ${VPN_SERVER_URL}
+      HASHED: ${QUOTED_WITH_HASH}
+      DNS: ${UPSTREAM_DNS}

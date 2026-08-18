@@ -1,0 +1,348 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Note the package patterns throughout: ./cmd/... ./internal/... rather than
+# ./... — the fetched corpus lives inside the module directory and contains
+# thousands of unrelated third-party Go files that would otherwise be built.
+env:
+  PKGS: ./cmd/... ./internal/...
+
+jobs:
+  build:
+    name: Build, vet, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      # Formatting is checked here, first, because it was previously checked
+      # nowhere: gofmt lived in an editor setting and nine files had drifted.
+      # `make fmt` turns `gofmt -l`'s printed list into a non-zero exit --
+      # `gofmt -l` alone exits 0 whatever it finds and would never fail a job.
+      - run: make fmt
+      - run: go build $PKGS
+      - run: go vet $PKGS
+      - run: go test $PKGS
+
+  # The extension's test suite. It ran in no automated path at all until this
+  # job existed — the Go jobs below never touch Node, and deliberately: `check`
+  # is the Go gate and it must not start depending on a Node toolchain being
+  # present. This job is where Node lives, and nowhere else.
+  #
+  # `npm ci` rather than `npm install`: the lockfile is committed and a CI run
+  # that quietly resolves a different tree is testing something other than what
+  # ships.
+  extension:
+    name: Extension build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      # The core binary the real-binary contract test drives. Without it that
+      # test skips, and the one check that catches a one-sided protocol bump
+      # would skip silently in the only place it is ever run.
+      - name: Build the core for the extension
+        run: make extension-core
+      - run: npm --prefix extension ci
+      - run: npm --prefix extension run compile
+      - run: npm --prefix extension test
+
+  # Packaging is a build step that only ever runs on a maintainer's laptop
+  # unless something runs it here, and its failure mode is the worst kind: the
+  # Go builds are green, the tests are green, and the artefact either does not
+  # exist or carries a binary for the wrong platform. `host/packaging.test.ts`
+  # checks that the two target lists agree; this job checks that the thing they
+  # describe actually builds and contains what it should.
+  package:
+    name: Cross-compile and package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - run: npm --prefix extension ci
+      - name: Build every platform core and every VSIX
+        run: make package
+      # A VSIX that is missing its core installs cleanly and then cannot start,
+      # which is a support ticket rather than a build failure. Assert the
+      # binary is in each one, under the name activation looks for.
+      - name: Assert every VSIX carries exactly one core
+        run: |
+          set -euo pipefail
+          declare -A expect=(
+            [darwin-arm64]=darwin-arm64 [darwin-x64]=darwin-amd64
+            [linux-x64]=linux-amd64     [linux-arm64]=linux-arm64
+            [alpine-x64]=linux-amd64    [alpine-arm64]=linux-arm64
+            [win32-x64]=windows-amd64
+          )
+          for vt in "${!expect[@]}"; do
+            gt="${expect[$vt]}"
+            exe=composure; [ "${gt%-*}" = windows ] && exe=composure.exe
+            vsix="extension/build/composure-$vt.vsix"
+            [ -f "$vsix" ] || { echo "::error::$vsix was not produced"; exit 1; }
+            found=$(unzip -Z1 "$vsix" | grep '^extension/bin/' || true)
+            if [ "$found" != "extension/bin/$gt/$exe" ]; then
+              echo "::error::$vsix carries '$found', expected 'extension/bin/$gt/$exe'"
+              exit 1
+            fi
+            echo "ok  $vsix -> $found ($(du -h "$vsix" | cut -f1))"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ github.run_id }}
+          path: extension/build/*.vsix
+          retention-days: 14
+
+  licence:
+    name: Licence scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go mod download
+      # CLEANROOM.md rule 5. Fails on BSL, SSPL, Elastic License and AGPL
+      # anywhere in the build graph. BSL termination is retroactive across
+      # every version, so this runs on every push, not nightly.
+      - name: Scan dependency licences
+        run: go run ./cmd/licencescan -v
+
+  fidelity:
+    name: Fidelity gate
+    runs-on: ubuntu-latest
+    # Needed by the "Commit metric history" step on main.
+    permissions:
+      contents: write
+    # The corpus is ~2.1GB of shallow clones and the four benchmarks walk it
+    # several times over.
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # The corpus is fetched, never committed. Cached by the fetch source so a
+      # change to corpus.go invalidates it.
+      - name: Cache corpus
+        id: corpus-cache
+        uses: actions/cache@v4
+        with:
+          path: corpus-repos
+          key: corpus-${{ runner.os }}-${{ hashFiles('internal/corpus/corpus.go') }}
+
+      - name: Fetch corpus
+        if: steps.corpus-cache.outputs.cache-hit != 'true'
+        run: go run ./cmd/fidelity fetch corpus-repos
+
+      # The gate itself. Compares all four benchmarks against
+      # benchmarks/baseline.json and fails on any regression.
+      #
+      #   A failing fidelity test is never fixed by changing the threshold.
+      #
+      # If this step is red, the change is wrong — not the baseline.
+      # Seven tests across resolve, topology, diagnose and edit skip themselves
+      # when corpus-repos is absent — and until this step existed, that was
+      # every CI run. The `build` job runs `go test` with no corpus; this job
+      # has the corpus and ran only the gate. So the corpus sweeps, including
+      # the one whose own header calls it "the only way to know the write path
+      # did not quietly acquire a second implementation", never ran anywhere.
+      #
+      # This is the same defect as a test that cannot fail, wearing a different
+      # hat: the assertions are real, and nothing ever reached them.
+      - name: Run the corpus-scale tests
+        run: go test $PKGS -run 'Corpus|corpus'
+
+      - name: Run fidelity gate
+        run: |
+          go run ./cmd/gate \
+            -corpus corpus-repos \
+            -commit "${{ github.sha }}" \
+            -timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Upload metric history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fidelity-history-${{ github.run_id }}
+          path: benchmarks/history.jsonl
+          retention-days: 90
+
+      # The pass rate is a tracked metric with history, not a boolean, so a
+      # slow downward drift that never breaches the baseline is still visible
+      # as a trend. Only main commits a row — pull request runs would race.
+      - name: Commit metric history
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- benchmarks/history.jsonl; then
+            echo "no new history row"
+            exit 0
+          fi
+          git config user.name  "composure-ci"
+          git config user.email "ci@composure.dev"
+          git add benchmarks/history.jsonl
+          git commit -m "ci: record fidelity metrics for ${GITHUB_SHA:0:12}"
+          git push
+
+  # CLEANROOM.md rule 6 and requirements §10: "CLA or DCO with relicensing
+  # rights from every contributor, from commit one." Every project that
+  # relicensed later could only do so because it owned or could relicense all
+  # of its code.
+  #
+  # This job is the DCO half — the half a machine can check. It asserts that
+  # every non-merge commit in the pull request certifies the Developer
+  # Certificate of Origin 1.1 with a well-formed `Signed-off-by` trailer.
+  # It does NOT establish relicensing rights; that needs a signed CLA and a
+  # legal entity to sign it to, and both are still open. CONTRIBUTING.md says
+  # so plainly rather than letting the sign-off imply more than it grants.
+  #
+  # Prose in CONTRIBUTING.md that nothing checks is the weakest form of a
+  # constraint, which is the whole reason this is a job and not a paragraph.
+  dco:
+    name: DCO sign-off
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Merge commits are excluded (`--no-merges`): GitHub generates them, and
+      # a contributor merging main into their branch cannot sign a commit they
+      # did not author. The commits carrying the contribution are the ones that
+      # matter, and every one of them is checked.
+      #
+      # Every commit is checked before the job exits, so a pull request with
+      # five unsigned commits reports all five in one run rather than one per
+      # push.
+      - name: Require a Developer Certificate of Origin sign-off
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # A trailer that is present but malformed — no angle brackets, no
+          # address, or a mangled key — does not match, and an unmatched
+          # trailer is treated exactly as an absent one. A sign-off nobody can
+          # trace back to a person certifies nothing.
+          trailer='^[[:space:]]*[Ss]igned-off-by:[[:space:]]+[^<>]+<[^<>@[:space:]]+@[^<>[:space:]]+>[[:space:]]*$'
+
+          commits=$(git rev-list --no-merges "$BASE_SHA".."$HEAD_SHA")
+          if [ -z "$commits" ]; then
+            echo "No non-merge commits in this pull request. Nothing to check."
+            exit 0
+          fi
+
+          failed=0
+          while IFS= read -r sha; do
+            subject=$(git log -1 --format=%s "$sha")
+            # Read the message into a variable and match with a here-string
+            # rather than piping into `grep -q`: under `pipefail`, grep exiting
+            # early on a match can SIGPIPE git and turn a pass into a failure.
+            message=$(git log -1 --format=%B "$sha")
+            if grep -qE "$trailer" <<<"$message"; then
+              echo "ok    ${sha:0:12}  $subject"
+            else
+              failed=1
+              echo "::error::${sha:0:12} has no valid Signed-off-by trailer -- $subject"
+              # Show a near miss so a typo is obvious rather than mysterious.
+              near=$(grep -i 'signed.off' <<<"$message" || true)
+              if [ -n "$near" ]; then
+                echo "      found instead: $near"
+              fi
+            fi
+          done <<<"$commits"
+
+          if [ "$failed" -ne 0 ]; then
+            cat <<'EOF'
+
+          Every commit must carry a Developer Certificate of Origin sign-off:
+
+            Signed-off-by: Your Name <you@example.com>
+
+          `git commit -s` adds it. To fix commits already pushed:
+
+            git rebase --signoff <base>   # then force-push the branch
+
+          See CONTRIBUTING.md. This certifies you wrote the contribution or
+          have the right to submit it under Apache-2.0.
+          EOF
+            exit 1
+          fi
+
+          echo "All non-merge commits are signed off."
+
+  baseline-guard:
+    name: Baseline guard
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # The most likely way this project fails is quietly: an agent or a human
+      # under instruction to make the suite green edits a threshold, and every
+      # number in RESULTS.md becomes fiction from that commit on.
+      #
+      # Lowering a baseline is a legitimate decision occasionally. It is never
+      # a silent one. This step forces it to be argued for in the PR body.
+      - name: Require justification for baseline changes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if ! git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- benchmarks/baseline.json; then
+            echo "benchmarks/baseline.json was modified in this pull request:"
+            git diff "$BASE_SHA" "$HEAD_SHA" -- benchmarks/baseline.json
+            if printf '%s' "$PR_BODY" | grep -q 'BASELINE-CHANGE:'; then
+              echo
+              echo "Justification found in the PR description. Allowing."
+            else
+              echo
+              echo "::error::benchmarks/baseline.json changed without justification."
+              cat <<'EOF'
+
+          The baseline records a measured property of the engine. Editing it does
+          not restore that property — it only stops CI from reporting that the
+          property is gone.
+
+          If the change is an IMPROVEMENT, that is fine and expected: add a line
+          to the PR description explaining it, starting with
+
+            BASELINE-CHANGE: <what moved, in which direction, and why>
+
+          If the change LOWERS a number, the burden is higher. Say what capability
+          was traded away and what makes that trade correct. "To make CI pass" is
+          not an answer.
+          EOF
+              exit 1
+            fi
+          else
+            echo "benchmarks/baseline.json unchanged."
+          fi

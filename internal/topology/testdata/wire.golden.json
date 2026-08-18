@@ -1,0 +1,518 @@
+{
+  "profiles": [
+    "full"
+  ],
+  "nodes": [
+    {
+      "id": "services.api",
+      "kind": "service",
+      "name": "api",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 28,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [
+        "full"
+      ],
+      "layer": 0
+    },
+    {
+      "id": "services.needy",
+      "kind": "service",
+      "name": "needy",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 46,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0,
+      "image": "alpine"
+    },
+    {
+      "id": "services.sidecar",
+      "kind": "service",
+      "name": "sidecar",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 40,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0,
+      "image": "alpine"
+    },
+    {
+      "id": "services.web",
+      "kind": "service",
+      "name": "web",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 2,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 1,
+      "image": "nginx:1.25"
+    },
+    {
+      "id": "services.worker",
+      "kind": "service",
+      "name": "worker",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 35,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [
+        "full"
+      ],
+      "layer": 0,
+      "image": "busybox"
+    },
+    {
+      "id": "networks.back",
+      "kind": "network",
+      "name": "back",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 12,
+        "column": 7,
+        "step": 0
+      },
+      "declared": false,
+      "external": true,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "networks.ext",
+      "kind": "network",
+      "name": "ext",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 52,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": true,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "networks.front",
+      "kind": "network",
+      "name": "front",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 50,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "internal": true,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "volumes.data",
+      "kind": "volume",
+      "name": "data",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 55,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "configs.nginxconf",
+      "kind": "config",
+      "name": "nginxconf",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 57,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "secrets.apikey",
+      "kind": "secret",
+      "name": "apikey",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 60,
+        "column": 3,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0
+    },
+    {
+      "id": "services.web.ports[0]",
+      "kind": "port",
+      "name": "8080:80",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 14,
+        "column": 9,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0,
+      "port": {
+        "published": "8080",
+        "target": "80",
+        "protocol": "tcp",
+        "raw": "8080:80"
+      }
+    },
+    {
+      "id": "services.web.ports[1]",
+      "kind": "port",
+      "name": "8443:443/udp",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 15,
+        "column": 9,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0,
+      "port": {
+        "host_ip": "127.0.0.1",
+        "published": "8443",
+        "target": "443",
+        "protocol": "udp",
+        "raw": "8443:443/udp"
+      }
+    },
+    {
+      "id": "services.api.build",
+      "kind": "dockerfile",
+      "name": "./api/Dockerfile.dev",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 29,
+        "column": 5,
+        "step": 0
+      },
+      "declared": true,
+      "external": false,
+      "profiles": [],
+      "layer": 0,
+      "build": {
+        "context": "./api",
+        "dockerfile": "Dockerfile.dev",
+        "target": "runtime",
+        "reference": "./api/Dockerfile.dev"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "kind": "build",
+      "from": "services.api",
+      "to": "services.api.build",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 29,
+        "column": 5,
+        "step": 0
+      },
+      "build": {
+        "context": "./api",
+        "dockerfile": "Dockerfile.dev",
+        "target": "runtime",
+        "reference": "./api/Dockerfile.dev"
+      }
+    },
+    {
+      "kind": "depends_on",
+      "from": "services.api",
+      "to": "services.worker",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 33,
+        "column": 18,
+        "step": 0
+      },
+      "depends_on": {
+        "condition": "service_started"
+      }
+    },
+    {
+      "kind": "network_mode",
+      "from": "services.sidecar",
+      "to": "services.web",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 42,
+        "column": 19,
+        "step": 0
+      }
+    },
+    {
+      "kind": "bind",
+      "from": "services.web",
+      "to": "services.web",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 21,
+        "column": 9,
+        "step": 0
+      },
+      "mount": {
+        "source": "./conf",
+        "target": "/etc/nginx/conf.d",
+        "mode": "rw",
+        "read_only": false,
+        "host_path": "./conf"
+      }
+    },
+    {
+      "kind": "config",
+      "from": "services.web",
+      "to": "configs.nginxconf",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 23,
+        "column": 15,
+        "step": 0
+      },
+      "mount": {
+        "source": "nginxconf",
+        "target": "",
+        "mode": "ro",
+        "read_only": true
+      }
+    },
+    {
+      "kind": "depends_on",
+      "from": "services.web",
+      "to": "services.api",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 5,
+        "column": 7,
+        "step": 0
+      },
+      "depends_on": {
+        "condition": "service_healthy",
+        "restart": "true",
+        "required": "false"
+      }
+    },
+    {
+      "kind": "link",
+      "from": "services.web",
+      "to": "services.api",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 27,
+        "column": 13,
+        "step": 0
+      },
+      "attach": {
+        "aliases": [
+          "backend"
+        ]
+      }
+    },
+    {
+      "kind": "network",
+      "from": "services.web",
+      "to": "networks.back",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 12,
+        "column": 7,
+        "step": 0
+      },
+      "attach": {
+        "aliases": []
+      }
+    },
+    {
+      "kind": "network",
+      "from": "services.web",
+      "to": "networks.front",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 10,
+        "column": 7,
+        "step": 0
+      },
+      "attach": {
+        "aliases": [
+          "www",
+          "edge"
+        ]
+      }
+    },
+    {
+      "kind": "publish",
+      "from": "services.web",
+      "to": "services.web.ports[0]",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 14,
+        "column": 9,
+        "step": 0
+      },
+      "port": {
+        "published": "8080",
+        "target": "80",
+        "protocol": "tcp",
+        "raw": "8080:80"
+      }
+    },
+    {
+      "kind": "publish",
+      "from": "services.web",
+      "to": "services.web.ports[1]",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 15,
+        "column": 9,
+        "step": 0
+      },
+      "port": {
+        "host_ip": "127.0.0.1",
+        "published": "8443",
+        "target": "443",
+        "protocol": "udp",
+        "raw": "8443:443/udp"
+      }
+    },
+    {
+      "kind": "secret",
+      "from": "services.web",
+      "to": "secrets.apikey",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 25,
+        "column": 9,
+        "step": 0
+      },
+      "mount": {
+        "source": "apikey",
+        "target": "/run/secrets/apikey",
+        "mode": "ro",
+        "read_only": true
+      }
+    },
+    {
+      "kind": "volume",
+      "from": "services.web",
+      "to": "volumes.data",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 20,
+        "column": 9,
+        "step": 0
+      },
+      "mount": {
+        "source": "data",
+        "target": "/var/lib/data",
+        "mode": "ro",
+        "read_only": true
+      }
+    },
+    {
+      "kind": "depends_on",
+      "from": "services.worker",
+      "to": "services.api",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 37,
+        "column": 18,
+        "step": 0
+      },
+      "depends_on": {
+        "condition": "service_started"
+      }
+    }
+  ],
+  "cycles": [
+    [
+      "services.api",
+      "services.worker"
+    ]
+  ],
+  "dangling": [
+    {
+      "kind": "depends_on",
+      "from": "services.needy",
+      "to": "services.hidden",
+      "ref": "hidden",
+      "reason": "filtered by profile",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 48,
+        "column": 18,
+        "step": 0
+      }
+    },
+    {
+      "kind": "volume",
+      "from": "services.web",
+      "to": "services.web",
+      "ref": "/var/log",
+      "reason": "mount has no source",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 22,
+        "column": 9,
+        "step": 0
+      }
+    },
+    {
+      "kind": "network_mode",
+      "from": "services.worker",
+      "to": "services.outside",
+      "ref": "container:outside",
+      "reason": "network_mode target is not a service",
+      "origin": {
+        "file": "wire.yaml",
+        "line": 38,
+        "column": 19,
+        "step": 0
+      }
+    }
+  ],
+  "max_layer": 1
+}

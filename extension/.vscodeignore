@@ -1,0 +1,47 @@
+# What does NOT ship to the marketplace.
+#
+# The shipped extension is four files plus one binary: dist/extension.js,
+# dist/webview.js, dist/webview.css, package.json, bin/<goos>-<goarch>/composure.
+# Everything else here is how it was built, and shipping it costs every
+# installer the download.
+#
+# `make package` appends the per-target `bin/**` rules to a generated copy of
+# this file, so the binaries are governed there rather than here — see the
+# `package` target. Packaging by hand with a bare `vsce package` therefore
+# carries every platform's binary; that is deliberate, so that a hand-run never
+# silently produces a VSIX with no core in it at all.
+
+# Source. The bundles in dist/ are what runs; the TypeScript is not needed to
+# run them and `**/*.ts` alone would not catch the directories.
+host/**
+webview/**
+shared/**
+*.ts
+**/*.ts
+
+# Tests and their build output.
+dist-test/**
+**/*.test.js
+**/*.test.ts
+
+# Source maps. ~400KB of the ~600KB dist/ tree, and useless without the
+# sources above.
+**/*.map
+
+# Build tooling and its inputs.
+build.mjs
+run-tests.mjs
+tsconfig.json
+node_modules/**
+package-lock.json
+.vscode/**
+build/**
+
+# The screenshot harness: measuring instruments, and a 900KB fixture of captured
+# core answers. It renders the shipped bundle; it is not part of it, and every
+# installer was paying for it.
+harness/**
+
+# Documentation that is for contributors, not users. README.md, CHANGELOG.md
+# and LICENSE.txt are picked up by vsce and must not be listed here.
+TESTING.md

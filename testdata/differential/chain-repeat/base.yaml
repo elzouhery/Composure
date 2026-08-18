@@ -1,0 +1,7 @@
+services:
+  web:
+    image: nginx:1.25
+    environment:
+      FROM: base
+    ports:
+      - "8080:80"

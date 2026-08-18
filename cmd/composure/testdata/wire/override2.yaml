@@ -1,0 +1,6 @@
+# Step 2. Replaces it a second time: two entries in the override history, so
+# the ORDER of the list is observable and provenance has depth. With one
+# override an inverted list looks identical.
+services:
+  web:
+    image: nginx:1.27

@@ -1,0 +1,32 @@
+{
+  // Open `extension/` as the workspace root and press F5.
+  //
+  // Nothing on screen can be asserted by CI, so the manual checks in
+  // TESTING.md are this story's acceptance evidence — and a check that is
+  // awkward to run is a check that stops being run. One keypress.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Opens `examples/`, which holds compose.yaml files at the names the
+      // activation globs actually match. It previously opened `testdata/`,
+      // where every file is named for the engine harness — e1-no-trailing-
+      // newline.yml, 01-comments.yml — so nothing matched, the extension
+      // never activated, and the window had no compose file to open.
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}", "${workspaceFolder}/../examples"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "preLaunchTask": "npm: compile"
+    },
+    {
+      "name": "Run Extension (empty folder)",
+      "type": "extensionHost",
+      "request": "launch",
+      // For the "no compose file" check: nothing may activate here.
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "preLaunchTask": "npm: compile"
+    }
+  ]
+}

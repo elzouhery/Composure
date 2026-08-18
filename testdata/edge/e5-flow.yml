@@ -1,0 +1,4 @@
+services:
+  compact: {image: nginx, restart: always}
+  normal:
+    image: alpine

@@ -1,0 +1,35 @@
+# The owner's file, reduced: adding a service through the extension failed with
+# `edit: operation 1: path segment "PolicyServer" not found`.
+#
+# The failure had nothing to do with these bytes — it was `run` locating every
+# staged operation against the ORIGINAL buffer, so the `image` insert could not
+# find the service the insert before it had just created. The shape is kept
+# anyway because it is the shape the report came from, and because the two
+# things the reporter suspected are both in it: the last service is behind a
+# profile, and the block it closes is followed by a comment and by more
+# top-level blocks that every offset after the insert has to survive.
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: hunter2
+
+  # Left behind by a migration nobody finished.
+  legacy-importer:
+    image: ghcr.io/shipyard/importer:0.9.3
+    profiles:
+      - migration
+
+networks:
+  shipyard:
+    driver: bridge
+
+volumes:
+  pgdata:
+  # Declared and mounted by nothing.
+  scratch:

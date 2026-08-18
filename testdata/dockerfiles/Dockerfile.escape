@@ -1,0 +1,5 @@
+# escape=`
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
+RUN powershell -Command `
+    Write-Host "one" ; `
+    Write-Host "two"

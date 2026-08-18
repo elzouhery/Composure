@@ -1,0 +1,15 @@
+services:
+  api:
+    command: -c "echo prod && sleep 2"
+    healthcheck:
+      test: curl -f http://localhost/health
+      interval: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - MODE=prod
+    restart: always
+  db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]

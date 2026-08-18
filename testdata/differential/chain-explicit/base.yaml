@@ -1,0 +1,18 @@
+services:
+  api:
+    image: busybox:1.36
+    entrypoint: /bin/sh
+    command: -c "echo base && sleep 1"
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 10s
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      - MODE=base
+      - SHARED=one
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: example

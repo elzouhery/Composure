@@ -1,0 +1,5 @@
+services:
+  a:
+    security_opt: ["no-new-privileges:true", "label:disable"]
+    group_add: ["1001", "1002"]
+    volumes_from: ["b"]

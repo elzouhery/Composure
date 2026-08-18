@@ -1,0 +1,813 @@
+{
+  "files": [
+    {
+      "path": "base.yaml",
+      "step": 0
+    },
+    {
+      "path": "override.yaml",
+      "step": 1
+    },
+    {
+      "path": "override2.yaml",
+      "step": 2
+    }
+  ],
+  "root": {
+    "kind": "mapping",
+    "scalar": "",
+    "map": [
+      {
+        "key": "x-defaults",
+        "key_origin": {
+          "file": "base.yaml",
+          "line": 8,
+          "column": 1,
+          "step": 0
+        },
+        "value": {
+          "kind": "mapping",
+          "scalar": "",
+          "map": [
+            {
+              "key": "restart",
+              "key_origin": {
+                "file": "base.yaml",
+                "line": 9,
+                "column": 3,
+                "step": 0
+              },
+              "value": {
+                "kind": "scalar",
+                "scalar": "unless-stopped",
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 9,
+                  "column": 12,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            },
+            {
+              "key": "logging",
+              "key_origin": {
+                "file": "base.yaml",
+                "line": 10,
+                "column": 3,
+                "step": 0
+              },
+              "value": {
+                "kind": "mapping",
+                "scalar": "",
+                "map": [
+                  {
+                    "key": "driver",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 11,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "scalar",
+                      "scalar": "json-file",
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 11,
+                        "column": 13,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  }
+                ],
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 11,
+                  "column": 5,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            }
+          ],
+          "origin": {
+            "file": "base.yaml",
+            "line": 8,
+            "column": 13,
+            "step": 0
+          },
+          "overrides": []
+        }
+      },
+      {
+        "key": "services",
+        "key_origin": {
+          "file": "override2.yaml",
+          "line": 4,
+          "column": 1,
+          "step": 2
+        },
+        "value": {
+          "kind": "mapping",
+          "scalar": "",
+          "map": [
+            {
+              "key": "web",
+              "key_origin": {
+                "file": "override2.yaml",
+                "line": 5,
+                "column": 3,
+                "step": 2
+              },
+              "value": {
+                "kind": "mapping",
+                "scalar": "",
+                "map": [
+                  {
+                    "key": "restart",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 9,
+                      "column": 3,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "scalar",
+                      "scalar": "unless-stopped",
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 9,
+                        "column": 12,
+                        "step": 0
+                      },
+                      "overrides": [],
+                      "alias": "defaults",
+                      "alias_site": {
+                        "file": "base.yaml",
+                        "line": 15,
+                        "column": 9,
+                        "step": 0
+                      }
+                    }
+                  },
+                  {
+                    "key": "logging",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 10,
+                      "column": 3,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "mapping",
+                      "scalar": "",
+                      "map": [
+                        {
+                          "key": "driver",
+                          "key_origin": {
+                            "file": "base.yaml",
+                            "line": 11,
+                            "column": 5,
+                            "step": 0
+                          },
+                          "value": {
+                            "kind": "scalar",
+                            "scalar": "json-file",
+                            "origin": {
+                              "file": "base.yaml",
+                              "line": 11,
+                              "column": 13,
+                              "step": 0
+                            },
+                            "overrides": []
+                          }
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 11,
+                        "column": 5,
+                        "step": 0
+                      },
+                      "overrides": [],
+                      "alias": "defaults",
+                      "alias_site": {
+                        "file": "base.yaml",
+                        "line": 15,
+                        "column": 9,
+                        "step": 0
+                      }
+                    }
+                  },
+                  {
+                    "key": "image",
+                    "key_origin": {
+                      "file": "override2.yaml",
+                      "line": 6,
+                      "column": 5,
+                      "step": 2
+                    },
+                    "value": {
+                      "kind": "scalar",
+                      "scalar": "nginx:1.27",
+                      "origin": {
+                        "file": "override2.yaml",
+                        "line": 6,
+                        "column": 12,
+                        "step": 2
+                      },
+                      "overrides": [
+                        {
+                          "value": "nginx:1.25",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 16,
+                            "column": 12,
+                            "step": 0
+                          }
+                        },
+                        {
+                          "value": "nginx:1.26",
+                          "origin": {
+                            "file": "override.yaml",
+                            "line": 4,
+                            "column": 12,
+                            "step": 1
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "key": "profiles",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 17,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "sequence",
+                      "scalar": "",
+                      "seq": [
+                        {
+                          "kind": "scalar",
+                          "scalar": "frontend",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 18,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        },
+                        {
+                          "kind": "scalar",
+                          "scalar": "edge",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 19,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 18,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "ports",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 20,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "sequence",
+                      "scalar": "",
+                      "seq": [
+                        {
+                          "kind": "scalar",
+                          "scalar": "8080:80",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 21,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 21,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "environment",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 22,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "mapping",
+                      "scalar": "",
+                      "map": [
+                        {
+                          "key": "TAG",
+                          "key_origin": {
+                            "file": "base.yaml",
+                            "line": 23,
+                            "column": 7,
+                            "step": 0
+                          },
+                          "value": {
+                            "kind": "scalar",
+                            "scalar": "v3",
+                            "origin": {
+                              "file": "base.yaml",
+                              "line": 23,
+                              "column": 12,
+                              "step": 0
+                            },
+                            "overrides": [],
+                            "raw": "${COMPOSURE_WIRE_TAG}",
+                            "interpolated": true
+                          }
+                        },
+                        {
+                          "key": "ABSENT",
+                          "key_origin": {
+                            "file": "base.yaml",
+                            "line": 24,
+                            "column": 7,
+                            "step": 0
+                          },
+                          "value": {
+                            "kind": "scalar",
+                            "scalar": "",
+                            "origin": {
+                              "file": "base.yaml",
+                              "line": 24,
+                              "column": 15,
+                              "step": 0
+                            },
+                            "overrides": [],
+                            "raw": "${COMPOSURE_WIRE_ABSENT}",
+                            "interpolated": true
+                          }
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 23,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "healthcheck",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 25,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "null",
+                      "scalar": "",
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 25,
+                        "column": 18,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "depends_on",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 26,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "sequence",
+                      "scalar": "",
+                      "seq": [
+                        {
+                          "kind": "scalar",
+                          "scalar": "db",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 27,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 27,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  }
+                ],
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 15,
+                  "column": 5,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            },
+            {
+              "key": "metrics",
+              "key_origin": {
+                "file": "base.yaml",
+                "line": 33,
+                "column": 3,
+                "step": 0
+              },
+              "value": {
+                "kind": "mapping",
+                "scalar": "",
+                "map": [
+                  {
+                    "key": "image",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 34,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "scalar",
+                      "scalar": "prom/prometheus:v2.51",
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 34,
+                        "column": 12,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "profiles",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 35,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "sequence",
+                      "scalar": "",
+                      "seq": [
+                        {
+                          "kind": "scalar",
+                          "scalar": "edge",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 36,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 36,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "depends_on",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 37,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "mapping",
+                      "scalar": "",
+                      "map": [
+                        {
+                          "key": "db",
+                          "key_origin": {
+                            "file": "base.yaml",
+                            "line": 38,
+                            "column": 7,
+                            "step": 0
+                          },
+                          "value": {
+                            "kind": "mapping",
+                            "scalar": "",
+                            "map": [
+                              {
+                                "key": "condition",
+                                "key_origin": {
+                                  "file": "base.yaml",
+                                  "line": 39,
+                                  "column": 9,
+                                  "step": 0
+                                },
+                                "value": {
+                                  "kind": "scalar",
+                                  "scalar": "service_started",
+                                  "origin": {
+                                    "file": "base.yaml",
+                                    "line": 39,
+                                    "column": 20,
+                                    "step": 0
+                                  },
+                                  "overrides": []
+                                }
+                              }
+                            ],
+                            "origin": {
+                              "file": "base.yaml",
+                              "line": 39,
+                              "column": 9,
+                              "step": 0
+                            },
+                            "overrides": []
+                          }
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 38,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  }
+                ],
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 34,
+                  "column": 5,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            },
+            {
+              "key": "db",
+              "key_origin": {
+                "file": "base.yaml",
+                "line": 43,
+                "column": 3,
+                "step": 0
+              },
+              "value": {
+                "kind": "mapping",
+                "scalar": "",
+                "map": [
+                  {
+                    "key": "image",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 44,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "scalar",
+                      "scalar": "postgres:16",
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 44,
+                        "column": 12,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  },
+                  {
+                    "key": "volumes",
+                    "key_origin": {
+                      "file": "base.yaml",
+                      "line": 45,
+                      "column": 5,
+                      "step": 0
+                    },
+                    "value": {
+                      "kind": "sequence",
+                      "scalar": "",
+                      "seq": [
+                        {
+                          "kind": "scalar",
+                          "scalar": "data:/var/lib/postgresql/data",
+                          "origin": {
+                            "file": "base.yaml",
+                            "line": 46,
+                            "column": 9,
+                            "step": 0
+                          },
+                          "overrides": []
+                        }
+                      ],
+                      "origin": {
+                        "file": "base.yaml",
+                        "line": 46,
+                        "column": 7,
+                        "step": 0
+                      },
+                      "overrides": []
+                    }
+                  }
+                ],
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 44,
+                  "column": 5,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            }
+          ],
+          "origin": {
+            "file": "base.yaml",
+            "line": 14,
+            "column": 3,
+            "step": 0
+          },
+          "overrides": []
+        }
+      },
+      {
+        "key": "volumes",
+        "key_origin": {
+          "file": "base.yaml",
+          "line": 48,
+          "column": 1,
+          "step": 0
+        },
+        "value": {
+          "kind": "mapping",
+          "scalar": "",
+          "map": [
+            {
+              "key": "data",
+              "key_origin": {
+                "file": "base.yaml",
+                "line": 49,
+                "column": 3,
+                "step": 0
+              },
+              "value": {
+                "kind": "null",
+                "scalar": "",
+                "origin": {
+                  "file": "base.yaml",
+                  "line": 49,
+                  "column": 8,
+                  "step": 0
+                },
+                "overrides": []
+              }
+            }
+          ],
+          "origin": {
+            "file": "base.yaml",
+            "line": 49,
+            "column": 3,
+            "step": 0
+          },
+          "overrides": []
+        }
+      }
+    ],
+    "origin": {
+      "file": "base.yaml",
+      "line": 8,
+      "column": 1,
+      "step": 0
+    },
+    "overrides": []
+  },
+  "profiles": {
+    "declared": [
+      "edge",
+      "frontend"
+    ],
+    "services": [
+      {
+        "name": "web",
+        "path": [
+          "services",
+          "web"
+        ],
+        "members": [
+          {
+            "kind": "scalar",
+            "scalar": "frontend",
+            "origin": {
+              "file": "base.yaml",
+              "line": 18,
+              "column": 9,
+              "step": 0
+            },
+            "overrides": []
+          },
+          {
+            "kind": "scalar",
+            "scalar": "edge",
+            "origin": {
+              "file": "base.yaml",
+              "line": 19,
+              "column": 9,
+              "step": 0
+            },
+            "overrides": []
+          }
+        ],
+        "always_active": false
+      },
+      {
+        "name": "metrics",
+        "path": [
+          "services",
+          "metrics"
+        ],
+        "members": [
+          {
+            "kind": "scalar",
+            "scalar": "edge",
+            "origin": {
+              "file": "base.yaml",
+              "line": 36,
+              "column": 9,
+              "step": 0
+            },
+            "overrides": []
+          }
+        ],
+        "always_active": false
+      },
+      {
+        "name": "db",
+        "path": [
+          "services",
+          "db"
+        ],
+        "members": [],
+        "always_active": true
+      }
+    ]
+  },
+  "findings": [
+    {
+      "kind": "undefined-variable",
+      "variable": "COMPOSURE_WIRE_ABSENT",
+      "path": [
+        "services",
+        "web",
+        "environment",
+        "ABSENT"
+      ],
+      "origin": {
+        "file": "base.yaml",
+        "line": 24,
+        "column": 15,
+        "step": 0
+      },
+      "message": "${COMPOSURE_WIRE_ABSENT} is referenced but defined in no .env file, env_file or the environment; it interpolates to an empty string"
+    }
+  ]
+}

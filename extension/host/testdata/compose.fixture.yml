@@ -1,0 +1,19 @@
+# A committed compose file for the real-binary contract test.
+#
+# It is deliberately small and deliberately boring: the test asserts that the
+# Go core's payload is readable by the TypeScript client, not that the resolver
+# handles anything difficult. The resolver's own corpus does that.
+#
+# Three services, in this order, because the test asserts file order too.
+services:
+  web:
+    image: nginx:1.27
+    ports:
+      - "8080:80"
+      - "8443:443"
+  api:
+    image: ghcr.io/example/api:2.1
+    depends_on:
+      - db
+  db:
+    image: postgres:16

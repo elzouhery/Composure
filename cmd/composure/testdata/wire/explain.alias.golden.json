@@ -1,0 +1,32 @@
+{
+  "path": "services.web.restart",
+  "file": "base.yaml",
+  "line": 9,
+  "column": 12,
+  "step": 0,
+  "kind": "scalar",
+  "value": "unless-stopped",
+  "overrides": [],
+  "alias": "defaults",
+  "alias_site": {
+    "file": "base.yaml",
+    "line": 15,
+    "column": 9,
+    "step": 0
+  },
+  "files": [
+    {
+      "path": "base.yaml",
+      "step": 0
+    },
+    {
+      "path": "override.yaml",
+      "step": 1
+    },
+    {
+      "path": "override2.yaml",
+      "step": 2
+    }
+  ],
+  "dropped": []
+}

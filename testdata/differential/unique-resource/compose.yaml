@@ -1,0 +1,22 @@
+services:
+  web:
+    image: nginx:1.25
+    ports:
+      - "8080:80"
+      - "9000:9000/udp"
+    volumes:
+      - data:/var/lib/data
+      - ./a:/shared
+    expose:
+      - "3000"
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 1.1.1.1
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "gateway:10.0.0.1"
+volumes:
+  data: {}
+  other: {}

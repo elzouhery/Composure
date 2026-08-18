@@ -1,0 +1,7 @@
+services:
+  web:
+    image: nginx:1.25
+  tools:
+    image: busybox:1.36
+    profiles: [debug]
+    command: sleep infinity

@@ -1,0 +1,3 @@
+from ubuntu:22.04
+label maintainer="someone@example.com"
+run apt-get update

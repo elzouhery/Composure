@@ -1,0 +1,49 @@
+# The golden-wire fixture, step 0.
+#
+# Every feature the JSON wire can carry is present here on purpose: an anchor
+# reached through a merge key, an interpolated scalar, an undefined variable
+# (which becomes a finding), an explicit null, a profiled service and a bare
+# one. TestWireFixtureStaysRich asserts each of those is still true, so the
+# golden cannot quietly weaken into a fixture that pins nothing.
+x-defaults: &defaults
+  restart: unless-stopped
+  logging:
+    driver: json-file
+
+services:
+  web:
+    <<: *defaults
+    image: nginx:1.25
+    profiles:
+      - frontend
+      - edge
+    ports:
+      - "8080:80"
+    environment:
+      TAG: ${COMPOSURE_WIRE_TAG}
+      ABSENT: ${COMPOSURE_WIRE_ABSENT}
+    healthcheck: null
+    depends_on:
+      - db
+
+  # In `edge` but not `frontend`, so the two profile names select DIFFERENT
+  # graphs. Without a service that only one of them admits, `--profile a` and
+  # `--profile b` produce identical output and a test comparing them proves
+  # nothing about the flag.
+  metrics:
+    image: prom/prometheus:v2.51
+    profiles:
+      - edge
+    depends_on:
+      db:
+        condition: service_started
+
+  # No profiles key at all: this is the always-active case, and the one the
+  # `AlwaysActive: len(members) == 0` predicate is decided by.
+  db:
+    image: postgres:16
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:

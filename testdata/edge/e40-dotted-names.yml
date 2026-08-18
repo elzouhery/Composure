@@ -1,0 +1,25 @@
+# Service and resource names containing a `.`, which the compose schema's own
+# name pattern allows — ^[a-zA-Z0-9._-]+$ — and which this tool's path syntax
+# uses as its separator.
+#
+# The two met badly. `add service` built its second operation's path by string
+# concatenation, `services` + "." + name, and resolve.ParsePath split it back
+# into the wrong segments: adding `foo.bar` reported `path segment "foo" not
+# found` and told the reader the tool was broken, for a request that was
+# perfectly well formed. resolve.Path.String already quotes a segment holding a
+# `.`, so the round trip is the path type's own.
+#
+# The fixture is dotted names in every position an operation addresses: an
+# existing service to insert into, a version-like name, and a resource.
+services:
+  web:
+    image: nginx
+  api.gateway:
+    image: traefik:2.11
+    ports:
+      - "8080:80"
+  v1.2:
+    image: alpine:3.20
+networks:
+  front.end:
+    driver: bridge

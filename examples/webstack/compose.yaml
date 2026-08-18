@@ -1,0 +1,118 @@
+# Shipyard — a document intake stack.
+#
+# Deliberately ordinary: this is the kind of file someone inherits and has to
+# understand on a Tuesday. Comments, anchors, an unset variable and a password
+# in plain text are all here on purpose — each one is something Composure is
+# supposed to survive, surface, or complain about later.
+
+x-service-defaults: &defaults
+  restart: unless-stopped
+  networks:
+    - shipyard
+
+services:
+  # Public edge. The only service with a published port.
+  gateway:
+    <<: *defaults
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      web:
+        condition: service_healthy
+      docs:
+        condition: service_started
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  web:
+    <<: *defaults
+    image: ghcr.io/shipyard/web:2.4.1
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:3000
+      SESSION_SECRET: ${SESSION_SECRET}   # nothing defines this — a finding later
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 0s
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    <<: *defaults
+    image: ghcr.io/shipyard/api:2.4.1
+    environment:
+      DATABASE_URL: postgres://shipyard:hunter2@db:5432/shipyard
+      REDIS_URL: redis://cache:6379
+      QUEUE_CONCURRENCY: "4"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/healthz || exit 1"]
+      interval: 10s
+      retries: 5
+    depends_on:
+      - db
+      - cache
+
+  # The worker that actually does the work. No healthcheck on purpose —
+  # nothing waits on it, so nothing breaks.
+  worker:
+    <<: *defaults
+    image: ghcr.io/shipyard/api:2.4.1
+    command: ["node", "dist/worker.js"]
+    environment:
+      DATABASE_URL: postgres://shipyard:hunter2@db:5432/shipyard
+      REDIS_URL: redis://cache:6379
+    container_name: Test
+
+  db:
+    <<: *defaults
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shipyard
+      POSTGRES_USER: shipyard
+      POSTGRES_PASSWORD: hunter2      # plaintext credential — a finding later
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shipyard"]
+      interval: 5s
+      retries: 10
+
+  cache:
+    <<: *defaults
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1"]
+    volumes:
+      - cachedata:/data
+
+  # Static docs. Built locally rather than pulled — this is the node that gets
+  # a Dockerfile of its own on the canvas once story 4.2 draws them.
+  docs:
+    <<: *defaults
+    build:
+      context: ./docs
+      dockerfile: Dockerfile
+      target: runtime
+
+  # Declared, never joined to anything, never given a port. Left behind by a
+  # migration nobody finished.
+  legacy-importer:
+    image: ghcr.io/shipyard/importer:0.9.3
+    profiles:
+      - migration
+  PolicyServer:
+    image: redis:latest
+
+networks:
+  shipyard:
+    driver: bridge
+
+volumes:
+  pgdata:
+  cachedata:
+  # Declared and mounted by nothing.
+  scratch:

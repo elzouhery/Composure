@@ -1,0 +1,44 @@
+{
+  "path": "services.web.image",
+  "file": "override2.yaml",
+  "line": 6,
+  "column": 12,
+  "step": 2,
+  "kind": "scalar",
+  "value": "nginx:1.27",
+  "overrides": [
+    {
+      "value": "nginx:1.25",
+      "origin": {
+        "file": "base.yaml",
+        "line": 16,
+        "column": 12,
+        "step": 0
+      }
+    },
+    {
+      "value": "nginx:1.26",
+      "origin": {
+        "file": "override.yaml",
+        "line": 4,
+        "column": 12,
+        "step": 1
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "base.yaml",
+      "step": 0
+    },
+    {
+      "path": "override.yaml",
+      "step": 1
+    },
+    {
+      "path": "override2.yaml",
+      "step": 2
+    }
+  ],
+  "dropped": []
+}

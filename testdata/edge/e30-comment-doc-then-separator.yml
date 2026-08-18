@@ -1,0 +1,20 @@
+# A licence header, then a document separator, then the real document.
+#
+# Found 2026-08-13 while sweeping the corpus for story 7.2: four Airflow compose
+# files are written this way, and goccy parses the header as a DOCUMENT of its
+# own — Docs[0] is a CommentGroupNode and the mapping is Docs[1].
+#
+# Every operation in this engine reads f.Docs[0], so no path in such a file is
+# addressable at all: `strategy.ScalarRange(src, services.web.image)` returns
+# "path not found" here, and has since before Epic 7. This fixture pins that the
+# consequence is a REFUSAL and never damage — a root insert declines with
+# ErrNoRootMapping rather than appending a key to the comment document or to the
+# wrong one of the two.
+#
+# If the locator is ever taught to skip a comment-only document, the assertion
+# in TestLeadingCommentDocumentIsRefusedNotDamaged is what has to change, and it
+# will change to "the edit lands", never to "the edit is silent".
+---
+services:
+  web:
+    image: nginx:1.25

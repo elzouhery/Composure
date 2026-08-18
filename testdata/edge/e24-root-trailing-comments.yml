@@ -1,0 +1,11 @@
+name: trailing-comments
+services:
+    web:
+        image: nginx:1.25
+        ports:
+            - "8080:80"
+
+# Everything below here is a trailing comment block at column 0. A top-level
+# insert lands AFTER it: the comments document the foot of the file, and
+# splitting them from it to slot a new key in above reads as damage.
+# See story 7.2.

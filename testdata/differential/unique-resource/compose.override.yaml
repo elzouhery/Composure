@@ -1,0 +1,19 @@
+services:
+  web:
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - other:/var/lib/data
+      - ./b:/shared
+    expose:
+      - "3000"
+      - "3001"
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    extra_hosts:
+      - "gateway:10.0.0.1"

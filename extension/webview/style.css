@@ -1,0 +1,2666 @@
+/*
+ * Composure has no palette.
+ *
+ * Every colour in this file is a `--vscode-*` token, on the canvas as much as
+ * in the chrome. There is no hex literal and no raw colour function anywhere,
+ * because a single literal breaks every theme except the one it was written
+ * against, and there are thousands. If the extension is unrecognisable as ours
+ * inside the reader's theme, that is the correct outcome.
+ *
+ * Sizes and spacing follow DESIGN.md: a 4px base, panes padded 10px, node
+ * corners 4px, and the reader's own editor font size — we do not get to decide
+ * how large someone wants their editor.
+ */
+
+/* The hidden attribute must actually hide.
+ *
+ * The UA stylesheet's `[hidden] { display: none }` is beaten by ANY author rule
+ * that sets `display` on the same element — and .banner, .empty, .narrow-list
+ * and .strip all set one. So every `element.hidden = true` in the webview was
+ * inert: the failure banner was never a failure at all, just an empty element
+ * that had never been hidden, and an empty-state message from a previously
+ * viewed file sat on top of a correctly drawn graph naming the wrong file.
+ *
+ * !important is load-bearing here rather than lazy: the whole point is to win
+ * against every element rule, including ones added later. */
+[hidden] {
+  display: none !important;
+}
+
+/* ---- the type scale ------------------------------------------------------
+ *
+ * FIVE steps, named once, and every `font-size` in this file names one of them.
+ *
+ * Measured before this block existed (`harness/system.mjs`, service + Dockerfile
+ * panes, Dark+ and Light+): the shipped pane painted TEN distinct font sizes —
+ * 8.64, 9, 9.6, 10.2, 11.05, 11.52, 11.96, 12, 12.48 and 13px — from seven
+ * different multipliers (0.72, 0.75, 0.78, 0.8, 0.85, 0.9, 0.92) plus one 9px
+ * literal. Nobody chose that scale. It is the residue of eight features being
+ * added by eight passes, each picking a fraction that looked right against
+ * whatever was next to it that day, and it is the single largest reason the
+ * pane reads as a mockup with additions bolted on rather than as one design:
+ * `#` and `${}` sit on the same row of the same pane at 12.48px and 11.52px.
+ *
+ * The two roots are not ours — DESIGN.md:120 — so the scale is derived from
+ * them and never from a pixel:
+ *
+ *   --type-ui     the reader's UI size.   Prose, keys, buttons, sentences.
+ *   --type-code   the reader's code size. Anything that is in the file verbatim.
+ *   --type-label  section and pane labels, uppercase, tracked.
+ *   --type-sub    a line subordinate to the one above it: provenance,
+ *                 resolution, notes, pills, summaries, row-action glyphs.
+ *   --type-index  an index rather than content: the availability list, the
+ *                 graph's second line, node markers.
+ *   --type-micro  the graph's smallest marks only — edge conditions, badge
+ *                 counts, the legend, a field's own chevron.
+ *
+ * A control added tomorrow picks a step. It does not get to invent one, and
+ * `harness/system.mjs --check` fails if it does.
+ */
+:root {
+  --type-ui: var(--vscode-font-size);
+  --type-code: var(--vscode-editor-font-size);
+  --type-label: 0.72rem;
+  --type-sub: 0.72rem;
+  --type-index: calc(var(--vscode-editor-font-size) * 0.85);
+  --type-micro: calc(var(--vscode-editor-font-size) * 0.75);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* The page itself never scrolls; the graph pans. */
+  overflow: hidden;
+}
+
+body {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+}
+
+.mono {
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+  font-variant-numeric: tabular-nums;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0;
+}
+
+/* ---- pane header ------------------------------------------------------- */
+
+.pane-header {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  min-width: 0;
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.pane-title {
+  font-size: var(--type-label);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.pane-file {
+  color: var(--vscode-descriptionForeground);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* What is in the file, in the header, where the reader looks first — the
+   mockup's `2 stages · 6 layers · …` line (directions-3.html:572).
+
+   It takes the slack (`flex: 1`), which is what pushes the header's controls to
+   the right edge and is the whole of gap 4: `+ add stage` used to wrap to a row
+   of its own because nothing in the header claimed the space between them.
+
+   It truncates rather than wraps. On a narrow pane the two numbers are the
+   first thing to give, because the filename and the control are both things the
+   reader acts on and the summary is a thing they read. */
+.pane-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+}
+
+/* A thin indeterminate bar in the pane header, never a spinner over the
+   canvas, and never before 200ms have passed. */
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  overflow: hidden;
+}
+
+.progress::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 30%;
+  background: var(--vscode-progressBar-background);
+  animation: composure-progress 1.2s linear infinite;
+}
+
+@keyframes composure-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress::after {
+    width: 100%;
+    animation: none;
+  }
+}
+
+/* ---- failure banner ---------------------------------------------------- */
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--vscode-inputValidation-errorBackground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  border-left: 2px solid var(--vscode-editorError-foreground);
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The banner's own surface is `inputValidation-errorBackground`, and the ONLY
+   foreground VS Code contributes against it is `inputValidation-errorForeground`
+   — story 4.5's pairing check is what caught this. It used to be the general
+   workbench foreground, which is legible in the themes it was written against
+   and promised by nothing. The fallback keeps a theme that omits the token
+   readable rather than transparent. */
+.banner-title {
+  display: block;
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-foreground));
+}
+
+.banner-detail {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--vscode-inputValidation-errorForeground, var(--vscode-descriptionForeground));
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+}
+
+.button {
+  flex: none;
+  padding: 3px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-border, transparent);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+}
+
+.button:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+/* A control that belongs to a pane header rather than to the reader's task.
+
+   `+ add stage` shipped as a filled primary button on a row of its own beneath
+   the header, which made it the loudest thing on a pane whose job is to show a
+   Dockerfile. The mockup has it as header text at the right edge
+   (directions-3.html:572). Secondary tokens, header type size, and it sits in
+   the header row — the same treatment `.toolbar-button` already has, so there
+   is one idea of "quiet control" in the stylesheet and not two.
+
+   That last sentence was PROSE, and it was false. Measured on the previous
+   bundle: `.button-quiet` rendered 17px tall at 11.52px with padding 1px 8px
+   and `.toolbar-button` rendered 22px tall at 13px with padding 2px 6px — one
+   idea, two boxes, in two panes the same reader moves between. They now share
+   the box, and only the pane they sit in differs. `harness/system.mjs --check`
+   asserts the rendered shapes are equal, so the claim is a number rather than
+   a comment.
+
+   2px 6px rather than 2px 8px: the toolbar's six controls plus the profile
+   group need 572px of a 656px pane, so four extra pixels per button wrapped the
+   row and put 28px MORE chrome above the canvas — which is the gap this pass is
+   also closing. The shared box is the tighter of the two. */
+.button-quiet {
+  padding: 2px 6px;
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+  font-size: var(--type-ui);
+}
+
+.button-quiet:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* ---- canvas ------------------------------------------------------------ */
+
+.canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--vscode-editor-background);
+}
+
+/* A parse failure holds the last good graph, dimmed. Losing the picture
+   mid-edit is worse than a stale one. */
+.canvas.is-stale .graph {
+  opacity: 0.4;
+}
+
+.graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.graph.is-hidden {
+  display: none;
+}
+
+.graph.is-panning {
+  cursor: grabbing;
+}
+
+.node {
+  cursor: pointer;
+  font-size: var(--type-code);
+}
+
+/* A node is a RAISED CARD on the canvas, and it has to read as one in every
+   theme. It used to be `sideBar-background` filled and `panel-border` stroked.
+   In Dark+ that reads. In Light+ the two fills are a hair apart and the only
+   outline is a 35%-translucent grey, which is the "plain grey rectangles" the
+   owner described.
+
+   `editorWidget.*` is the surface VS Code raises over the editor, and unlike
+   `sideBar` it ships a BORDER token with it — an opaque border colour in both
+   default themes and `contrastBorder` in both high-contrast ones. The fill is
+   unchanged in the two default themes; what changes is that the card is now
+   OUTLINED rather than tinted, which is what the mockup's node is.
+
+   Note what the mechanical check does and does not cover. `a11y.test.ts`
+   ("a raised surface separates from the pane it sits on") refuses a surface
+   that is the same colour as its pane in any of VS Code's four default themes,
+   and the old rule passed that — the defect here is edge WEIGHT, which no token
+   comparison can see. The screenshot harness is the evidence for this half. */
+.node-box {
+  fill: var(--vscode-editorWidget-background);
+  stroke: var(--vscode-editorWidget-border, var(--vscode-panel-border));
+  stroke-width: 1;
+}
+
+/* The card's first line, and it has to LEAD the line under it.
+ *
+ * The mockup separates the two on three axes at once: 11px against 9px, and a
+ * near-white name over a mid-grey caption — a full step of ink. We had size,
+ * and in Dark+ we had ink as well, because `descriptionForeground` there is
+ * `foreground` at 70%. In LIGHT+ we had neither: the two tokens resolve 16
+ * points apart and measure 5.13:1 and 4.32:1 against the card —
+ * 1.19x apart, indistinguishable at 12px. A service name that reads as part of
+ * its own image reference is the "looks nothing like the mockup" complaint in
+ * its smallest form, and it is a light-theme-only failure, which is the theme
+ * the owner runs.
+ *
+ * Weight is the axis left. The tokens are the theme's and the size is the
+ * reader's — `DESIGN.md:120` — so neither is ours to move, and this is the same
+ * axis `rhythm.mjs` already uses to separate a section heading from a
+ * provenance line. Asserted by `harness/canvas.mjs --check` in both themes. */
+.node-label {
+  fill: var(--vscode-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+  font-weight: 600;
+}
+
+.node-detail {
+  fill: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-index);
+}
+
+/* ---- node kinds --------------------------------------------------------
+ *
+ * A network is not a service and must not look like one. There is no palette
+ * to spend on this — DESIGN.md reserves colour for severity, diff and the one
+ * Dockerfile identity colour — so the kinds are separated by SHAPE and FILL
+ * WEIGHT instead: corner radius, border weight, and whether the box is filled
+ * at all. That survives a high-contrast theme, which a colour code does not.
+ */
+
+/* Resources — networks, volumes, configs, secrets — sit on the editor surface
+   rather than the raised one, with a fully rounded end: a capsule, not a card.
+   Being unfilled by design, the OUTLINE is the whole of the shape, and it was
+   drawn in `panel-border` — which both default themes ship as a 35%-translucent
+   grey. Composited against the canvas behind it that measures **1.34:1** in
+   Light+ and 1.98:1 in Dark+. In
+   Light+ a network was a rectangle you have to look for, which is the same
+   defect `.node-port` was fixed for and the same one the value chip was fixed
+   for, in the one place neither fix reached.
+
+   `editorWidget-border` is opaque in both default themes and `contrastBorder`
+   in both high-contrast ones — the token `.node-box` already stands on, so the
+   card and the capsule now share one edge colour and differ, as intended, by
+   fill and corner alone. Measured after: 1.70:1 Light+, 2.26:1 Dark+.
+   `harness/canvas.mjs --check` composites the alpha before it measures, which
+   is what a token comparison cannot do. */
+.node-network .node-box,
+.node-volume .node-box,
+.node-config .node-box,
+.node-secret .node-box {
+  fill: var(--vscode-editor-background);
+  stroke: var(--vscode-editorWidget-border, var(--vscode-panel-border));
+  rx: 12;
+}
+
+.node-volume .node-box {
+  stroke-dasharray: 5 3;
+}
+
+.node-config .node-box,
+.node-secret .node-box {
+  stroke-dasharray: 2 3;
+}
+
+/* A published port is the edge of the stack, and it says so by SHAPE: square
+   corners, where a service is rounded and a resource is a capsule.
+
+   It used to say so by SURFACE as well — `input-background`, on the argument
+   that a port names something outside the stack. That was the last of the
+   residue `RAISED_SURFACES` recorded: in Light+ `input-background` and
+   `editor-background` resolve to the same value, so the box was white on white
+   behind a hairline, measured at ratio 1.000:1 against the canvas — the exact
+   failure the value chip was fixed for. The fill now comes from `.node-box`,
+   which `RAISED_SURFACES` vouches for against the pane.
+
+   The label moves with it and had to: `input-foreground` is the one foreground
+   VS Code guarantees against `input-background` and nothing else, so a box that
+   leaves that surface drags its text off its only guaranteed pairing. Both
+   moved in one edit, which is why there is no rule for the text here at all —
+   it inherits `.node-label` / `.node-detail`, whose pairings against
+   `editorWidget-background` are declared in `INK_ON`. */
+.node-port .node-box {
+  rx: 0;
+}
+
+/* The one identity colour in the product: the Dockerfile node, and nothing
+   else. It marks the boundary between the two grammars — a different file, a
+   different engine, and from story 6.3 a different editor behind it. */
+.node-dockerfile .node-box {
+  fill: var(--vscode-editor-background);
+  stroke: var(--vscode-charts-orange);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+}
+
+.node-dockerfile .node-label {
+  fill: var(--vscode-charts-orange);
+}
+
+/* Used but never declared: the node is present rather than dropped, and it
+   says so in its own outline as well as in its second line. */
+.node.is-undeclared .node-box {
+  stroke-dasharray: 3 3;
+  opacity: 0.85;
+}
+
+/* ---- node markers ------------------------------------------------------
+ *
+ * The three relations with no far side to draw a line to. Severity is carried
+ * in the words — `unresolved`, `dependency cycle` — and never by colour alone.
+ */
+
+.node-marker {
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-index);
+  fill: var(--vscode-descriptionForeground);
+}
+
+.marker-unresolved,
+.marker-cycle {
+  fill: var(--vscode-editorWarning-foreground);
+}
+
+/* ---- edges -------------------------------------------------------------
+ *
+ * One path element per edge kind, holding every edge of that kind as a
+ * subpath: the 500-service example declares 767 edges, and 767 elements is 767
+ * style resolutions and 767 paint boxes for lines nobody clicks.
+ *
+ * Kinds are told apart by dash pattern and weight, not by colour, for the same
+ * reason the node kinds are. The legend in the header names the ones present.
+ */
+
+.edge {
+  fill: none;
+  stroke: var(--vscode-descriptionForeground);
+  stroke-width: 1;
+  opacity: 0.65;
+}
+
+/* depends_on is the relation that decides whether the stack starts, so it is
+   the one edge drawn at full strength. */
+.edge-depends_on {
+  stroke: var(--vscode-foreground);
+  stroke-width: 1.4;
+  opacity: 0.9;
+}
+
+.edge-network {
+  stroke-dasharray: none;
+}
+
+.edge-network_mode {
+  stroke-width: 1.4;
+  stroke-dasharray: 9 2 2 2;
+}
+
+.edge-link {
+  stroke-dasharray: 7 3;
+}
+
+.edge-volume {
+  stroke-dasharray: 5 3;
+}
+
+.edge-config,
+.edge-secret {
+  stroke-dasharray: 2 3;
+}
+
+.edge-secret {
+  stroke-width: 1.4;
+}
+
+.edge-publish {
+  stroke-dasharray: 1 2;
+}
+
+.edge-build {
+  stroke: var(--vscode-charts-orange);
+  stroke-dasharray: 4 3;
+  opacity: 0.9;
+}
+
+.arrow-head {
+  fill: var(--vscode-descriptionForeground);
+}
+
+.arrow-strong {
+  fill: var(--vscode-foreground);
+}
+
+.arrow-build {
+  fill: var(--vscode-charts-orange);
+}
+
+/* The condition on a depends_on edge, on a plate so the line underneath does
+   not run through the word. Which condition it is decides whether the stack
+   starts, so it is on the canvas rather than in a tooltip. */
+/* The plate is a MASK, not a chip. It exists so the edge does not run through
+   the word; it is not a thing in its own right, and the mockup draws the
+   condition as bare 8px text over the line (`directions-3.html:289`). It
+   carried a stroke as well, so five conditions on `examples/webstack` drew five
+   outlined boxes on a canvas whose other boxes are nodes — the reader counts
+   rectangles. The fill stays and goes fully opaque, because a 0.92 plate let
+   the line show through the letters it was hiding. */
+.edge-label-plate {
+  fill: var(--vscode-editor-background);
+  stroke: none;
+  opacity: 1;
+}
+
+.edge-label-text {
+  fill: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-micro);
+}
+
+/* service_healthy is the condition that hangs a stack when the far side has no
+   healthcheck (story 3.3 diagnoses exactly that). It reads at full ink so it is
+   not skimmed past — and it still says which condition it is, in words. */
+.condition-service_healthy .edge-label-text {
+  fill: var(--vscode-foreground);
+}
+
+/* ---- the toolbar: search, focus and collapse — story 4.4 ---------------
+ *
+ * Four real controls and a status line, on the same side bar surface as the
+ * legend and the header. Nothing here is a hover affordance and nothing is an
+ * icon alone: every one of them is a tab stop with a name.
+ */
+
+/* ONE chrome band, not three.
+ *
+ * The toolbar, the `+ add` bar and the legend each carried their own
+ * `sideBar-background` AND their own `border-bottom`, so the 94px between the
+ * pane header and the canvas read as three stacked bars — measured: rules at
+ * y = 48, 84 and 104 of a 693px pane, against the mockup's single 5px-padded
+ * pane header (directions-3.html:277). Nothing is removed and no control moves:
+ * the three keep their own rows, and only the two INTERNAL rules go, so the
+ * band is one surface with one edge where it meets the canvas. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* The field takes the slack, and it is the thing that gives it up.
+ *
+ * A 120px basis is what made the row wrap the moment auto-arrange joined it:
+ * the six controls and the profile group need 572px of a 656px pane, and a
+ * field asking for 120 turns that into two rows and 28px more chrome above a
+ * canvas the gap report already measured at 14% chrome. Every other item in
+ * the row is a fixed control that cannot shrink; a search field can, and at any
+ * pane wider than this one it grows straight back. */
+.toolbar-search {
+  flex: 1 1 72px;
+  min-width: 0;
+  padding: 2px 6px;
+  /* 3px, not 2px. DESIGN.md's `rounded.field` is 3px and every other box in the
+     product is on it; this was the one 2px corner in the stylesheet and it sat
+     next to five 3px ones. */
+  border-radius: 3px;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
+}
+
+.toolbar-search:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+.toolbar-label {
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-label);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* The profile toggles — story 4.6. A group, so a screen reader reads "Profiles
+   declared by this stack" once rather than a run of unrelated buttons. It
+   carries no colour of its own: each toggle is an ordinary .toolbar-button and
+   is pressed the same way Focus and the collapse controls are. */
+.toolbar-profiles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-button {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+}
+
+.toolbar-button:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Pressed is carried by the button's own state, not by colour alone: the
+   control is a real toggle with aria-pressed, and the status line beside it
+   says in words what the press did. */
+.toolbar-button[aria-pressed='true'] {
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+}
+
+/* Auto-arrange with nothing to discard.
+ *
+ * NOT `[disabled]`: a disabled button is not focusable, so a reader tabbing the
+ * toolbar of a stack nobody has dragged would never meet the control and would
+ * never learn it exists. It stays a tab stop, says `aria-disabled` to a screen
+ * reader, and answers a press in the status line. The dimming is the same
+ * demotion `.node-detail` uses, so there is one ratio for "quieter than the
+ * thing beside it" in this stylesheet rather than two. */
+.toolbar-button.is-unavailable {
+  opacity: 0.55;
+}
+
+.toolbar-button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* ---- `+ add`: declaring something the file does not have yet ------------
+ *
+ * Stories 7.3 and 7.4. It sits under the toolbar rather than inside it because
+ * it OPENS: a composer that pushed the search field around every time it was
+ * toggled would move a control the reader was aiming at. Every colour is a
+ * token, like everything else here.
+ */
+.addbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  align-items: flex-start;
+}
+
+.add-composer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.add-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* What the declaration will do, in words, next to the field it will do it
+   from. The reader is told that a resource arrives with nothing under it BEFORE
+   they press, rather than discovering it in the diff. */
+.add-note {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* The empty state's sentence and its one action, side by side (EXPERIENCE.md's
+   empty-stack row). The button is a real button: a stack with nothing in it is
+   a starting point, and the control that starts it is not a hint. */
+.empty-text {
+  margin-right: 8px;
+}
+
+/* The live region. It is how a reader who cannot see the dimming learns that
+   three nodes matched — or that none did and the graph was left alone. */
+.toolbar-status {
+  margin: 0;
+  padding: 4px 10px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* The filtered-stack line — story 4.6.
+ *
+ * Its own element rather than a sentence in .toolbar-status, which search,
+ * focus and collapse all overwrite. It reads at full ink because it is not a
+ * hint about a control: it is the statement that what is on the canvas is not
+ * the whole stack, and a reader who misses it draws a wrong conclusion about
+ * their project. */
+.toolbar-note {
+  margin: 0;
+  padding: 4px 10px;
+  color: var(--vscode-foreground);
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* An unfiltered stack has nothing to say here, and the element STAYS — it is a
+   live region, and a region that appears already carrying its text is announced
+   late or not at all. So it is emptied rather than hidden, and this is what
+   makes an empty one take no room: no padding, no rule, no ink. */
+.toolbar-note:empty {
+  padding: 0;
+  border-bottom: none;
+}
+
+/* ---- emphasis: what search and focus mode do to the canvas -------------
+ *
+ * Opacity and stroke weight. Not position — a search that moved a box would
+ * destroy the spatial memory it exists to serve — and not hue, because the
+ * palette is the theme's and severity has first claim on what colour is left.
+ */
+
+.node.is-dimmed {
+  opacity: 0.3;
+}
+
+.node.is-match .node-box {
+  stroke: var(--vscode-foreground);
+  stroke-width: 2;
+}
+
+/* A folded group: one box standing for several, drawn heavier than a service
+   so the difference is visible before the label is read. It says what it holds
+   in its second line and in its accessible name. */
+.node.is-group .node-box {
+  stroke: var(--vscode-foreground);
+  stroke-width: 1.6;
+  stroke-dasharray: none;
+}
+
+.service-row.is-dimmed {
+  opacity: 0.45;
+}
+
+.service-row.is-match {
+  border-left-color: var(--vscode-foreground);
+}
+
+/* ---- legend ------------------------------------------------------------ */
+
+/* The key to the dash patterns. The mockup has none — it draws four services
+   and two edge kinds — and this pane draws up to nine, told apart by dash and
+   weight rather than by colour, so the key stays. What it does not get to be is
+   a third band of chrome: 94px of a 693px pane was header, toolbar, add bar and
+   legend before a node was drawn. Tightened from 24px to 20px, which is the
+   whole of what a key to five dash patterns is worth. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 4px 10px;
+  list-style: none;
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* The band's ONE edge is wherever it stops. Only the LAST visible row of the
+   three carries a rule; the rows above it are inside the band and do not.
+   `[hidden]` rather than a display query, because that is how `main.ts` takes
+   them off screen (`:660`, and the add bar on a file the reader cannot add to);
+   an element hidden that way is still a DOM sibling, which is why this is a
+   `:has()` on the pane and not an adjacent-sibling rule. */
+.pane-graph:has(.legend:not([hidden])) .toolbar,
+.pane-graph:has(.legend:not([hidden])) .addbar,
+.pane-graph:has(.addbar:not([hidden])) .toolbar {
+  border-bottom: none;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 0;
+  border-top: 1px solid var(--vscode-descriptionForeground);
+}
+
+.legend-depends_on .legend-swatch {
+  border-top-width: 2px;
+  border-top-color: var(--vscode-foreground);
+}
+
+.legend-network_mode .legend-swatch {
+  border-top-style: dashed;
+  border-top-width: 2px;
+}
+
+.legend-link .legend-swatch,
+.legend-volume .legend-swatch {
+  border-top-style: dashed;
+}
+
+.legend-config .legend-swatch,
+.legend-secret .legend-swatch,
+.legend-publish .legend-swatch {
+  border-top-style: dotted;
+}
+
+.legend-build .legend-swatch {
+  border-top-style: dashed;
+  border-top-color: var(--vscode-charts-orange);
+}
+
+.legend-label {
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-index);
+}
+
+.node.is-selected .node-box {
+  stroke: var(--vscode-focusBorder);
+  stroke-width: 1.6;
+}
+
+/* The focus ring is never removed. There is no `outline: none` in this
+   extension, and the ring is drawn on the node itself so it survives panning
+   and zooming. */
+.node:focus .node-box,
+.node:focus-visible .node-box {
+  stroke: var(--vscode-focusBorder);
+  stroke-width: 1.6;
+}
+
+.node:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+.graph:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 24px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* ---- narrow panel ------------------------------------------------------ */
+
+/* Below 600px the canvas is hidden — a 400px column cannot hold a pannable
+   graph — and the stack is presented as a list instead. Hiding the canvas
+   alone would hide the only selectable thing in the pane and the empty state
+   with it, leaving a strip and nothing else. Every row here is a real button,
+   so the whole stack stays reachable from the keyboard at any width. */
+.strip {
+  padding: 10px;
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.narrow-list {
+  flex: 1;
+  min-height: 0;
+  /* The list scrolls vertically. The page never scrolls sideways. */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.service-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.service-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  border-left: 2px solid transparent;
+}
+
+.service-row:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.service-row.is-selected {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+  border-left-color: var(--vscode-focusBorder);
+}
+
+/* The focus ring is never removed anywhere in this extension. */
+.service-row:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+.service-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.service-detail {
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-index);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.service-row.is-selected .service-detail {
+  color: inherit;
+}
+
+.narrow-note {
+  margin: 0;
+  padding: 16px 10px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+}
+
+#app.is-narrow .canvas {
+  display: none;
+}
+
+/* No canvas, no edges, so no key to the edges. */
+#app.is-narrow .legend {
+  display: none;
+}
+
+/* The list is a narrow-panel affordance only: at full width the graph is the
+   view, and two parallel presentations of the same stack is two truths. */
+#app:not(.is-narrow) .narrow-list {
+  display: none;
+}
+
+/* ---- the split: graph left, inspector right ---------------------------- */
+
+/* DESIGN.md's identity. Both panes are permanently visible; the inspector does
+   not open or close and there is no mode. The divider persists per workspace
+   and the ratio arrives as a flex-basis from main.ts, so a resized panel keeps
+   the reader's proportion instead of squeezing one pane away. */
+.split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pane-graph {
+  flex-grow: 0;
+  flex-shrink: 1;
+}
+
+.divider {
+  flex: none;
+  width: 5px;
+  cursor: col-resize;
+  background: var(--vscode-panel-border);
+  /* The one control that decides how much of the wedge you can see, so it is
+     a real tab stop with arrow keys — never mouse-only. */
+  border: none;
+  padding: 0;
+}
+
+.divider:hover,
+.divider.is-dragging {
+  background: var(--vscode-focusBorder);
+}
+
+.divider:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* ---- the inspector ----------------------------------------------------- */
+
+.inspector {
+  flex-grow: 0;
+  flex-shrink: 1;
+  border-left: 1px solid var(--vscode-panel-border);
+  background: var(--vscode-editor-background);
+}
+
+.inspector-header {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+
+.inspector-name {
+  color: var(--vscode-foreground);
+  flex: 0 1 auto;
+}
+
+.inspector-summary,
+.inspector-source {
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+}
+
+.inspector-source {
+  flex-basis: 100%;
+}
+
+/* A file with no escape directive, no CRLF and no BOM has nothing to mark, and
+   an empty element with `flex-basis: 100%` still claims a whole row of a
+   wrapping header. That row is what pushed `+ add stage` off the header line. */
+.inspector-source:empty {
+  display: none;
+}
+
+/* The pane scrolls; it never truncates. `available, not set` is the whole
+   product and a list that stops early is the product not working. */
+.inspector-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+
+  /* The key column, once, for every row on the pane at every depth.
+   *
+   * `cqw` rather than `%`, and the pane is the query container: a percentage
+   * resolves against whatever box the row happens to sit in, so a row inside a
+   * nested mapping got a narrower key cell AND started further right, and the
+   * value column drifted right by one indent per level. Against the pane, one
+   * number serves every depth and `--ind` (set per container from the nesting
+   * level) takes the step back out again, so every value in the pane starts on
+   * the same x.
+   *
+   * 29% is the mockup's ratio — `.k { width: 96px }` on a 334px form pane. The
+   * old 34% on a 439px inspector spent 142px on keys whose longest is
+   * `healthcheck`, and grew without limit on a wide panel; the ceiling is what
+   * `.stageform .field` used to need a rule of its own to say. */
+  --key-col: clamp(64px, 29cqw, 168px);
+  container-type: inline-size;
+}
+
+/* The Dockerfile pane's vocabulary is bounded and short — `HEALTHCHECK` is the
+   longest word in it — so its ceiling is lower. One declaration now, rather
+   than a grid override that the provenance line underneath never heard about:
+   `line 6` used to be indented to 34% of a 1100px pane, x=377, while the values
+   it sat under started at x=124. */
+.stageform-body {
+  --key-col: clamp(56px, 29cqw, 108px);
+}
+
+.inspector-message {
+  margin: 0 0 8px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.inspector-note {
+  margin: 0 0 12px;
+  color: var(--vscode-descriptionForeground);
+  border-left: 2px solid var(--vscode-panel-border);
+  padding-left: 8px;
+}
+
+.inspector-detail {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+}
+
+/* ---- groups and fields -------------------------------------------------- */
+
+/* The rhythm, on the 4px base: 4px between rows, 8px under a row that carries
+   subordinate lines, 20px between sections. The old scale was 4 and 12, and a
+   section heading, a key, a value and a provenance line all landed at the same
+   distance from each other and in the same weight, so the pane read as one
+   undifferentiated column of text.
+
+   One number, not `margin-bottom` plus a `.grp + .grp` margin-top: adjacent
+   siblings COLLAPSE their vertical margins to the larger of the two, so the
+   second declaration would have been a rule that changed nothing — measured
+   12px between sections with both in place. */
+.grp {
+  margin-bottom: 20px;
+}
+
+.grp-t {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 3px 0;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+/* Dim ink, per DESIGN.md:119 — but not the same WEIGHT as the provenance line
+   it was otherwise identical to. Weight is the one axis left: the type size is
+   fixed by the reader's editor and the colour by the token. */
+.grp-name {
+  font-size: var(--type-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.field-block {
+  margin-bottom: 4px;
+}
+
+/* A block that carries a provenance line, a resolution sentence, a diagnostic
+   or a note is several lines with nothing between them, and then 4px to the
+   next key — so the subordinate lines read as belonging to the row BELOW them
+   as much as the one above. Twice the gap underneath binds them upward. */
+.field-block:has(> .prov, > .diag, > .resolution, > .field-note, > .field-controls) {
+  margin-bottom: 8px;
+}
+
+/* One step, and one step only, per level of nesting. `--ind` (set from the
+   nesting level in inspector.ts) takes the same 16px back out of the key
+   column, so the row steps right and the VALUE column does not move. */
+.field-block.is-nested {
+  margin-left: 8px;
+  border-left: 1px solid var(--vscode-panel-border);
+  padding-left: 7px;
+}
+
+/* An edit staged but not written. The file is untouched: story 6.1 owns the
+   write, and this strip is the only evidence a stage exists. */
+.field-block.is-staged {
+  border-left: 2px solid var(--vscode-focusBorder);
+  padding-left: 6px;
+}
+
+/* FOUR tracks — `key | value | mark | actions` — and every row lays out on the
+   same four whether or not it fills them.
+   =========================================================================
+   The mockup's row is two cells (directions-3.html:167–173). Epic 8 added a
+   severity/upgrade MARK to the row and Epic 9 added row ACTIONS — `Remove`,
+   `#`, `${}` — and both were appended as extra `auto` columns bolted on by
+   `:has()`, in whatever order the row happened to acquire them. Measured on the
+   previous bundle (`harness/system.mjs`, service pane, 1100px):
+
+     * the row-action glyphs landed on EIGHT different x — 724, 761, 762, 921,
+       1042, 1063, 1072, 1076 — while the value column was disciplined to one;
+     * a parent row (`environment`, `depends_on`, `healthcheck.test`) has no
+       value chip, so its two children auto-placed into tracks 1 and 2 and the
+       `#` sat 350px left of every other `#` on the pane, hard against the word
+       `environment`, reading as part of the key;
+     * a row's right edge was 1090px with actions, 1078px on a parent row, and
+       on the one row carrying a finding the PILL sat outside the actions, so
+       the same three things came in two orders.
+
+   The pane already argues, in `rhythm.mjs`, that the LEFT edge is a column and
+   a nesting level comes out of the key rather than moving the row. This is the
+   same argument for the right edge: it is a gutter, and a track a row does not
+   use is empty rather than absent.
+
+   `column-gap: 0` with the 6px carried as `margin-left` on the non-first
+   children is what makes "empty" cost nothing: a grid gap is charged for an
+   empty track and a margin is not, so a row with no pill ends where a row with
+   one ends. The value's BORDER BOX still starts at `key-col + 6`, which is the
+   x `rhythm.mjs --check` pins as the one value column, so this moves nothing
+   the reader was already reading. */
+.field {
+  display: grid;
+  grid-template-columns: calc(var(--key-col) - var(--ind, 0px)) minmax(0, 1fr) auto auto;
+  column-gap: 0;
+  row-gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+  /* The anchor for story 7.9's value list — its arrow and its popup are
+     absolutely positioned against this row. Deliberately NOT a wrapper around
+     the value cell: `harness/rhythm.mjs` measures the one value column as
+     `.field > .field-value`, so a flex container would have taken every field
+     with a value list out of that check — the exact rows the combobox touches.
+     An absolutely positioned child is out of flow, claims no grid cell and
+     changes no geometry on a row that has no list. */
+  position: relative;
+}
+
+/* The 6px that used to be the grid gap. On the children rather than on the
+   grid, so an unoccupied track is free — see the block above. */
+.field > * {
+  margin-left: 6px;
+}
+
+/* …except the two children that are OUT of flow. A grid gap does not reach an
+   absolutely positioned child and a margin does: the value list opened six
+   pixels right of the field it belongs to the first time this was measured,
+   which `harness/comboshot.mjs` caught as `popup x=806, field x=800`. Their
+   left edge is `left:` in their own rule and nothing else gets to move it. */
+.field > .combo-popup,
+.field > .combo-toggle {
+  margin-left: 0;
+}
+
+/* An `<input>` value cell sizes itself with `width: 100%` — 100% of the grid
+   AREA, which its own 6px margin then pushes 6px past the row's right edge.
+   Every editable Dockerfile row measured 1096 against 1090 for every other row.
+   Inside `.field` the grid stretches it, so the width is not needed and is the
+   thing doing the damage; outside it (the add composer) `width: 100%` stays. */
+.field > .field-input {
+  width: auto;
+}
+
+/* The mark and the actions are PLACED, not auto-placed — in a row as well as in
+   a column. Auto-placement is what put a parent row's `#` in the value track;
+   and a column alone is not enough, because the pill is appended to the row
+   AFTER the actions (`inspector.ts appendDiagnostic` runs after the row is
+   built) and grid's sparse cursor will not step backwards from track 4 to
+   track 3, so the pill landed on a second row of its own — measured as a
+   39px-tall `SESSION_SECRET` row with the pill 24px under its own value.
+   The value cell stays auto-placed: it is the only child left, and the first
+   free cell is exactly where it belongs. */
+.field > .field-key {
+  grid-row: 1;
+  grid-column: 1;
+  margin-left: 0;
+}
+
+.field > .pill,
+.field > .pill-upgrade {
+  grid-row: 1;
+  grid-column: 3;
+}
+
+.field > .field-actions {
+  grid-row: 1;
+  grid-column: 4;
+}
+
+/* A row whose value is the rows underneath it — a mapping, or a list too long
+   to print inline. There is no chip in the value cell, so the key takes only
+   the width it needs; the mark and the actions stay in the gutter every other
+   row puts them in. */
+.field.is-parent {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.field-key {
+  color: var(--vscode-descriptionForeground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A literal key from the file — an environment variable's name — is in the
+   code face, because it is in the file verbatim. A schema key's label is
+   prose about the file and is not. */
+.field-key-literal {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* DESIGN.md:156 — the value sits "on an input surface". The mockup's value chip
+   has a background, a border, a radius and padding, and this rule had none of
+   the four: values rendered as bare text on the pane background, so a pane of
+   forty values read as a paragraph rather than as forty things you can change.
+
+   The surface used to be `input-background`, which in Dark+ is a distinctly
+   lighter grey than the editor and reads — but in Light+ `input.background` and
+   `editor.background` are THE SAME WHITE, so the chip was a white rectangle on
+   a white pane and the only thing left of it was a pale hairline. A pane of
+   forty values read as a form of empty inputs: measured on
+   `02b-service-selected-light.png`. It was invisible in one theme and nobody
+   noticed, because the theme it was written against was the other one.
+
+   `editorWidget.background` is the surface VS Code raises over the editor, and
+   it carries `editorWidget.border` with it — an opaque border colour in the two
+   default themes and `contrastBorder` in the two high-contrast ones, which is
+   what holds Light High Contrast, where the widget and editor backgrounds are
+   both white and only the border separates them. `foreground` is the ink VS Code
+   contributes against that surface (`GUARANTEED_ON` in webview/a11y.ts), so the
+   pairing check still passes — and the warning ink on an unresolved value,
+   which used to be an argued EXCEPTION because VS Code never contributed it
+   against an input surface, is now a pairing the platform does contribute. */
+.field-value {
+  color: var(--vscode-foreground);
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border));
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Reveal in full on focus rather than wrap, so a twenty-row group stays
+   scannable and no value is unreachable. */
+.field-value:focus,
+.field-block:hover > .field > .field-value {
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* DESIGN.md:157 — "An unset field renders with a dashed border, italic dim
+   placeholder showing the schema default where one exists, and no fill." The
+   dashed border and the absent fill were both missing; only the colour and the
+   italic were here, so an unset field looked like a set one with grey text. */
+.field-value.is-unset {
+  color: var(--vscode-descriptionForeground);
+  background: transparent;
+  border: 1px dashed var(--vscode-panel-border);
+  font-style: italic;
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+}
+
+/* The placeholder is the same statement in the same voice, for the input that
+   an opened key renders as. */
+/* `descriptionForeground` rather than `input-placeholderForeground`, because
+   the chip is no longer on the input surface and VS Code contributes the
+   placeholder colour against that surface and no other. Same voice, same
+   dimness, a pairing the platform actually makes. */
+.field-input::placeholder {
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+  font-family: var(--vscode-font-family);
+}
+
+/* An uninterpolated variable is a finding, not an error: the value renders,
+   and the resolution line beneath says what is missing. */
+.field-value.is-unresolved,
+.resolution.is-unresolved {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+/* The separator between the values of a collapsed list. Not in the file, so
+   not in the code face — DESIGN.md's monospace rule, applied to a punctuation
+   mark the reader must not mistake for content. */
+.field-sep {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+}
+
+/* Story 9.2 — an entry of a collapsed list is a control, not a label.
+   `CMD · wget · -qO- · http://localhost:3000/healthz` read as one inert string
+   and the owner said so in four words. It still reads as one string: the button
+   carries the entry's own text, in the code face, with no chrome of its own
+   until it is hovered or focused, so the collapsed row loses nothing and gains
+   a way in. The underline on hover is what says it is pressable. */
+.field-item {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.field-item:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+.field-item:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* `+ entry` — the key column of the add row. It is not a key in the file, so
+   it is in the UI face and the dim ink every label on this pane uses. */
+.field-key-add {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+/* The key half of `+ key`, the add row for a free-form mapping.
+ *
+ * `environment`, `labels` and `build.args` permit any key, so there is no
+ * `available, not set` list for them and no key to press — the reader has to
+ * NAME the key, which is a field and not a label. It carries `.field-key`, so
+ * it is placed in track 1 by the rule above and takes exactly the column every
+ * key on the pane takes, at every depth: no new track, no new placement, and
+ * the value beside it stays in the pane's one value column.
+ *
+ * The box is `.field-input`, unchanged — the same box the value beside it takes
+ * and the same one every editable cell on this pane takes. What is set here is
+ * only what `.field-key` would otherwise impose on an input: its ink, which is
+ * the dim label colour, and an ellipsis that belongs to text rather than to a
+ * field somebody is typing in. The FACE stays monospace and that is deliberate:
+ * what goes in this cell is bytes that end up in the file, which is DESIGN.md's
+ * one load-bearing type rule. The `+ key` prompt is the PLACEHOLDER, which
+ * `.field-input::placeholder` already renders in the UI face — our words, their
+ * face — exactly as `add an entry` is rendered on the list form's row. */
+.field > input.field-key {
+  color: var(--vscode-foreground);
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* ---- `.row-action`: ONE shape for everything that acts on a row ----------
+ *
+ * `Remove`, `#` and `${}` arrived in three separate stories and shipped as three
+ * separate shapes. Measured on the previous bundle (`harness/system.mjs`):
+ *
+ *   .comment-open   17px tall, 12.48px code face, padding 0 3px, radius 3px
+ *   .extract-open   16px tall, 11.52px code face, padding 0 3px, radius 3px
+ *   .entry-remove   13px tall, 11.52px UI face,   padding 0,     radius 0
+ *   .comment-remove 13px tall, 11.52px UI face,   padding 0,     radius 0
+ *
+ * Two of them sit side by side in the same `.field-actions` cell of the same
+ * row, one pixel and one type step apart. That is not a hierarchy, it is three
+ * passes not looking at each other, and it is what "eight additions bolted on"
+ * looks like when you measure it rather than describe it.
+ *
+ * The rule: **a control that acts on the row it sits in has one shape.** One
+ * box, one type step, one radius, one hit area. What varies between them is
+ * only the FACE — `#` and `${}` are marks the file itself uses and stay in the
+ * code face (DESIGN.md's monospace rule), `Remove` is our word and stays in the
+ * UI face — and the face does not change the box, because `line-height` and
+ * `min-height` are set here rather than left to whatever the glyph measures.
+ */
+.row-action {
+  min-height: 16px;
+  padding: 0 3px;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+  line-height: 16px;
+}
+
+.row-action:hover,
+.row-action.is-open {
+  color: var(--vscode-textLink-activeForeground);
+}
+
+.row-action:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* The two that are marks the file uses keep the code face. Nothing else about
+   them differs — see the box above. */
+.comment-open,
+.extract-open {
+  font-family: var(--vscode-editor-font-family);
+}
+
+/* `Remove` is a word, so it underlines on hover the way every other word this
+   pane makes pressable does. A glyph does not: an underline under `#` reads as
+   part of the mark. */
+.entry-remove:hover,
+.comment-remove:hover {
+  text-decoration: underline;
+}
+
+/* ---- story 9.1: comments ------------------------------------------------ */
+
+/* `#` is the mark the file itself uses, so the glyph is in the code face;
+   everything it means is in the accessible name. Quiet until hovered or
+   focused — there is one of these on every row that has bytes, and a pane of
+   fifteen loud buttons is a pane about buttons. Its BOX is `.row-action`. */
+
+/* The block itself, under the row it belongs to. The rule down its left is what
+   says "this is about the row above" rather than "this is the next row". */
+.comment-block {
+  margin: 4px 0 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--vscode-panel-border);
+}
+
+/* The rule and the padding indent the block by ten pixels, and the pane has ONE
+   value column — story 4.5's geometry, measured by `harness/epic9.mjs --check`,
+   which caught this at x = 806, 816. The ten comes back out of the key column,
+   exactly as a nesting level does through `--ind`. */
+.comment-block > .field-block > .field,
+.extract-block > .field-block > .field {
+  grid-template-columns: calc(var(--key-col) - var(--ind, 0px) - 10px) minmax(0, 1fr) auto auto;
+}
+
+.comment-key {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+/* A run of comment lines is ONE comment, so the field for it has room for
+   several. `resize: vertical` and nothing else: a horizontal resize would take
+   the field out of the pane's one value column. */
+textarea.comment-input {
+  min-height: 3.4em;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.comment-staged {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+/* ---- story 9.3: moving a value into a variable --------------------------- */
+
+/* `${}` — what the file will say afterwards, which is the one thing that has to
+   be recognisable. Its box is `.row-action`, the same one `#` takes; the two
+   used to differ by a pixel and a type step while sitting side by side. */
+
+.extract-block {
+  margin: 4px 0 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--vscode-panel-border);
+}
+
+.extract-diff-label {
+  margin-top: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+/* The two diffs of a move, in the same face the pending strip uses.
+   `.pending-second .pending-diff` is deliberately NOT styled here: it already
+   carries `.pending-diff`, and a second rule of equal specificity would replace
+   the surface that rule's ink was checked against — which the derived-pairing
+   scan catches, and did. */
+.extract-diff {
+  /* A column of lines, the same way `.pending .pending-diff` lays one out. As
+     `display: block` the `white-space: pre` spans ran together on one line and
+     the `-` and the `+` of a two-line diff sat side by side — a diff nobody
+     could read is a diff nobody approved. */
+  display: flex;
+  flex-direction: column;
+  margin: 2px 0 0;
+  padding: 4px 6px;
+  overflow-x: auto;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 3px;
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-sub);
+  line-height: 1.5;
+}
+
+.pending-second-label {
+  margin-top: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+/* The control that STAGES the move. Not `button-primary`: the primary control
+   in this pane is the one that writes, and there is still only one of those. */
+.extract-stage {
+  margin-top: 6px;
+  padding: 2px 6px;
+  border: 1px solid var(--vscode-button-border, transparent);
+  /* 3px and the UI step, which makes this the same box as `.toolbar-button` and
+     `.button-quiet` — the product's one quiet control. It shipped at a 2px
+     corner and an inherited size, so a third quiet button existed that looked
+     like neither of the other two. */
+  border-radius: 3px;
+  font-size: var(--type-ui);
+  line-height: normal;
+  cursor: pointer;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+.extract-stage:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+.extract-stage:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* ---- resolution and provenance ------------------------------------------ */
+
+.resolution {
+  margin-left: calc(var(--key-col) - var(--ind, 0px));
+  padding-left: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+  overflow-wrap: anywhere;
+}
+
+.resolution-note {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+/* Always visible, never a hover — a tooltip is a thing users do not know to
+   look for. Indented to the value column so it reads as subordinate. */
+.prov {
+  margin-left: calc(var(--key-col) - var(--ind, 0px));
+  padding-left: 6px;
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+  overflow-wrap: anywhere;
+}
+
+.prov-word.is-many {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.prov-link {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--vscode-textLink-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-sub);
+  font-variant-numeric: tabular-nums;
+}
+
+.prov-link:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+.prov-link:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* ---- diagnostics inline ------------------------------------------------- */
+
+/* On the field that caused it, never in a panel of our own: VS Code's problems
+   panel already exists, the reader already knows it, and we publish there too. */
+/* DESIGN.md:180 — the pill "sits inline with the field it concerns". The pill
+   is now a child of the field row itself; what remains here is the sentence,
+   which is a paragraph and belongs under the row rather than in it. */
+.diag {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: baseline;
+  margin: 2px 0 6px calc(var(--key-col) - var(--ind, 0px));
+  padding-left: 6px;
+  font-size: var(--type-sub);
+  color: var(--vscode-descriptionForeground);
+}
+
+/* The pill inside a field row: flex: none so it never squeezes the value, and
+   it sits after it, which is where the mockup puts it. */
+.field > .pill {
+  align-self: center;
+}
+
+.pill-error {
+  color: var(--vscode-editorError-foreground);
+}
+
+.pill-warning {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.pill-hint {
+  color: var(--vscode-editorInfo-foreground);
+}
+
+/* The four `:has()` rules that used to grow the row a track at a time — one for
+   a pill, one for actions, one for both, one for a parent row carrying actions
+   — are gone. The row now HAS all four tracks (see `.field` above), so a mark
+   and a set of controls no longer change the shape of the grid they land in,
+   which is what let three things arrive in two orders and eight x positions.
+
+   `.field-actions` is still a single child holding `Remove`, `#` and `${}`
+   together: three loose buttons would claim three cells, overflow the four
+   tracks and wrap onto a line of their own — the defect `rhythm.mjs --check`
+   caught as `one value column x = 806, 678, 694`. */
+
+/* The controls sit together, at the row's baseline, and never wrap. */
+.field-actions {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+/* The message flows WITH the anchors on the line, rather than taking a full
+   line of its own and pushing them onto a second.
+
+   `flex: 1 1 100%` forced a line break before any anchor, so the cheapest
+   finding on the pane cost two lines whatever it said. It now takes the room
+   it needs and the anchors follow it, which is one line for a short message and
+   the same number as before for a long one — never more. Nothing is truncated
+   and nothing is hidden: the whole message is on screen, wrapped. */
+.diag-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Severity is a word first. The colour repeats it; it never carries it alone. */
+.pill {
+  flex: none;
+  padding: 0 5px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  font-size: var(--type-sub);
+  text-transform: lowercase;
+}
+
+.diag-error .pill,
+.diag-error .diag-text {
+  color: var(--vscode-editorError-foreground);
+}
+
+.diag-warning .pill,
+.diag-warning .diag-text {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.diag-hint .pill,
+.diag-hint .diag-text {
+  color: var(--vscode-editorInfo-foreground);
+}
+
+/* ---- available, not set -------------------------------------------------- */
+
+/* The differentiator. Never collapsed, never behind a "show more". If it does
+   not fit, the pane scrolls. */
+/* The block runs one step BELOW the pane's own type, and only one step.
+
+   The mockup sets it at 10px against an 11.5px chrome — 0.87 — because the
+   block is an index of what is available, not a row of values, and at the pane
+   size it read as a wall of links rather than a list of keys. `0.85` is the
+   ratio `.node-detail` already uses for the same demotion, so there is one
+   number in the stylesheet for "a step quieter", not two.
+
+   Every key is still rendered, still a button, still reachable, and still
+   never truncated or behind a "show more" (story 5.2). Nothing about WHAT is
+   listed changes here; only how loudly. */
+.addable {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--vscode-panel-border);
+  color: var(--vscode-descriptionForeground);
+  /* The INDEX step, which is the step its keys are already on: the lead, the
+     group label and the keys are one block saying one thing, and they used to
+     be three sizes (11.05, 11.05-uppercase and 10.2). */
+  font-size: var(--type-index);
+  line-height: 1.7;
+}
+
+.addable-lead {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* One group's run of keys inside the pane's single block.
+
+   Not a block of its own — no heading, no rule, no margin, no dashed border.
+   The whole point of consolidating is that ten paragraphs became one, and every
+   one of those four is what made the old ones read as ten.
+
+   It does take its own LINE, which the first attempt did not: run against run
+   in one flow, a group label landed mid-line between two keys with no delimiter
+   and `… working_dir ENVIRONMENT annotations …` read as though ENVIRONMENT were
+   a key. A line per group costs three lines over the flow and is the difference
+   between an index and a wall. The label is the same dim, uppercase,
+   letter-spaced face `.grp-name` uses, so it reads as the group name it is. */
+.addable-run {
+  display: block;
+  text-indent: -12px;
+  padding-left: 12px;
+}
+
+/* No size of its own. It used to be 0.72rem against a 13px block; now the block
+   is the smaller of the two and an absolute 0.72rem would make the group LABEL
+   larger than the keys under it. Uppercase and the letter-spacing are what
+   separate it, the same two properties `.grp-name` uses. */
+.addable-group {
+  margin-right: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* A key sits one step below the editor's own code size, matching the block it
+   is in. It keeps the code face — these are literally the keys that would go in
+   the file — and it keeps the link colour, which is the affordance saying a
+   click puts one there. The mockup's is `.addable b` in accent at 10px; the
+   link token is the ink DESIGN.md's `available-not-set` names and the only
+   accent-weight ink `INK_ON` guarantees on this surface. */
+.addable-key {
+  padding: 0 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--vscode-textLink-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-index);
+}
+
+.addable-key:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+.addable-key:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* Marked, not hidden (AD-21). The reader learns the key exists AND that
+   upgrading would give it to them. */
+.addable-key.is-unsupported {
+  color: var(--vscode-descriptionForeground);
+  text-decoration: underline dotted;
+}
+
+.addable-key.is-deprecated {
+  text-decoration: line-through;
+}
+
+/* Same reason as `.addable-group`: the block sets the size and its annotations
+   take it, so the block is one size throughout rather than three. */
+.addable-default,
+.addable-mark {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-style: italic;
+}
+
+/* A default the specification records in PROSE. It is not a value and must not
+   look like one — the reader can see that "interval value" is a description
+   rather than a duration only if it is presented as a quotation. */
+.addable-default.is-prose {
+  text-decoration: underline dotted;
+}
+
+/* ---- groups, nested groups and per-field controls ------------------------ */
+
+/* A count of rows that are also on screen underneath the heading. Never a
+   substitute for the values themselves. */
+.grp-count {
+  margin-left: auto;
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Where a nested mapping says where IT is declared.
+
+   Not a `.prov`, and the difference is the point rather than a way round a
+   check. Every `.prov` on this pane is a subordinate line indented to the value
+   column, and it means "the value on the row above came from here". This one
+   belongs to the heading it sits in and means "this mapping is declared here",
+   so it is on the heading's line, at the heading's size, in the heading's ink —
+   the mockup's right-hand `.grp-t` slot. Put in the value column instead, it
+   claimed to be the provenance of whichever row happened to be first.
+
+   `margin-left: auto` so it takes the right edge when there is no count, and
+   sits after the count when there is. */
+.grp-prov {
+  margin-left: auto;
+  font-size: var(--type-sub);
+}
+
+/* A mapping rendered as its own group inside a semantic one. Indented so the
+   nesting reads, and ruled so its `available, not set` line clearly belongs to
+   it rather than to the group above. */
+/* One step, the same 16px `.field-block.is-nested` takes, and the same 16px
+   `--ind` gives back to the key column. Two indenting containers that stepped
+   by different amounts — 19px here, 17px there — is how one pane ended up with
+   three value columns. */
+.grp-nested {
+  margin: 6px 0 10px 8px;
+  padding-left: 7px;
+  border-left: 1px solid var(--vscode-panel-border);
+}
+
+.grp-nested.is-staged {
+  border-left-color: var(--vscode-focusBorder);
+}
+
+/* Discarding ONE staged edit. A real button, tab-reachable and named — the
+   `unstage` message existed for a story and nothing ever sent it. */
+.field-controls {
+  margin-top: 2px;
+}
+
+.field-unstage {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--vscode-textLink-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+}
+
+.field-unstage:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+.field-unstage:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* The pane header's own summary — `4 services · 1 network · 2 warnings`. */
+.pane-summary,
+.inspector-severity {
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The strip docks here, at the foot of the inspector (DESIGN.md:184) rather
+   than at the foot of the panel, where it used to span the graph as well. */
+.inspector-footer {
+  flex: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- the node badge ------------------------------------------------------ */
+
+.node-badge-error {
+  fill: var(--vscode-editorError-foreground);
+}
+
+.node-badge-warning {
+  fill: var(--vscode-editorWarning-foreground);
+}
+
+.node-badge-hint {
+  fill: var(--vscode-editorInfo-foreground);
+}
+
+.node-badge-count {
+  fill: var(--vscode-editor-background);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-micro);
+}
+
+/* ---- narrow panels -------------------------------------------------------- */
+
+/* 600–900px: the two-column field grid collapses to one. */
+@media (max-width: 900px) {
+  /* One column, so the key sits above its value. The mark and the actions
+     follow the value rather than each taking a line of their own: they are
+     placed into tracks 3 and 4 above, and a single-track grid would stack them.
+     `grid-column: auto` hands them back to auto-placement, which on a one-track
+     grid means the next row down — so they are unplaced ONTO the value's line
+     by giving the row two tracks below 900px: content, then the gutter. */
+  .field,
+  .field.is-parent {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    row-gap: 0;
+  }
+
+  .field > * {
+    margin-left: 0;
+  }
+
+  /* One column, so the key is on its own line above the value; the mark and
+     the actions stay on the value's line, in the gutter at its right. */
+  .field > .field-key {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+
+  .field > .pill,
+  .field > .pill-upgrade {
+    grid-row: 2;
+    grid-column: 2;
+    margin-left: 6px;
+  }
+
+  .field > .field-actions {
+    grid-row: 2;
+    grid-column: 3;
+    margin-left: 6px;
+  }
+
+  .resolution,
+  .prov,
+  .diag {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  /* Epic 9's blocks reset too, and this is the omission that made every one of
+     its affordances unusable in this band.
+
+     The wide rule above takes the ten pixels of the block's rule-and-padding
+     indent back out of the KEY column, which is right when there is a key
+     column. Below 900px there is not: `.field` is one content track and the
+     key spans `1 / -1` on the row above. That rule is (0,3,0) and `.field`
+     here is (0,1,0), so without this the four-track wide grid survived the
+     media query, the key still spanned the whole row, and the input landed in
+     the surviving 72px key track with 200px of its own row empty beside it.
+
+     Measured by `epic9.mjs --check` at 760, which now runs: the variable-name
+     field of story 9.3's move block, story 9.4's ARG block and story 9.1's
+     comment block were all 72px wide, and all three blocks reported a mix of
+     three- and four-track fields against the band's one shape. */
+  .comment-block > .field-block > .field,
+  .extract-block > .field-block > .field {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}
+
+/* Below 600px the graph pane collapses and the inspector takes the panel.
+   The graph returns on widening; nothing is lost, and the page never scrolls
+   sideways. */
+.is-narrow .split {
+  flex-direction: column;
+}
+
+.is-narrow .pane-graph {
+  flex: 0 0 auto;
+  max-height: 45%;
+}
+
+.is-narrow .inspector {
+  flex: 1 1 auto;
+  border-left: none;
+  border-top: 1px solid var(--vscode-panel-border);
+}
+
+/* ---- the write path — Epic 6 -------------------------------------------
+ *
+ * Two new surfaces: the docked pending-diff strip, and the Dockerfile stage
+ * form that replaces the split. Both inherit every colour from the same
+ * `--vscode-*` tokens as everything above; there is no palette here either.
+ *
+ * The diff's own colours come from VS Code's diff editor tokens, so a reader's
+ * added and removed lines look the way their diffs already look. A hand-picked
+ * green and red would be a second opinion about what "added" looks like, and it
+ * would be the one that failed in a high-contrast theme.
+ */
+
+/* THE CAP USED TO BE A PERCENTAGE, AND THAT IS WHAT HID THE PRODUCT.
+ *
+ * `max-height: 40%` resolves against `.inspector-footer`, whose own height is
+ * this strip's content — a circle. Chrome broke it the only way it can: it
+ * sized the footer to the UNCONSTRAINED strip (197px), then clipped the strip
+ * to 40% of that (94px). Measured at 1100x720: `.pending-diff` clientHeight 51,
+ * scrollHeight 154, with 103px of EMPTY FOOTER under it. The three lines that
+ * fitted were `--- a/`, `+++ b/` and `@@`; the `−`/`+` pair — "the entire
+ * product", EXPERIENCE.md:230 — was below the fold of a box that had a hundred
+ * spare pixels directly beneath it.
+ *
+ * A viewport unit is not circular: in a webview the viewport IS the panel, so
+ * `50vh` caps the strip at half the panel without asking the footer how tall it
+ * is. The footer then measures exactly the strip, and the strip measures its
+ * content until the content is genuinely too big to show. */
+.pending {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 50vh;
+  padding: 6px 10px 8px;
+  border-top: 1px solid var(--vscode-panel-border);
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+
+/* Two rows, not one. `Pending`, `Discard` and `Save to compose.yaml` took the
+   whole 438px row, so `1 edit · 1 line removed, 1 added` — the sentence that
+   says a one-value change is a one-line change — rendered as `1 edit · 1 line
+   r…`. The summary is given its own line by `flex-basis: 100%` and put after
+   the controls by `order`; the DOM order is unchanged, so a screen reader still
+   hears the count before the buttons that act on it. */
+.pending-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  row-gap: 2px;
+  flex: none;
+}
+
+.pending-summary {
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-controls {
+  order: 1;
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+/* Only when there is something staged: with the buttons hidden, `Pending  no
+   pending changes` fits on one row and a second row would be a blank line. */
+.pending:not(.is-empty) .pending-summary {
+  order: 2;
+  flex: 1 0 100%;
+}
+
+/* `Save to <file>` is the primary control and the only one that writes. It is
+   given the secondary treatment reversed rather than a colour of its own. */
+.button-primary {
+  font-weight: 600;
+}
+
+/* The empty state is a sentence, not an absence (DESIGN.md:186). The strip
+   stays on screen with "no pending changes" in it, so a reader can tell a pane
+   with nothing staged from a pane whose strip failed to appear. */
+.pending.is-empty {
+  max-height: none;
+}
+
+.pending.is-empty .pending-diff {
+  display: none;
+}
+
+.pending-note {
+  margin: 0;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-ui);
+  white-space: normal;
+}
+
+.pending .pending-diff {
+  margin: 0;
+  overflow: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+  color: var(--vscode-editor-foreground);
+}
+
+.diff-line {
+  white-space: pre;
+  padding: 0 4px;
+}
+
+.diff-add {
+  background: var(--vscode-diffEditor-insertedTextBackground, transparent);
+  color: var(--vscode-gitDecoration-addedResourceForeground, var(--vscode-editor-foreground));
+}
+
+.diff-del {
+  background: var(--vscode-diffEditor-removedTextBackground, transparent);
+  color: var(--vscode-gitDecoration-deletedResourceForeground, var(--vscode-editor-foreground));
+}
+
+.diff-hunk,
+.diff-meta {
+  color: var(--vscode-descriptionForeground);
+}
+
+.diff-ctx {
+  color: var(--vscode-editor-foreground);
+}
+
+/* ---- editable values ---------------------------------------------------
+ *
+ * Editing is immediate: the value IS an input, there is no edit mode and there
+ * is no pencil.
+ *
+ * This used to add "until focused it is styled to read as text, so a pane of
+ * forty fields does not look like a form nobody asked to fill in" — a
+ * deliberate reversal of DESIGN.md:156, recorded in a code comment and nowhere
+ * else. The contract and the code disagreed, and the contract won: a value the
+ * reader can change is on an input surface whether or not the pointer is over
+ * it, because an affordance that appears on hover is an affordance a keyboard
+ * reader never learns exists.
+ */
+
+/* THE RULE THAT ACTUALLY WINS, and the one the Light+ defect lived in.
+ *
+ * Every changeable value is a real `<input>` carrying `field-value field-input`
+ * (stageform.ts:680), and this block comes LATER in the file at equal
+ * specificity — so fixing `.field-value` alone changed the two chips that are
+ * spans and none of the forty the reader clicks. It has to say the same thing
+ * twice, and there is a test that renders the page and reads the colour back
+ * (`harness/surfaces.mjs`) rather than trusting that it does.
+ *
+ * A RECORDED DEPARTURE FROM DESIGN.md:141 — "raised for headers and trees, base
+ * for content, input for editable values". That ladder assumes the input
+ * surface differs from the content surface. In Light+ `input.background` and
+ * `editor.background` are both white, so the bottom two rungs are the same rung
+ * and the ladder says nothing. VS Code gets away with it because the workbench
+ * never puts an input on the editor background — its inputs live in the side
+ * bar and in widgets. This pane IS the editor background, so the chip takes the
+ * raised widget surface instead: it is the nearest rung that exists in all four
+ * themes, and `editorWidget.border` comes with it. */
+.field-input {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1px 6px;
+  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border));
+  border-radius: 3px;
+  background: var(--vscode-editorWidget-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+}
+
+.field-input:hover {
+  border-color: var(--vscode-focusBorder);
+}
+
+.field-input:focus {
+  border-color: var(--vscode-focusBorder);
+  outline: none;
+}
+
+/* Never removed: the focus ring is the accessibility floor, and a field the
+   reader cannot see the cursor in is a field they cannot use. */
+.field-input:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.field-note {
+  margin-top: 2px;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+  white-space: normal;
+}
+
+.field-note.is-staged-note {
+  color: var(--vscode-editorInfo-foreground, var(--vscode-descriptionForeground));
+}
+
+/* Where a value is actually written — decision 21.
+
+   Two states, two inks, and NEITHER carries information the sentence does not:
+   the reason is in the words, and the colour only says which of the two kinds
+   it is. A reader with a monochrome theme or a colour deficiency loses nothing.
+
+   is-override  the field is still typeable, and typing writes the key HERE,
+                overriding the anchor for this one place.
+   is-readonly  nothing can be typed. The sentence says whether that is
+                "cannot be done safely" or "not built yet". */
+.field-note.is-override {
+  color: var(--vscode-editorInfo-foreground, var(--vscode-descriptionForeground));
+}
+
+.field-note.is-readonly {
+  color: var(--vscode-disabledForeground, var(--vscode-descriptionForeground));
+  font-style: italic;
+}
+
+/* The value column of a row that carries an instruction flag. One grid cell,
+   holding the flag and the field it qualifies — see stageform.ts editableRow
+   for what a third grid child did instead. */
+.field-value-cell {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.field-value-cell .field-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-flags {
+  flex: none;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+}
+
+/* ---- the Dockerfile stage form — story 6.2 ---------------------------- */
+
+.stageform {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stageform-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.stage-detail {
+  margin: 0 0 6px;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-code);
+}
+
+/* An instruction the engine will not rewrite in place (R7.4). It is shown, and
+   it is shown as unavailable rather than hidden: the reader needs to know the
+   line is there. */
+.field-block.is-readonly .field-value {
+  color: var(--vscode-disabledForeground, var(--vscode-descriptionForeground));
+  white-space: pre-wrap;
+}
+
+/* A Dockerfile a build names and the disk does not have — story 6.3. Warning
+   rather than error, and the word "missing" carries it, never the colour. */
+.marker-missing {
+  fill: var(--vscode-editorWarning-foreground);
+}
+
+.service-row.is-missing .service-detail {
+  color: var(--vscode-editorWarning-foreground);
+}
+
+/* The values a key accepts — story 7.9, rebuilt as a real combobox.
+
+   WHAT WAS HERE. An `<input list=…>` bound to a `<datalist>`, plus the values
+   printed under the field as a row of `.addable-key` chips. The owner tested it
+   and rejected it: a datalist FILTERS its options against the input's own text,
+   so `restart: unless-stopped` opened a popup containing one entry — the value
+   the field already showed — and the other three read as links below the field.
+   "The expected values should be in the list and not as links below it."
+
+   So the chips are gone and the popup below is ours: styled from `--vscode-*`
+   tokens, photographable by the harness, assertable by a test, and never
+   filtered. `webview/combo.ts` carries the full argument.
+
+   The one thing the links carried that had to survive is the sentence about
+   whether the set is CLOSED — `gpus` and `restart` are different claims. It is
+   `.combo-lead`, at the head of the popup, and it travels again in every
+   option's accessible name. */
+
+/* The arrow. Inside the value cell's right edge rather than beside it, so the
+   row still has exactly two grid children and the value column does not move.
+   No surface of its own: it sits ON the field chip. */
+.combo-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  font-size: var(--type-micro);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.combo-toggle:hover {
+  color: var(--vscode-foreground);
+}
+
+.combo-toggle:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+/* Room for the arrow, so a long value does not run underneath it. */
+.field-value.has-combo {
+  padding-right: 22px;
+}
+
+/* The popup. Anchored to the row and starting at the VALUE column, the same
+   edge `.prov`, `.resolution` and `.diag` already start at, so it opens under
+   the field rather than under the key.
+
+   `editorWidget-background` with `editorWidget-border` is the surface VS Code
+   raises over the editor — the same pair the value chip uses, and the pair that
+   holds in Light High Contrast where the widget and editor backgrounds are both
+   white and only the border separates them. Recorded in `a11y.RAISED_SURFACES`,
+   so a theme in which it vanishes is a failing test rather than a screenshot
+   nobody takes. */
+.combo-popup {
+  position: absolute;
+  top: 100%;
+  left: calc(var(--key-col) - var(--ind, 0px) + 6px);
+  right: 0;
+  z-index: 30;
+  margin-top: 2px;
+  max-height: 232px;
+  overflow-y: auto;
+  padding: 4px 0 2px;
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border, var(--vscode-panel-border));
+  border-radius: 3px;
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, transparent);
+}
+
+/* Below 900px the key column is not a column — `.field` is one content track
+   and the key sits on the row above — so the popup starts where the field
+   starts. `comboshot.mjs` pins `popup.x === field.x`, and at 760 that read
+   556 against 468: the popup hung 88px to the right of the field it belongs
+   to, half of it off the pane.
+
+   This sits HERE, next to the rule it corrects, and NOT in the `narrow panels`
+   section above, because that section ends around line 2064 and this rule is
+   declared after it. Same specificity, later source order — the section could
+   not have reset it from up there, which is exactly how this shipped. Any rule
+   below this point that hangs off `--key-col` needs its own narrow block, next
+   to itself. */
+@media (max-width: 900px) {
+  .combo-popup {
+    left: 0;
+  }
+}
+
+/* `display` is set above, so the user agent's `[hidden] { display: none }`
+   would lose the cascade to it and a closed popup would stay on screen. */
+.combo-popup[hidden] {
+  display: none;
+}
+
+/* Whether the set is closed, in the reader's words. PROSE about the
+   specification, so the UI face — the values under it are text from a file and
+   stay in the code face. DESIGN.md's one rule about which face means what. */
+.combo-popup .combo-lead {
+  padding: 2px 8px 5px;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.combo-popup .combo-option {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 8px;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+}
+
+/* The keyboard cursor — where Up and Down are, and what Enter would choose.
+   `aria-activedescendant` says the same thing to a screen reader. */
+.combo-popup .combo-option.is-active {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+.combo-popup .combo-option:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+/* The tick that says which value the field currently holds. A GLYPH and an
+   `aria-selected`, never a colour: story 4.5's floor says a state carried only
+   in colour is a state some readers do not have. The cell is always there, so
+   choosing does not reflow the list. */
+.combo-mark {
+  flex: none;
+  width: 9px;
+  font-family: var(--vscode-font-family);
+}
+
+.combo-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A key whose value list has no field to open — `gpus` written as a list of
+   device objects. The specification's words are stated as text rather than
+   dropped; there is no field for a link to fill, so there is no link. */
+.allowed-note {
+  margin-left: calc(var(--key-col) - var(--ind, 0px));
+  padding-left: 6px;
+}
+
+/* Same reason as `.combo-popup` above, and it has to be here for the same
+   cascade reason: below 900px there is no key column to hang this off, and the
+   section that would have reset it is declared earlier in the file. Left
+   indented, the note began a key column inside a pane that no longer has one —
+   at 760 it started 121px in, on a 302px pane. */
+@media (max-width: 900px) {
+  .allowed-note {
+    margin-left: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Epic 8 — what Docker Hub says about an image value.
+   ------------------------------------------------------------------------ */
+
+/* The upgrade pill: `node:22-alpine · minor · 40MB smaller`, beside the value,
+   the way the design has drawn it since it was agreed
+   (directions-3.html:576, `class="pill warn"`).
+
+   It is a BUTTON and it reads as one — pressing it stages the change. It
+   borrows `.pill`'s shape from the finding pills above so the pane has one pill
+   and not two, and takes the warning ink for the same reason the mockup does:
+   an old base image is a thing to attend to, not an error. Every colour is a
+   `--vscode-*` token; there is no colour literal in this file or in the module
+   that builds the element. */
+/* IT IS NOT IN THE ROW, AND THE MEASUREMENT IS WHY.
+
+   The mockup draws it inline after the value (directions-3.html:576) and the
+   first build did exactly that, as a third grid column. Photographed at the
+   default split — `harness/shoot.mjs 10-upgrade-pill`, inspector 439px, key
+   column 121px — the pill is 250px of the 318px that remain, so the value cell
+   collapsed to 24 pixels and `ghcr.io/shipyard/web:2.4.1` rendered as a single
+   clipped glyph. The reader lost the value they came to read, to a decoration
+   about it.
+
+   The mockup is not wrong; it is drawn on the DOCKERFILE pane, which is the
+   full 1080px width. Rather than let one control behave two ways in two panes,
+   it sits under the value in both, at the value column's own left edge — so it
+   still reads as "this value" and not "this pane", and it cannot crush the
+   field at any width, including the 560px narrow layout. */
+.pill-upgrade {
+  display: inline-block;
+  margin: 3px 0 0 calc(var(--key-col) - var(--ind, 0px) + 6px);
+  padding: 0 6px;
+  max-width: 100%;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--vscode-editorWarning-foreground);
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--type-sub);
+  line-height: 1.7;
+  /* `.pill` above lowercases every severity word. That is right for `error`
+     and ruinous here: it turned `40MB smaller` into `40mb smaller`, silently
+     rewriting a unit the core composed. The pill's text is a reference, a
+     version-change word and a size — none of them ours to re-case. */
+  text-transform: none;
+  white-space: normal;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pill-upgrade:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.pill-upgrade:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+/* The sentence under an image value. It is the LAST note on the block on
+   purpose: everything above it is a fact about the reader's own files and this
+   one is a fact about a third party's registry, so it is set apart in the
+   description ink rather than the body ink. */
+.field-note.image-note {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* The search popup reuses `.combo-popup` whole — one popup in this product, not
+   two. What it adds is a result that is three lines rather than one word. */
+.imagesearch-popup .imagesearch-option {
+  display: block;
+  padding: 3px 8px 4px;
+}
+
+.imagesearch-name {
+  display: block;
+  color: var(--vscode-foreground);
+}
+
+.imagesearch-meta,
+.imagesearch-desc {
+  display: block;
+  color: var(--vscode-descriptionForeground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--type-sub);
+  line-height: 1.3;
+}
+
+.imagesearch-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The magnifier sits where the value list's arrow sits, so a field that has
+   both — none does today, and the layout must not depend on that staying true —
+   does not stack two controls on one cell. */
+.add-composer .combo-toggle {
+  position: static;
+  align-self: center;
+}

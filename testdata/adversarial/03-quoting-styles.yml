@@ -1,0 +1,24 @@
+services:
+  mixed:
+    image: "nginx:1.27-alpine"
+    container_name: 'my-container'
+    command: sh -c "echo hello && sleep infinity"
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      BARE: value
+      DOUBLE: "quoted value"
+      SINGLE: 'single quoted'
+      NUMERIC_STRING: "8080"
+      BOOL_STRING: "true"
+      EMPTY: ""
+      WITH_DOLLAR: "$$literal"
+      MULTILINE_LITERAL: |
+        line one
+        line two
+      MULTILINE_FOLDED: >
+        folded line one
+        folded line two
+    ports: ["8080:80", "9090:90"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`example.com`)"

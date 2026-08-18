@@ -1,0 +1,34 @@
+{
+  "_comment": [
+    "AD-21. The Compose Specification JSON Schema records no version information",
+    "at all: it is a single, current, unified document, which is exactly why the",
+    "file's own `version:` field must never be used to select one. This file is",
+    "the separate, explicitly partial record of the other half of AD-21 — where a",
+    "key's minimum Compose is KNOWN, it is written down here so the inspector can",
+    "mark keys newer than the reader's installed binary as unsupported-here rather",
+    "than hiding them.",
+    "",
+    "This is NOT the available-key list. That list is generated from",
+    "compose-spec.json at runtime and nothing here can add to it or remove from",
+    "it — a key absent from this file is offered with no mark at all, which is the",
+    "honest answer when the minimum is unknown. Being incomplete therefore costs a",
+    "missing annotation, never a hidden key.",
+    "",
+    "Keys are matched by the last segment of the config path, so `develop` covers",
+    "`services.<name>.develop`. Scope is recorded for the reader, not used for",
+    "matching."
+  ],
+  "keys": {
+    "include": { "min": "2.20.0", "scope": "top level", "note": "compose sub-projects" },
+    "attach": { "min": "2.20.0", "scope": "service" },
+    "develop": { "min": "2.22.0", "scope": "service", "note": "watch and sync" },
+    "gpus": { "min": "2.30.0", "scope": "service" },
+    "post_start": { "min": "2.30.0", "scope": "service", "note": "lifecycle hook" },
+    "pre_stop": { "min": "2.30.0", "scope": "service", "note": "lifecycle hook" },
+    "label_file": { "min": "2.32.0", "scope": "service" },
+    "enable_ipv4": { "min": "2.32.0", "scope": "network" },
+    "models": { "min": "2.35.0", "scope": "top level and service" },
+    "use_api_socket": { "min": "2.35.0", "scope": "service" },
+    "provider": { "min": "2.36.0", "scope": "service" }
+  }
+}

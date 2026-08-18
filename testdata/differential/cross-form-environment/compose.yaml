@@ -1,0 +1,15 @@
+# `environment` as a LIST here and as a MAPPING in the override.
+#
+# Compose normalises both spellings to a mapping before merging and keeps
+# BASE_A. Composure replaces the collection whole and loses it, because the
+# resolved model keeps the shape each file wrote — the splice engine edits
+# those bytes, and a model showing a mapping where the file has a list would
+# send an edit to a range that is not there.
+#
+# This fixture exists to prove that divergence is STILL THERE. See DIVERGES.
+services:
+  web:
+    image: nginx:1.25
+    environment:
+      - BASE_A=1
+      - SHARED=base

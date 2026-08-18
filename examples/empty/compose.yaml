@@ -1,0 +1,3 @@
+# A project that declares nothing. The canvas should show a plain empty state —
+# no nodes, and no "Add service" button, because authoring is a later phase.
+services: {}

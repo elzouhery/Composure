@@ -1,0 +1,7 @@
+# Deliberately malformed: the bracket is never closed.
+# Opening this should show a named banner with the parse position, and the
+# previously drawn graph should dim rather than disappear.
+services:
+  web:
+    image: nginx
+    ports: [ "8080:80"

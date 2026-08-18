@@ -1,0 +1,32 @@
+# Production stack — do not edit by hand
+# Owner: platform-team@example.com
+
+services:
+  # The public-facing web tier
+  web:
+    image: nginx:1.27-alpine   # pinned deliberately, see INFRA-421
+    ports:
+      - "80:80"    # http
+      - "443:443"  # https
+    # TODO: move this to a config map
+    environment:
+      NGINX_HOST: example.com
+
+  api:
+    image: ghcr.io/acme/api:v2.3.1
+    # Depends on the database being *healthy*, not merely started
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+
+# Networks are declared explicitly so nothing lands on the default bridge
+networks:
+  frontend:
+  backend:
+    internal: true

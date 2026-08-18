@@ -1,0 +1,13 @@
+services:
+  keep:
+    image: alpine
+
+  # This service is legacy and scheduled for removal
+  # See INFRA-902 for context
+  legacy:
+    image: old:1.0
+    environment:
+      X: "1"
+
+  after:
+    image: nginx

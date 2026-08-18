@@ -1,0 +1,30 @@
+# A comment on a LIST ENTRY, which is the shape e44 does not have.
+#
+# The trap this fixture exists to spring: `locate` answers a sequence entry
+# with the VALUE token's column, not the column of the `-`. A comment above an
+# entry sits at the dash's indent, so a run looked for at the value's indent
+# finds nothing — and the pane then reports that an entry has no comment while
+# the comment is plainly there, two spaces to the left.
+#
+# Every list below repeats an entry and every interesting comment is in the
+# MIDDLE of its list, for e43's reason: a list of distinct values commented at
+# index 0 cannot tell an off-by-one from a correct answer.
+services:
+  web:
+    image: nginx
+    ports:
+      # the public edge
+      - "8080:80"
+      # the TLS edge
+      # and this run is two lines, so replacing one line of it is visible
+      - "8443:443"
+      - "8080:80"
+    command:
+      ## a section marker the reader wrote with two hashes of their own
+      - sh
+      - -c
+      - sh
+    healthcheck:
+      # A flow sequence. Its entries have no line of their own, so there is
+      # nowhere above one of them for a comment to go.
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]

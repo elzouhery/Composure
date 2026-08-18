@@ -1,0 +1,2 @@
+services: {web: {image: nginx}, api: {image: node}}
+networks: {frontend: {}}

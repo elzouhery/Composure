@@ -1,0 +1,34 @@
+# The two Compose merge tags, in a single file.
+#
+# `!reset` and `!override` are YAML tags, not keys, and they are the newest
+# surface in the language this engine reads. They are here because a tag is a
+# parse-level construct: a resolver that did not know them would either refuse
+# the file or — worse — carry `!reset` into the model as an ordinary null and
+# report a declaration that Compose removes.
+#
+# In a SINGLE file neither tag has anything to act on. That is the point of the
+# fixture: `!reset` must leave nothing behind rather than surviving as a null
+# that reads like `ports:` with no value, and `!override` must leave an
+# ordinary value. The two-file behaviour is covered in merge_test.go.
+services:
+  api:
+    image: ghcr.io/example/api:1.4.0
+    # A reset with an explicit null, and one with an empty collection. Both
+    # spellings appear in the wild.
+    command: !reset null
+    ports: !reset []
+    # An override on a sequence that would otherwise append.
+    dns_search: !override
+      - internal.example
+    environment:
+      KEEP: kept
+      DROPPED: !reset null
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+
+  worker:
+    image: ghcr.io/example/api:1.4.0
+    # A quoted "!reset" is a STRING, not a tag. Nothing here may treat it as a
+    # directive — the same distinction the merge key already makes for "<<".
+    command: "!reset"
