@@ -126,7 +126,12 @@ port"*, which is the question the entire phase-1 wedge exists to answer.
 
 ## Repository facts
 
-- Module path: `github.com/elzouhery/composure`
+- Module path: `github.com/elzouhery/composure` — lowercase, and it stays
+  lowercase even though the repository is `Composure`. Go module paths are
+  case-sensitive and conventionally all-lowercase; GitHub resolves the
+  repository either way, so `go get` works. Recasing this would rewrite the
+  import line in 92 files and produce a proxy path encoded as `!composure`,
+  in exchange for nothing.
 - Licence: Apache-2.0. Contributors sign a CLA/DCO with relicensing rights.
 - The corpus (`corpus-repos/`) is **fetched, not committed** — 2.3GB of shallow
   clones. `fidelity fetch corpus-repos` rebuilds it. It is gitignored.
