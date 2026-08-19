@@ -162,7 +162,7 @@ jobs:
       # change to corpus.go invalidates it.
       - name: Cache corpus
         id: corpus-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: corpus-repos
           key: corpus-${{ runner.os }}-${{ hashFiles('internal/corpus/corpus.go') }}
