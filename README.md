@@ -172,7 +172,7 @@ or a build `ARG`, Docker Hub, the CLI and its exit codes, and troubleshooting.
 ### From source
 
 ```bash
-git clone https://github.com/elzouhery/composure.git
+git clone https://github.com/elzouhery/Composure.git
 cd composure
 make package                       # cross-compiles every core, builds the VSIX set
 code --install-extension extension/build/composure-darwin-arm64.vsix

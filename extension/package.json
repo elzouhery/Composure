@@ -11,13 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/elzouhery/composure.git"
+    "url": "https://github.com/elzouhery/Composure.git"
   },
-  "homepage": "https://github.com/elzouhery/composure#readme",
+  "homepage": "https://github.com/elzouhery/Composure#readme",
   "bugs": {
-    "url": "https://github.com/elzouhery/composure/issues"
+    "url": "https://github.com/elzouhery/Composure/issues"
   },
-  "qna": "https://github.com/elzouhery/composure/issues",
+  "qna": "https://github.com/elzouhery/Composure/issues",
   "//categories": "`Other` was dropped: it is the marketplace's dumping ground and adds no way to be found that the two accurate categories do not. `Formatters` is deliberately NOT claimed — this extension's whole property is that it never reformats a file.",
   "categories": [
     "Visualization",
