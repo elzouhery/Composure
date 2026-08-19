@@ -83,7 +83,7 @@
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.24.2",
     "ovsx": "^1.1.1",
-    "puppeteer-core": "^24.43.1",
+    "puppeteer-core": "^25.7.0",
     "typescript": "^5.7.3"
   },
   "icon": "media/icon.png",
