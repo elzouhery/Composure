@@ -117,7 +117,7 @@ jobs:
             fi
             echo "ok  $vsix -> $found ($(du -h "$vsix" | cut -f1))"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: vsix-${{ github.run_id }}
           path: extension/build/*.vsix
@@ -198,7 +198,7 @@ jobs:
 
       - name: Upload metric history
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fidelity-history-${{ github.run_id }}
           path: benchmarks/history.jsonl
