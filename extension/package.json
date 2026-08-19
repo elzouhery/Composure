@@ -84,7 +84,7 @@
     "esbuild": "^0.24.2",
     "ovsx": "^1.1.1",
     "puppeteer-core": "^24.43.1",
-    "typescript": "^5.7.3"
+    "typescript": "^7.0.2"
   },
   "icon": "media/icon.png",
   "galleryBanner": {
