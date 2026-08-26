@@ -183,7 +183,7 @@ code --install-extension extension/build/composure-darwin-arm64.vsix
 carries exactly one core.
 
 Requires Go 1.24+ and Node 20+ to build. Running it needs nothing but VS Code
-1.85 or a fork on the same extension API.
+1.134 or a fork on the same extension API.
 
 ## Quick start, without the editor
 
