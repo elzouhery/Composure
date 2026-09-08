@@ -77,12 +77,12 @@
   },
   "//dependencies": "Deliberately empty and asserted empty by host/packaging.test.ts. `make licence` walks the Go build graph and cannot see node_modules, so the only tree size that gate can vouch for is zero. NOTE: `npm install --save-dev` deletes this empty object; restore it by hand afterwards.",
   "devDependencies": {
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.5.0",
     "@types/vscode": "^1.134.0",
     "@vscode/vsce": "^3.9.2",
     "esbuild": "^0.28.2",
     "ovsx": "^1.1.1",
-    "puppeteer-core": "^25.9.0",
+    "puppeteer-core": "^25.10.0",
     "typescript": "^5.7.3"
   },
   "icon": "media/icon.png",
