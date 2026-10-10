@@ -179,7 +179,7 @@ tables are in
 
 ## Requirements
 
-VS Code 1.134 or later, or a fork on the same extension API once it reaches that
+VS Code 1.140 or later, or a fork on the same extension API once it reaches that
 API level — Cursor and Windsurf lag the upstream release by some months. The Go core ships **inside** the extension as a platform binary and is
 spawned as a subprocess; there is nothing else to install and no daemon to run.
 

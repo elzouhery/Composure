@@ -2,11 +2,11 @@
   "name": "composure",
   "displayName": "Composure",
   "description": "See the stack your compose file declares, find out which file and line set each value, and edit compose files and Dockerfiles without reformatting them — one changed value is a two-line diff.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "elzouhery",
   "license": "Apache-2.0",
   "engines": {
-    "vscode": "^1.134.0",
+    "vscode": "^1.140.0",
     "node": ">=18"
   },
   "repository": {
@@ -77,13 +77,19 @@
   },
   "//dependencies": "Deliberately empty and asserted empty by host/packaging.test.ts. `make licence` walks the Go build graph and cannot see node_modules, so the only tree size that gate can vouch for is zero. NOTE: `npm install --save-dev` deletes this empty object; restore it by hand afterwards.",
   "devDependencies": {
-    "@types/node": "^26.5.0",
-    "@types/vscode": "^1.134.0",
-    "@vscode/vsce": "^3.9.2",
+    "@types/node": "^26.6.5",
+    "@types/vscode": "^1.140.0",
+    "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.28.2",
-    "ovsx": "^1.1.1",
-    "puppeteer-core": "^25.10.0",
-    "typescript": "^5.7.3"
+    "ovsx": "^1.2.0",
+    "puppeteer-core": "^25.13.0",
+    "typescript": "^7.0.2"
+  },
+  "//overrides": "ovsx 1.x still asks for vsce 3, whose secretlint tree reaches braces through globby — an advisory with no fixed braces release. ovsx only calls vsce to build a VSIX from source, which this project never asks of it (publish-ovsx uploads the packages `make package` built), so it shares the top-level vsce. Drop this once ovsx depends on vsce 4.",
+  "overrides": {
+    "ovsx": {
+      "@vscode/vsce": "$@vscode/vsce"
+    }
   },
   "icon": "media/icon.png",
   "galleryBanner": {

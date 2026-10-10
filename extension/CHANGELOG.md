@@ -8,7 +8,31 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
-## [0.2.0] — unreleased
+## [0.3.0] — 2026-10-10
+
+A maintenance release. No behaviour changes: the panel, the resolver and the
+editing engine are the ones 0.2.0 shipped. What moved is the toolchain the
+package is built with, and with it the editor version the package asks for.
+
+### Changed
+
+- **Requires VS Code 1.140 or later**, up from 1.85. The extension compiles
+  against the 1.140 API types, and the declared floor has to promise the API
+  the code was checked against. An editor below 1.140 — including a fork that
+  has not yet reached that API level — keeps 0.2.0, which does the same things.
+
+### Security
+
+- The build and publishing toolchain was brought current, clearing every
+  advisory `npm audit` reported against it: 9 high and 2 moderate, in
+  `undici`, `js-yaml`, `markdown-it`, `fast-uri`, `brace-expansion` and the
+  `braces` chain under the packaging tool. None of these ever shipped — the
+  extension has no runtime npm dependencies, and the package contains only the
+  bundled extension and the core binary — so nothing changes for an installed
+  copy. It is recorded because the tools that build and sign a release are part
+  of what a release is trusted on.
+
+## [0.2.0] — 2026-08-19
 
 The first release published from the open-source repository. No behaviour
 changes: 0.1.0 and 0.2.0 do the same things, and the version moves because the
