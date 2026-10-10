@@ -64,8 +64,8 @@ ls extension/build/          # one .vsix per target
 ```
 
 `make package` cross-compiles every core and runs `vsce package --target` once
-per platform. It needs Go 1.24+ and Node 20+. Running the extension needs
-neither — only VS Code 1.134 or later, or a fork once it reaches that API level.
+per platform. It needs Go 1.24+ and Node 22+. Running the extension needs
+neither — only VS Code 1.140 or later, or a fork once it reaches that API level.
 Cursor and Windsurf work once they catch up; JetBrains and vim do not.
 
 No Docker daemon is required to read, resolve or edit anything.
