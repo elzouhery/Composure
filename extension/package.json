@@ -82,7 +82,7 @@
     "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.28.2",
     "ovsx": "^1.2.0",
-    "puppeteer-core": "^25.13.0",
+    "puppeteer-core": "^25.16.0",
     "typescript": "^7.0.2"
   },
   "//overrides": "ovsx 1.x still asks for vsce 3, whose secretlint tree reaches braces through globby — an advisory with no fixed braces release. ovsx only calls vsce to build a VSIX from source, which this project never asks of it (publish-ovsx uploads the packages `make package` built), so it shares the top-level vsce. Drop this once ovsx depends on vsce 4.",
