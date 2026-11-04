@@ -79,7 +79,7 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "@types/vscode": "^1.140.0",
-    "@vscode/vsce": "^4.0.0",
+    "@vscode/vsce": "^4.1.0",
     "esbuild": "^0.28.2",
     "ovsx": "^1.2.0",
     "puppeteer-core": "^25.13.0",
